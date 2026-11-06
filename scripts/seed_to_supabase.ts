@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
 
 // تحميل متغيرات البيئة من .env
 const envPath = path.resolve(process.cwd(), '.env');
@@ -79,7 +80,6 @@ async function main() {
 
   console.log('3. قراءة بيانات المنتجات وإدراجها في جدول products...');
   // قراءة السكربت أو البيانات المجهزة
-  const { execSync } = require('child_process');
   const pythonScript = `
 import sys, json
 sys.path.append('scripts')

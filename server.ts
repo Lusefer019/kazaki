@@ -1,6 +1,5 @@
 import 'dotenv/config';
-import express, { Request, Response } from 'express';
-import { createServer as createViteServer } from 'vite';
+import express, { type Request, type Response } from 'express';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -10,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.DEFAULT_APP_PORT || process.env.PORT || 3000);
 
 // Security Headers Middleware (Compatible with AI Studio preview iframe)
 app.use((req, res, next) => {
@@ -1054,6 +1053,7 @@ app.get('/api/health', (req: Request, res: Response) => {
 // ----------------------------------------------------
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: {
         middlewareMode: true,

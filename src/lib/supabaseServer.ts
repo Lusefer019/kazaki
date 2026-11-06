@@ -1,4 +1,4 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 const isValidHttpUrl = (str: string | undefined | null): boolean => {
   if (!str || typeof str !== 'string') return false;

@@ -1,4 +1,4 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { Product, Category, Order, StoreSettings, SupportMessage } from '../types';
 
 export interface SupabaseConfig {
