@@ -19,24 +19,12 @@ export default defineConfig(() => {
       cssTarget: ['safari14', 'ios14'],
     },
     server: {
+      port: 3000,
+      host: '0.0.0.0',
       // HMR is controlled via DISABLE_HMR env var.
-      hmr: process.env.DISABLE_HMR !== 'true',
+      hmr: false,
       // Optimize file watching in production/CI environments.
-      watch: process.env.DISABLE_HMR === 'true' ? null : {},
-      proxy: {
-        '/api': {
-          target: 'http://localhost:3000',
-          changeOrigin: true,
-        },
-      },
-    },
-    preview: {
-      proxy: {
-        '/api': {
-          target: 'http://localhost:3000',
-          changeOrigin: true,
-        },
-      },
+      watch: null,
     },
   };
 });

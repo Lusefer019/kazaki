@@ -10,12 +10,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
-// Security Headers Middleware (Protection against Clickjacking, MIME sniffing, and XSS)
+// Security Headers Middleware (Compatible with AI Studio preview iframe)
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   next();
@@ -24,22 +23,29 @@ app.use((req, res, next) => {
 // Simple in-memory Rate Limiting (Prevents DDoS and Brute Force attacks)
 const ipRequestCounts = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 300; // 300 requests per minute
+const MAX_REQUESTS_PER_WINDOW = 600; // 600 requests per minute
 
 app.use((req, res, next) => {
   // Allow static assets, images, and vite dev modules without rate limiting
   if (
     req.path.startsWith('/@') ||
+    req.path.startsWith('/src/') ||
     req.path.startsWith('/assets') ||
     req.path.startsWith('/images') ||
     req.path.startsWith('/node_modules') ||
+    req.path.endsWith('.ts') ||
+    req.path.endsWith('.tsx') ||
     req.path.endsWith('.js') ||
     req.path.endsWith('.css') ||
     req.path.endsWith('.jpeg') ||
     req.path.endsWith('.jpg') ||
     req.path.endsWith('.png') ||
+    req.path.endsWith('.webp') ||
     req.path.endsWith('.svg') ||
-    req.path.endsWith('.ico')
+    req.path.endsWith('.ico') ||
+    req.path.endsWith('.json') ||
+    req.path.endsWith('.woff') ||
+    req.path.endsWith('.woff2')
   ) {
     return next();
   }
@@ -1049,7 +1055,11 @@ app.get('/api/health', (req: Request, res: Response) => {
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: false,
+        watch: null,
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);
@@ -1060,10 +1070,18 @@ async function startServer() {
     });
   }
 
-  app.listen(Number(PORT), '0.0.0.0', () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`KAZAKI Full-Stack Server running at http://0.0.0.0:${PORT}`);
   });
 }
+
+process.on('uncaughtException', (err) => {
+  console.error('[Server Uncaught Exception]:', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[Server Unhandled Rejection]:', reason);
+});
 
 startServer().catch((err) => {
   console.error('Fatal error starting server:', err);
