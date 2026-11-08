@@ -34,9 +34,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
     setSelectedCategory,
     categories,
     logout,
-    currentLanguage,
-    setCurrentLanguage,
-    setIsLanguageModalOpen,
     phoneNotificationsEnabled,
     setIsPhoneNotifsModalOpen,
     customerNotifications,
@@ -55,8 +52,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
   const isAdmin = currentUser?.role === 'admin' || isCurrentSessionAdmin(currentUser, activeView);
   const relevantNotifications = isAdmin ? adminNotifications : customerNotifications;
   const unreadNotifsCount = relevantNotifications.filter((n) => !n.read).length;
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-rose-100 shadow-xs">
@@ -185,7 +180,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
                   : 'text-stone-600 border-transparent hover:text-rose-600'
               }`}
             >
-              {currentUser ? (isEn ? 'My Account' : isKu ? 'هەژمارەکەم' : 'حسابي') : getBtnText('login', 'تسجيل الدخول')}
+              {currentUser ? 'حسابي' : getBtnText('login', 'تسجيل الدخول')}
             </button>
           </nav>
 
@@ -199,47 +194,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
                 if (activeView !== 'products') setActiveView('products');
               }}
               placeholder={getBtnText('searchPlaceholder', 'البحث في المتجر...')}
-              className={`w-full bg-rose-50/50 border border-rose-100 hover:border-rose-300 focus:border-rose-400 focus:bg-white text-xs rounded-full py-2 sm:py-2.5 ${isEn ? 'pl-8 pr-3' : 'pr-8 pl-3'} text-stone-800 placeholder-stone-400 transition-all outline-hidden focus:ring-2 focus:ring-rose-200`}
+              className="w-full bg-rose-50/50 border border-rose-100 hover:border-rose-300 focus:border-rose-400 focus:bg-white text-xs rounded-full py-2 sm:py-2.5 pr-8 pl-3 text-stone-800 placeholder-stone-400 transition-all outline-hidden focus:ring-2 focus:ring-rose-200"
             />
-            <Search className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-400 absolute ${isEn ? 'left-3' : 'right-3'} pointer-events-none`} />
+            <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-stone-400 absolute right-3 pointer-events-none" />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className={`absolute ${isEn ? 'right-2.5' : 'left-2.5'} text-stone-400 hover:text-stone-600 text-xs p-1`}
+                className="absolute left-2.5 text-stone-400 hover:text-stone-600 text-xs p-1"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
-          {/* Right Action Icons: Language + Cart + User */}
+          {/* Right Action Icons: Cart + User */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-            {/* Language Selector Popup Trigger - Responsive on all screen sizes */}
-            <button
-              onClick={() => setIsLanguageModalOpen(true)}
-              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-full bg-rose-50/90 hover:bg-rose-100 text-stone-700 hover:text-rose-700 border border-rose-200/90 text-xs font-bold transition-all cursor-pointer shadow-2xs group min-h-[36px]"
-              title={isEn ? 'Change Language' : isKu ? 'گۆڕینی زمان' : 'تغيير لغة المتجر'}
-              aria-label="Select Language"
-            >
-              <Globe className="w-3.5 h-3.5 text-rose-600 transition-transform group-hover:rotate-45 shrink-0" />
-              <span className="hidden sm:inline">
-                {currentLanguage === 'ar'
-                  ? 'العربية'
-                  : currentLanguage === 'en'
-                  ? 'English'
-                  : 'کوردی'}
-              </span>
-              <span className="sm:hidden text-[11px] font-bold">
-                {currentLanguage === 'ar' ? 'عربي' : currentLanguage === 'en' ? 'EN' : 'کورد'}
-              </span>
-              <ChevronDown className="w-3 h-3 text-stone-400 group-hover:text-rose-600 transition-colors" />
-            </button>
-
             {/* Notifications Bell Button */}
             <button
               onClick={() => setIsCustomerNotifsModalOpen(true)}
               className="relative p-2 sm:p-2.5 rounded-full text-stone-700 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer group min-w-[40px] min-h-[40px] flex items-center justify-center"
-              title={isEn ? 'Notifications & New Arrivals' : isKu ? 'ئاگادارییەکان و تازە گەیشتووەکان' : 'الإشعارات ووصل حديثاً'}
+              title="الإشعارات ووصل حديثاً"
               aria-label="Notifications"
             >
               <Bell className="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -271,7 +245,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
                 <button
                   onClick={() => onOpenAuth('login')}
                   className="sm:hidden p-2 rounded-full text-stone-700 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center"
-                  title={isEn ? 'Sign in or create account' : isKu ? 'چوونەژوور یان دروستکردنی هەژمار' : 'تسجيل الدخول أو إنشاء حساب'}
+                  title="تسجيل الدخول أو إنشاء حساب"
                   aria-label={getBtnText('login', 'تسجيل الدخول')}
                 >
                   <User className="w-5 h-5" />
@@ -281,7 +255,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
                 <button
                   onClick={() => onOpenAuth('login')}
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 text-xs font-bold transition-all cursor-pointer shadow-2xs group"
-                  title={isEn ? 'Customer Sign In' : isKu ? 'چوونەژوورەوەی کڕیار' : 'تسجيل دخول الزبون'}
+                  title="تسجيل دخول الزبون"
                 >
                   <User className="w-3.5 h-3.5 text-rose-600 transition-transform group-hover:scale-110" />
                   <span>{getBtnText('login', 'تسجيل الدخول')}</span>
@@ -290,10 +264,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
                 <button
                   onClick={() => onOpenAuth('register')}
                   className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white text-xs font-bold transition-all shadow-xs cursor-pointer hover:shadow-md"
-                  title={isEn ? 'Create customer account' : isKu ? 'دروستکردنی هەژماری نوێ' : 'إنشاء حساب زبون جديد'}
+                  title="إنشاء حساب زبون جديد"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
-                  <span>{isEn ? 'Register' : isKu ? 'دروستکردنی هەژمار' : 'إنشاء حساب'}</span>
+                  <span>إنشاء حساب</span>
                 </button>
               </div>
             ) : (
@@ -320,7 +294,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
                   {/* Dropdown Menu for Logged In User */}
                   {isUserMenuOpen && (
                     <div
-                      className={`absolute ${isEn ? 'right-0 text-left' : 'left-0 text-right'} mt-2 w-64 bg-white rounded-2xl shadow-xl border border-rose-100 py-2 z-50 animate-in fade-in slide-in-from-top-2`}
+                      className="absolute left-0 text-right mt-2 w-64 bg-white rounded-2xl shadow-xl border border-rose-100 py-2 z-50 animate-in fade-in slide-in-from-top-2"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       <div className="px-4 py-2 border-b border-rose-50">
@@ -329,11 +303,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
                         <div className="mt-1">
                           {currentUser.role === 'admin' ? (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">
-                              {isEn ? 'Role: General Manager' : isKu ? 'ڕۆڵ: بەڕێوەبەری گشتی' : 'صلاحية: المدير العام'}
+                              صلاحية: المدير العام
                             </span>
                           ) : (
                             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">
-                              {isEn ? 'Registered Customer' : isKu ? 'هەژماری تۆمارکراو' : 'حساب زبون مسجل'}
+                              حساب زبون مسجل
                             </span>
                           )}
                         </div>
@@ -343,14 +317,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
                         <div className="p-2 border-b border-rose-50 bg-amber-50/40">
                           <button
                             onClick={() => setActiveView('admin')}
-                            className={`w-full ${isEn ? 'text-left' : 'text-right'} px-3 py-2.5 rounded-xl bg-gradient-to-r from-stone-900 to-stone-800 hover:from-stone-800 hover:to-stone-700 text-white font-bold text-xs flex items-center justify-between shadow-xs transition-all cursor-pointer`}
+                            className="w-full text-right px-3 py-2.5 rounded-xl bg-gradient-to-r from-stone-900 to-stone-800 hover:from-stone-800 hover:to-stone-700 text-white font-bold text-xs flex items-center justify-between shadow-xs transition-all cursor-pointer"
                           >
                             <div className="flex items-center gap-2">
                               <ShieldCheck className="w-4 h-4 text-amber-400" />
-                              <span>{isEn ? 'Store Admin Dashboard' : isKu ? 'داشبۆردی بەڕێوەبەرایەتی' : 'لوحة تحكم المتجر (الإدارة)'}</span>
+                              <span>لوحة تحكم المتجر (الإدارة)</span>
                             </div>
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-semibold">
-                              {isEn ? 'Enter' : isKu ? 'چوونەژوور' : 'دخول'}
+                              دخول
                             </span>
                           </button>
                         </div>
@@ -358,26 +332,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
 
                       <button
                         onClick={() => setActiveView('login')}
-                        className={`w-full ${isEn ? 'text-left' : 'text-right'} px-4 py-2.5 text-xs text-stone-700 hover:bg-rose-50 flex items-center gap-2 cursor-pointer`}
+                        className="w-full text-right px-4 py-2.5 text-xs text-stone-700 hover:bg-rose-50 flex items-center gap-2 cursor-pointer"
                       >
                         <User className="w-4 h-4 text-rose-500" />
-                        <span>{isEn ? 'My Profile & Account Details' : isKu ? 'پڕۆفایل و وردەکارییەکانی هەژمار' : 'تفاصيل حسابي والملف الشخصي'}</span>
+                        <span>تفاصيل حسابي والملف الشخصي</span>
                       </button>
 
                       <button
                         onClick={onOpenOrders}
-                        className={`w-full ${isEn ? 'text-left' : 'text-right'} px-4 py-2.5 text-xs text-stone-700 hover:bg-rose-50 flex items-center gap-2 cursor-pointer`}
+                        className="w-full text-right px-4 py-2.5 text-xs text-stone-700 hover:bg-rose-50 flex items-center gap-2 cursor-pointer"
                       >
                         <Package className="w-4 h-4 text-stone-500" />
-                        <span>{isEn ? 'My Orders & Purchases' : isKu ? 'داواکارییەکانم و کڕینەکانم' : getBtnText('trackOrder', 'طلباتي السابقة ومشترياتي')}</span>
+                        <span>{getBtnText('trackOrder', 'طلباتي السابقة ومشترياتي')}</span>
                       </button>
 
                       <button
                         onClick={logout}
-                        className={`w-full ${isEn ? 'text-left' : 'text-right'} px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2 cursor-pointer`}
+                        className="w-full text-right px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2 cursor-pointer"
                       >
                         <LogOut className="w-4 h-4 text-red-500" />
-                        <span>{isEn ? 'Sign Out' : isKu ? 'چوونەدەرەوە' : 'تسجيل الخروج'}</span>
+                        <span>تسجيل الخروج</span>
                       </button>
                     </div>
                   )}
@@ -408,38 +382,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
       {/* Mobile & Tablet Menu Drawer */}
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t border-rose-100 bg-white px-4 py-4 space-y-3 max-h-[calc(100dvh-4rem)] sm:max-h-[calc(100dvh-5rem)] overflow-y-auto shadow-xl">
-          {/* Mobile Language Switcher Trigger */}
-          <div className="flex items-center justify-between pb-3 border-b border-rose-100">
-            <span className="text-xs font-bold text-stone-500">{isEn ? 'Language:' : isKu ? 'زمان:' : 'اللغة:'}</span>
-            <button
-              onClick={() => {
-                setIsLanguageModalOpen(true);
-                setIsMobileMenuOpen(false);
-              }}
-              className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-stone-800 border border-rose-200 text-xs font-bold cursor-pointer transition-colors shadow-2xs"
-            >
-              <Globe className="w-3.5 h-3.5 text-rose-600" />
-              <span>
-                {currentLanguage === 'ar'
-                  ? 'العربية'
-                  : currentLanguage === 'en'
-                  ? 'English'
-                  : 'کوردی'}
-              </span>
-              <ChevronDown className="w-3 h-3 text-stone-400" />
-            </button>
-          </div>
-
           {/* Mobile Customer Account Actions Card */}
           {!currentUser ? (
-            <div className={`p-3.5 rounded-2xl bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200/80 ${isEn ? 'text-left' : 'text-right'} space-y-2.5 shadow-2xs`}>
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200/80 text-right space-y-2.5 shadow-2xs">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-full bg-rose-200/80 text-rose-700 flex items-center justify-center font-bold shrink-0">
                   <User className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-stone-900">{isEn ? 'Customer Account' : isKu ? 'هەژماری کڕیار' : 'حساب الزبون'}</h4>
-                  <p className="text-[11px] text-stone-500">{isEn ? 'Sign in to easily follow up on your orders' : isKu ? 'بچۆ ژوورەوە بۆ بەدواداچوونی ئاسانی داواکارییەکانت' : 'سجّل دخولك لمتابعة مشترياتك وطلباتك بكل سهولة'}</p>
+                  <h4 className="text-xs font-bold text-stone-900">حساب الزبون</h4>
+                  <p className="text-[11px] text-stone-500">سجّل دخولك لمتابعة مشترياتك وطلباتك بكل سهولة</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2 pt-1">
@@ -459,18 +411,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
                   }}
                   className="py-2 px-3 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 text-white text-xs font-bold hover:from-rose-500 hover:to-pink-500 transition-colors shadow-xs text-center cursor-pointer"
                 >
-                  {isEn ? 'Create Account' : isKu ? 'دروستکردنی هەژمار' : 'إنشاء حساب جديد'}
+                  إنشاء حساب جديد
                 </button>
               </div>
             </div>
           ) : (
-            <div className={`p-3.5 rounded-2xl bg-rose-50/80 border border-rose-200/80 ${isEn ? 'text-left' : 'text-right'} space-y-2.5`}>
+            <div className="p-3.5 rounded-2xl bg-rose-50/80 border border-rose-200/80 text-right space-y-2.5">
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">
-                    {currentUser.role === 'admin'
-                      ? (isEn ? 'Role: General Manager' : isKu ? 'ڕۆڵ: بەڕێوەبەری گشتی' : 'صلاحية: المدير العام')
-                      : (isEn ? 'Registered Customer' : isKu ? 'هەژماری تۆمارکراو' : 'حساب زبون مسجل')}
+                    {currentUser.role === 'admin' ? 'صلاحية: المدير العام' : 'حساب زبون مسجل'}
                   </span>
                   <p className="text-xs font-bold text-stone-900 mt-1">{currentUser.name}</p>
                   <p className="text-[10px] text-stone-500 truncate">{currentUser.email}</p>
@@ -482,7 +432,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
                   }}
                   className="text-xs text-red-600 font-bold hover:underline cursor-pointer"
                 >
-                  {isEn ? 'Sign Out' : isKu ? 'چوونەدەرەوە' : 'تسجيل الخروج'}
+                  تسجيل الخروج
                 </button>
               </div>
               <div className="flex gap-2 pt-1">
@@ -493,7 +443,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
                   }}
                   className="flex-1 py-1.5 px-2 rounded-xl bg-white border border-rose-200 text-stone-700 text-xs font-semibold text-center hover:bg-rose-50 transition-colors cursor-pointer"
                 >
-                  {isEn ? 'My Profile' : isKu ? 'پڕۆفایلەکەم' : 'حسابي والملف'}
+                  حسابي والملف
                 </button>
                 <button
                   onClick={() => {
@@ -502,7 +452,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
                   }}
                   className="flex-1 py-1.5 px-2 rounded-xl bg-white border border-rose-200 text-stone-700 text-xs font-semibold text-center hover:bg-rose-50 transition-colors cursor-pointer"
                 >
-                  {isEn ? 'My Orders' : isKu ? 'داواکارییەکانم' : 'طلباتي السابقة'}
+                  طلباتي السابقة
                 </button>
                 {currentUser.role === 'admin' && (
                   <button
@@ -512,7 +462,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
                     }}
                     className="flex-1 py-1.5 px-2 rounded-xl bg-stone-900 text-amber-400 text-xs font-bold text-center hover:bg-stone-800 transition-colors cursor-pointer"
                   >
-                    {isEn ? 'Admin' : isKu ? 'بەڕێوەبەرایەتی' : 'الإدارة'}
+                    الإدارة
                   </button>
                 )}
               </div>
@@ -525,7 +475,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
               setSelectedCategory('all');
               setIsMobileMenuOpen(false);
             }}
-            className={`block w-full ${isEn ? 'text-left' : 'text-right'} text-sm font-semibold text-stone-800 py-1.5`}
+            className="block w-full text-right text-sm font-semibold text-stone-800 py-1.5"
           >
             {getBtnText('home', 'الرئيسية')}
           </button>
@@ -535,7 +485,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
               setSelectedCategory('all');
               setIsMobileMenuOpen(false);
             }}
-            className={`block w-full ${isEn ? 'text-left' : 'text-right'} text-sm font-semibold text-stone-800 py-1.5`}
+            className="block w-full text-right text-sm font-semibold text-stone-800 py-1.5"
           >
             {getBtnText('shop', 'جميع المنتجات')}
           </button>
@@ -544,7 +494,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
               setActiveView('contact');
               setIsMobileMenuOpen(false);
             }}
-            className={`block w-full ${isEn ? 'text-left' : 'text-right'} text-sm font-semibold text-stone-800 py-1.5`}
+            className="block w-full text-right text-sm font-semibold text-stone-800 py-1.5"
           >
             {getBtnText('contactUs', 'تواصل معنا')}
           </button>
@@ -553,7 +503,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
               setActiveView('about');
               setIsMobileMenuOpen(false);
             }}
-            className={`block w-full ${isEn ? 'text-left' : 'text-right'} text-sm font-semibold text-stone-800 py-1.5`}
+            className="block w-full text-right text-sm font-semibold text-stone-800 py-1.5"
           >
             {getBtnText('aboutUs', 'من نحن')}
           </button>
@@ -562,11 +512,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
               setIsMobileMenuOpen(false);
               setIsCustomerNotifsModalOpen(true);
             }}
-            className={`flex items-center justify-between w-full ${isEn ? 'text-left' : 'text-right'} text-sm font-semibold text-rose-700 py-2 px-3 rounded-xl bg-rose-50/70 border border-rose-200/60 mt-1`}
+            className="flex items-center justify-between w-full text-right text-sm font-semibold text-rose-700 py-2 px-3 rounded-xl bg-rose-50/70 border border-rose-200/60 mt-1"
           >
             <div className="flex items-center gap-2">
               <Bell className="w-4 h-4 text-rose-600" />
-              <span>{isEn ? 'Notifications & New Arrivals' : isKu ? 'ئاگادارییەکان و تازە گەیشتووەکان' : 'الإشعارات ووصل حديثاً'}</span>
+              <span>الإشعارات ووصل حديثاً</span>
             </div>
             {unreadNotifsCount > 0 && (
               <span className="bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">

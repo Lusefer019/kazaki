@@ -8,14 +8,10 @@ import {
   Award,
   Clock,
   ArrowRight,
-  ArrowLeft,
   Edit2,
   CheckCircle2,
-  Star,
   ShoppingBag,
   Camera,
-  Image as ImageIcon,
-  Plus,
 } from 'lucide-react';
 import { defaultAboutUs } from '../../data/initialData';
 import { optimizeImageFile } from '../../utils/mediaUpload';
@@ -27,21 +23,16 @@ export const AboutView: React.FC = () => {
     setActiveView,
     setSelectedCategory,
     currentUser,
-    currentLanguage,
     getBtnText,
   } = useStore();
 
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
-
   const about = settings.aboutUs || defaultAboutUs;
 
-  // Localized texts
-  const badgeText = isEn ? (about.badgeEn || about.badge) : isKu ? (about.badgeKu || about.badge) : about.badge;
-  const titleText = isEn ? (about.titleEn || about.title) : isKu ? (about.titleKu || about.title) : about.title;
-  const subtitleText = isEn ? (about.subtitleEn || about.subtitle) : isKu ? (about.subtitleKu || about.subtitle) : about.subtitle;
-  const storyText = isEn ? (about.storyEn || about.story) : isKu ? (about.storyKu || about.story) : about.story;
-  const missionText = isEn ? (about.missionEn || about.mission) : isKu ? (about.missionKu || about.mission) : about.mission;
+  const badgeText = about.badge;
+  const titleText = about.title;
+  const subtitleText = about.subtitle;
+  const storyText = about.story;
+  const missionText = about.mission;
 
   const features = about.features || defaultAboutUs.features || [];
   const gallery = about.gallery && about.gallery.length > 0 ? about.gallery : (defaultAboutUs.gallery || []);
@@ -114,7 +105,7 @@ export const AboutView: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen pb-20 ${isEn ? 'text-left' : 'text-right'}`} dir={isEn ? 'ltr' : 'rtl'}>
+    <div className="min-h-screen pb-20 text-right" dir="rtl">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full bg-stone-900/95 text-white border border-rose-500/50 shadow-2xl backdrop-blur-md text-xs font-bold flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-200">
@@ -131,8 +122,8 @@ export const AboutView: React.FC = () => {
               onClick={() => setActiveView('home')}
               className="inline-flex items-center gap-2 text-xs font-bold text-stone-500 hover:text-rose-600 transition-colors cursor-pointer"
             >
-              {isEn ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-              <span>{isEn ? 'Back to Home' : isKu ? 'گەڕانەوە بۆ سەرەکی' : 'العودة للرئيسية'}</span>
+              <ArrowRight className="w-4 h-4" />
+              <span>العودة للرئيسية</span>
             </button>
 
             {currentUser?.role === 'admin' && (
@@ -155,7 +146,7 @@ export const AboutView: React.FC = () => {
                   className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-900 hover:bg-stone-800 text-amber-400 text-xs font-bold shadow-sm transition-all cursor-pointer"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
-                  <span>{isEn ? 'Edit About Us in Admin Dashboard' : 'لوحة تعديل من نحن كمدير'}</span>
+                  <span>لوحة تعديل من نحن كمدير</span>
                 </button>
               </div>
             )}
@@ -184,14 +175,10 @@ export const AboutView: React.FC = () => {
           <div className="lg:col-span-7 space-y-6">
             <div className="space-y-3">
               <span className="text-xs font-bold uppercase tracking-wider text-rose-600">
-                {isEn ? 'The Concept & Philosophy' : isKu ? 'فەلسەفە و دەستپێک' : 'فلسفة البداية والشغف'}
+                فلسفة البداية والشغف
               </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-900 leading-snug">
-                {isEn
-                  ? 'Everlasting Lego Blooms Crafted To Stay With You Forever'
-                  : isKu
-                  ? 'گوڵی لێکۆی شایستە بۆ هەمیشە دەمێنێتەوە'
-                  : 'ورد الليكو الفاخر الذي لا يذبل • صُمم ليبقى معك للأبد'}
+                ورد الليكو الفاخر الذي لا يذبل • صُمم ليبقى معك للأبد
               </h2>
             </div>
 
@@ -203,7 +190,7 @@ export const AboutView: React.FC = () => {
             <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-r from-rose-50 to-pink-50/70 border border-rose-200/80 space-y-2.5">
               <div className="flex items-center gap-2 text-rose-800 font-bold text-sm">
                 <Heart className="w-4 h-4 text-rose-600 fill-rose-600" />
-                <span>{isEn ? 'Our Mission & Promise' : isKu ? 'پەیام و بەڵێنی ئێمە' : 'رسالتنا ووعدنا لكل عميل'}</span>
+                <span>رسالتنا ووعدنا لكل عميل</span>
               </div>
               <p className="text-xs sm:text-sm text-stone-700 leading-relaxed">
                 {missionText}
@@ -242,7 +229,7 @@ export const AboutView: React.FC = () => {
                     KAZAKI.IQ BOUTIQUE
                   </span>
                   <p className="text-sm sm:text-base font-bold">
-                    {isEn ? 'Precision Craftsmanship & Timeless Elegance' : isKu ? 'دەستڕەنگینی ورد و جوانییەکی هەمیشەیی' : 'دقة هندسية وجمال خالد لا يبهت'}
+                    دقة هندسية وجمال خالد لا يبهت
                   </p>
                 </div>
               </div>
@@ -255,7 +242,7 @@ export const AboutView: React.FC = () => {
                   {about.experienceYears || '+3'}
                 </span>
                 <span className="text-[11px] text-stone-500 block font-medium">
-                  {isEn ? 'Years of Passion' : isKu ? 'ساڵ لە داهێنان' : 'سنوات من التميز'}
+                  سنوات من التميز
                 </span>
               </div>
               <div className="bg-white p-4 rounded-2xl border border-rose-100 shadow-2xs text-center space-y-1">
@@ -263,7 +250,7 @@ export const AboutView: React.FC = () => {
                   {about.satisfiedCustomers || '+10K'}
                 </span>
                 <span className="text-[11px] text-stone-500 block font-medium">
-                  {isEn ? 'Happy Clients' : isKu ? 'کڕیاری دڵخۆش' : 'زبون يثق بنا'}
+                  زبون يثق بنا
                 </span>
               </div>
               <div className="bg-white p-4 rounded-2xl border border-rose-100 shadow-2xs text-center space-y-1">
@@ -271,23 +258,23 @@ export const AboutView: React.FC = () => {
                   {about.everlastingGuarantee || '100%'}
                 </span>
                 <span className="text-[11px] text-stone-500 block font-medium">
-                  {isEn ? 'Everlasting Flowers' : isKu ? 'گوڵی هەمیشەیی' : 'ورد لا يذبل للأبد'}
+                  ورد لا يذبل للأبد
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Studio Photo Gallery Showcase (معرض صور الاستوديو الحية) */}
+        {/* Studio Photo Gallery Showcase */}
         {gallery && gallery.length > 0 && (
           <div className="space-y-6 bg-gradient-to-b from-white via-rose-50/20 to-white p-6 sm:p-10 rounded-3xl border border-rose-100 shadow-2xs">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-rose-600 block mb-1">
-                  {isEn ? 'Boutique & Studio Gallery' : isKu ? 'گەلەری ستۆدیۆ' : 'معرض صور المتجر والورشة'}
+                  معرض صور المتجر والورشة
                 </span>
                 <h3 className="text-xl sm:text-2xl font-extrabold text-stone-900">
-                  {isEn ? 'Lego Flower Glimpses' : isKu ? 'دیمەنەکانی گوڵی لێکۆ' : 'لقطات ورد الليكو'}
+                  لقطات ورد الليكو
                 </h3>
               </div>
 
@@ -318,7 +305,7 @@ export const AboutView: React.FC = () => {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3 text-white text-xs font-bold">
-                    <span>{isEn ? 'KAZAKI.IQ Lego Flowers' : isKu ? 'گوڵی لێکۆ KAZAKI.IQ' : 'ورد ليكو KAZAKI.IQ'}</span>
+                    <span>ورد ليكو KAZAKI.IQ</span>
                   </div>
                 </div>
               ))}
@@ -330,17 +317,17 @@ export const AboutView: React.FC = () => {
         <div className="space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <span className="text-xs font-bold uppercase tracking-wider text-rose-600">
-              {isEn ? 'Why Choose KAZAKI.IQ' : isKu ? 'بۆچی KAZAKI.IQ هەڵدەبژێریت' : 'لماذا يختار الجميع KAZAKI.IQ؟'}
+              لماذا يختار الجميع KAZAKI.IQ؟
             </span>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900">
-              {isEn ? 'Crafted For Life’s Most Precious Moments' : isKu ? 'دروستکراوە بۆ بەنرخترین ساتەکانی ژیان' : 'مزايا فريدة صنعت لأجمل لحظات العمر'}
+              مزايا فريدة صنعت لأجمل لحظات العمر
             </h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {features.map((feat) => {
-              const featTitle = isEn ? (feat.titleEn || feat.title) : isKu ? (feat.titleKu || feat.title) : feat.title;
-              const featDesc = isEn ? (feat.descriptionEn || feat.description) : isKu ? (feat.descriptionKu || feat.description) : feat.description;
+              const featTitle = feat.title;
+              const featDesc = feat.description;
 
               return (
                 <div
@@ -367,23 +354,15 @@ export const AboutView: React.FC = () => {
           <div className="relative z-10 max-w-2xl space-y-4">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-xs font-semibold backdrop-blur-xs">
               <Heart className="w-3.5 h-3.5 fill-white" />
-              <span>{isEn ? 'Make It An Everlasting Gift' : isKu ? 'بیبکە بە دیارییەکی هەمیشەیی' : 'اجعل هديتك تدوم للأبد'}</span>
+              <span>اجعل هديتك تدوم للأبد</span>
             </span>
 
             <h3 className="text-2xl sm:text-4xl font-extrabold leading-snug">
-              {isEn
-                ? 'Ready To Pick Your Luxury Lego Flowers or Gift Box?'
-                : isKu
-                ? 'ئامادەیت بۆ هەڵبژاردنی گوڵی لێکۆ یان بوکسی دیاری؟'
-                : 'جاهز لاختيار بوكس أو ورود ليغو التي تناسب ذوقك؟'}
+              جاهز لاختيار بوكس أو ورود ليغو التي تناسب ذوقك؟
             </h3>
 
             <p className="text-rose-100 text-xs sm:text-sm leading-relaxed max-w-xl">
-              {isEn
-                ? 'Explore our exclusive collection with fast nationwide delivery to all Iraq provinces and premium gift wrapping.'
-                : isKu
-                ? 'سەیری کۆمەڵە ناوازەکەمان بکەن بە گەیاندنی خێرا بۆ هەموو پارێزگاکانی عێراق و تەغلیفی شایستە.'
-                : 'تصفح تشكيلتنا الحصرية مع خدمة التوصيل السريع لكافة محافظات العراق والتغليف الفاخر والمميز.'}
+              تصفح تشكيلتنا الحصرية مع خدمة التوصيل السريع لكافة محافظات العراق والتغليف الفاخر والمميز.
             </p>
 
             <div className="pt-2 flex flex-wrap gap-3">
@@ -396,7 +375,7 @@ export const AboutView: React.FC = () => {
                 className="px-8 py-3.5 rounded-full bg-white hover:bg-rose-50 text-rose-700 font-bold text-xs shadow-lg transition-colors cursor-pointer flex items-center gap-2"
               >
                 <ShoppingBag className="w-4 h-4" />
-                <span>{getBtnText('shop', isEn ? 'Shop Now' : isKu ? 'ئێستا بکڕە' : 'تسوق الآن واستكشف ورود ليغو والبوكسات')}</span>
+                <span>{getBtnText('shop', 'تسوق الآن واستكشف ورود ليغو والبوكسات')}</span>
               </button>
 
               <button
@@ -406,7 +385,7 @@ export const AboutView: React.FC = () => {
                 }}
                 className="px-6 py-3.5 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/30 backdrop-blur-xs transition-colors cursor-pointer"
               >
-                {getBtnText('contactUs', isEn ? 'Contact Customer Service' : isKu ? 'پەیوەندی بە خزمەتگوزاری بکە' : 'تواصل مع خدمة العملاء')}
+                {getBtnText('contactUs', 'تواصل مع خدمة العملاء')}
               </button>
             </div>
           </div>

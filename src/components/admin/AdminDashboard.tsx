@@ -178,20 +178,10 @@ export const AdminDashboard: React.FC = () => {
   const [notifSavedToast, setNotifSavedToast] = useState(false);
 
   // All Site Texts & Buttons customizer state
-  const [siteTextsForm, setSiteTextsForm] = useState<Record<string, Record<SupportedLanguage, string>>>(() => {
-    const raw = JSON.parse(JSON.stringify(siteTexts || initialSiteTexts));
-    // Ensure every single key has its authentic English translation in the English slot
-    Object.keys(initialSiteTexts).forEach((k) => {
-      if (!raw[k]) {
-        raw[k] = { ...initialSiteTexts[k] };
-      } else if (!raw[k].en || raw[k].en.trim() === '') {
-        raw[k].en = initialSiteTexts[k]?.en || '';
-      }
-    });
-    return raw;
+  const [siteTextsForm, setSiteTextsForm] = useState<Record<string, { ar: string; en?: string; ku?: string }>>(() => {
+    return JSON.parse(JSON.stringify(siteTexts || initialSiteTexts));
   });
   const [buttonSearchQuery, setButtonSearchQuery] = useState('');
-  const [activeBtnLangTab, setActiveBtnLangTab] = useState<'all' | SupportedLanguage>('all');
   const [activeTextCategoryTab, setActiveTextCategoryTab] = useState<
     'all' | 'buttons' | 'hero' | 'products' | 'cart' | 'tracking' | 'contact'
   >('all');
@@ -199,18 +189,10 @@ export const AdminDashboard: React.FC = () => {
   const buttonsForm = siteTextsForm;
   const setButtonsForm = setSiteTextsForm;
 
-  // Keep siteTextsForm in sync when siteTexts updates in context, ensuring English is always populated
+  // Keep siteTextsForm in sync when siteTexts updates in context
   React.useEffect(() => {
     if (siteTexts) {
-      const cloned = JSON.parse(JSON.stringify(siteTexts));
-      Object.keys(initialSiteTexts).forEach((k) => {
-        if (!cloned[k]) {
-          cloned[k] = { ...initialSiteTexts[k] };
-        } else if (!cloned[k].en || cloned[k].en.trim() === '') {
-          cloned[k].en = initialSiteTexts[k]?.en || '';
-        }
-      });
-      setSiteTextsForm(cloned);
+      setSiteTextsForm(JSON.parse(JSON.stringify(siteTexts)));
     }
   }, [siteTexts]);
 
@@ -712,59 +694,12 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  // Auto-translate product Arabic title and description to English & Kurdish
-  const handleAutoTranslateProduct = async () => {
-    if (!productForm.title.trim()) {
-      showNotification('يرجى إدخال اسم المنتج بالعربية أولاً للترجمة');
-      return;
-    }
-    setIsTranslatingProduct(true);
-    showNotification('جارِ ترجمة اسم ووصف المنتج إلى الكردية والإنجليزية...');
-    try {
-      const titleTrans = await translateArabicToEnAndKu(productForm.title);
-      const descTrans = productForm.description.trim()
-        ? await translateArabicToEnAndKu(productForm.description)
-        : { en: '', ku: '' };
-
-      setProductForm((prev) => ({
-        ...prev,
-        titleEn: titleTrans.en || prev.titleEn,
-        titleKu: titleTrans.ku || prev.titleKu,
-        descriptionEn: descTrans.en || prev.descriptionEn,
-        descriptionKu: descTrans.ku || prev.descriptionKu,
-      }));
-      showNotification('تمت ترجمة بيانات المنتج إلى الإنجليزية والكردية بنجاح');
-    } catch {
-      showNotification('حدث خطأ أثناء الترجمة، يرجى المحاولة ثانية');
-    } finally {
-      setIsTranslatingProduct(false);
-    }
-  };
-
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     const tagArray = productForm.tags
       .split(',')
       .map((t) => t.trim())
       .filter(Boolean);
-
-    // Auto-translate if English or Kurdish are empty
-    let effTitleEn = productForm.titleEn.trim();
-    let effTitleKu = productForm.titleKu.trim();
-    let effDescEn = productForm.descriptionEn.trim();
-    let effDescKu = productForm.descriptionKu.trim();
-
-    if (!effTitleEn || !effTitleKu) {
-      const trans = await translateArabicToEnAndKu(productForm.title);
-      if (!effTitleEn) effTitleEn = trans.en;
-      if (!effTitleKu) effTitleKu = trans.ku;
-    }
-
-    if (productForm.description.trim() && (!effDescEn || !effDescKu)) {
-      const descTrans = await translateArabicToEnAndKu(productForm.description);
-      if (!effDescEn) effDescEn = descTrans.en;
-      if (!effDescKu) effDescKu = descTrans.ku;
-    }
 
     const galleryImages = [
       productForm.image,
@@ -778,11 +713,7 @@ export const AdminDashboard: React.FC = () => {
     if (editingProductId) {
       updateProduct(editingProductId, {
         title: productForm.title,
-        titleEn: effTitleEn,
-        titleKu: effTitleKu,
         description: productForm.description,
-        descriptionEn: effDescEn,
-        descriptionKu: effDescKu,
         price: Number(productForm.price),
         originalPrice: Number(productForm.originalPrice) || undefined,
         categoryId: productForm.categoryId,
@@ -795,15 +726,11 @@ export const AdminDashboard: React.FC = () => {
         isFeatured: productForm.isFeatured,
         tags: tagArray,
       });
-      showNotification('تم تحديث المنتج وترجمته بنجاح');
+      showNotification('تم تحديث المنتج بنجاح');
     } else {
       addProduct({
         title: productForm.title,
-        titleEn: effTitleEn,
-        titleKu: effTitleKu,
         description: productForm.description,
-        descriptionEn: effDescEn,
-        descriptionKu: effDescKu,
         price: Number(productForm.price),
         originalPrice: Number(productForm.originalPrice) || undefined,
         categoryId: productForm.categoryId,
@@ -819,188 +746,46 @@ export const AdminDashboard: React.FC = () => {
         isNew: true,
         tags: tagArray,
       });
-      showNotification('تمت إضافة المنتج الجديد وترجمته بنجاح');
+      showNotification('تمت إضافة المنتج الجديد بنجاح');
     }
     setIsProductModalOpen(false);
   };
 
-  const categoryTranslateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const categoryDescTranslateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   const handleCategoryNameChange = (newName: string) => {
-    // Instant translation from internal dictionary for instant responsiveness
-    const instant = instantTranslateArabic(newName);
     setCategoryForm((prev) => ({
       ...prev,
       name: newName,
-      nameEn: instant.en || prev.nameEn,
-      nameKu: instant.ku || prev.nameKu,
     }));
-
-    // Debounced online/lexicon translation for full accuracy
-    if (categoryTranslateTimeoutRef.current) {
-      clearTimeout(categoryTranslateTimeoutRef.current);
-    }
-    if (newName.trim()) {
-      categoryTranslateTimeoutRef.current = setTimeout(async () => {
-        try {
-          const trans = await translateArabicToEnAndKu(newName.trim());
-          setCategoryForm((prev) => {
-            if (prev.name === newName) {
-              return {
-                ...prev,
-                nameEn: trans.en || prev.nameEn,
-                nameKu: trans.ku || prev.nameKu,
-              };
-            }
-            return prev;
-          });
-        } catch {
-          // ignore
-        }
-      }, 500);
-    }
   };
 
   const handleCategoryDescChange = (newDesc: string) => {
-    const instant = instantTranslateArabic(newDesc);
     setCategoryForm((prev) => ({
       ...prev,
       description: newDesc,
-      descriptionEn: instant.en || prev.descriptionEn,
-      descriptionKu: instant.ku || prev.descriptionKu,
     }));
-
-    if (categoryDescTranslateTimeoutRef.current) {
-      clearTimeout(categoryDescTranslateTimeoutRef.current);
-    }
-    if (newDesc.trim()) {
-      categoryDescTranslateTimeoutRef.current = setTimeout(async () => {
-        try {
-          const trans = await translateArabicToEnAndKu(newDesc.trim());
-          setCategoryForm((prev) => {
-            if (prev.description === newDesc) {
-              return {
-                ...prev,
-                descriptionEn: trans.en || prev.descriptionEn,
-                descriptionKu: trans.ku || prev.descriptionKu,
-              };
-            }
-            return prev;
-          });
-        } catch {
-          // ignore
-        }
-      }, 600);
-    }
   };
 
-  // Auto-translate category Arabic name & description to English & Kurdish
-  const handleAutoTranslateCategory = async () => {
-    if (!categoryForm.name.trim()) {
-      showNotification('يرجى إدخال اسم القسم بالعربية أولاً للترجمة');
-      return;
-    }
-    setIsTranslatingCategory(true);
-    showNotification('جارِ ترجمة اسم ووصف القسم إلى الكردية والإنجليزية...');
-    try {
-      const nameTrans = await translateArabicToEnAndKu(categoryForm.name);
-      const descTrans = categoryForm.description.trim()
-        ? await translateArabicToEnAndKu(categoryForm.description)
-        : { en: '', ku: '' };
-
-      setCategoryForm((prev) => ({
-        ...prev,
-        nameEn: nameTrans.en || prev.nameEn,
-        nameKu: nameTrans.ku || prev.nameKu,
-        descriptionEn: descTrans.en || prev.descriptionEn,
-        descriptionKu: descTrans.ku || prev.descriptionKu,
-      }));
-      showNotification('تمت ترجمة بيانات القسم إلى الإنجليزية والكردية بنجاح');
-    } catch {
-      showNotification('حدث خطأ أثناء الترجمة، يرجى المحاولة ثانية');
-    } finally {
-      setIsTranslatingCategory(false);
-    }
-  };
-
-  // Add or Edit Category with automatic translation & sync
-  const handleSaveCategory = async (e: React.FormEvent) => {
+  // Add or Edit Category
+  const handleSaveCategory = (e: React.FormEvent) => {
     e.preventDefault();
     if (!categoryForm.name.trim()) return;
-
-    const existingCat = categories.find((c) => c.id === editingCategoryId);
-    const nameChanged = existingCat && existingCat.name.trim() !== categoryForm.name.trim();
-
-    let effNameEn = categoryForm.nameEn.trim();
-    let effNameKu = categoryForm.nameKu.trim();
-    let effDescEn = categoryForm.descriptionEn.trim();
-    let effDescKu = categoryForm.descriptionKu.trim();
-
-    const arabicRegex = /[\u0600-\u06FF]/;
-    const isEnUntranslated = !effNameEn || nameChanged || effNameEn === categoryForm.name.trim() || arabicRegex.test(effNameEn);
-    const isKuUntranslated = !effNameKu || nameChanged || effNameKu === categoryForm.name.trim();
-
-    // 1. Instant dictionary translation
-    const instant = instantTranslateArabic(categoryForm.name.trim());
-    if (isEnUntranslated && instant.en) effNameEn = instant.en;
-    if (isKuUntranslated && instant.ku) effNameKu = instant.ku;
-
-    // 2. Full translation
-    if (isEnUntranslated || isKuUntranslated) {
-      try {
-        const trans = await translateArabicToEnAndKu(categoryForm.name.trim());
-        if (isEnUntranslated && trans.en) effNameEn = trans.en;
-        if (isKuUntranslated && trans.ku) effNameKu = trans.ku;
-      } catch {
-        // keep fallback
-      }
-    }
-
-    if (categoryForm.description.trim()) {
-      const descChanged = existingCat && existingCat.description?.trim() !== categoryForm.description.trim();
-      const isDescEnUntranslated = !effDescEn || descChanged || effDescEn === categoryForm.description.trim() || arabicRegex.test(effDescEn);
-      const isDescKuUntranslated = !effDescKu || descChanged || effDescKu === categoryForm.description.trim();
-
-      const instantDesc = instantTranslateArabic(categoryForm.description.trim());
-      if (isDescEnUntranslated && instantDesc.en) effDescEn = instantDesc.en;
-      if (isDescKuUntranslated && instantDesc.ku) effDescKu = instantDesc.ku;
-
-      if (isDescEnUntranslated || isDescKuUntranslated) {
-        try {
-          const descTrans = await translateArabicToEnAndKu(categoryForm.description.trim());
-          if (isDescEnUntranslated && descTrans.en) effDescEn = descTrans.en;
-          if (isDescKuUntranslated && descTrans.ku) effDescKu = descTrans.ku;
-        } catch {
-          // keep fallback
-        }
-      }
-    }
 
     if (editingCategoryId) {
       updateCategory(editingCategoryId, {
         name: categoryForm.name.trim(),
-        nameEn: effNameEn,
-        nameKu: effNameKu,
         description: categoryForm.description.trim(),
-        descriptionEn: effDescEn,
-        descriptionKu: effDescKu,
         image: categoryForm.image.trim() || 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80',
         icon: categoryForm.icon,
       });
-      showNotification('تم تحديث وتعديل اسم القسم وترجمته تلقائياً بنجاح');
+      showNotification('تم تحديث وتعديل اسم القسم بنجاح');
     } else {
       addCategory({
         name: categoryForm.name.trim(),
-        nameEn: effNameEn,
-        nameKu: effNameKu,
         description: categoryForm.description.trim(),
-        descriptionEn: effDescEn,
-        descriptionKu: effDescKu,
         image: categoryForm.image.trim() || 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80',
         icon: categoryForm.icon,
       });
-      showNotification('تمت إضافة القسم الجديد وترجمته تلقائياً بنجاح');
+      showNotification('تمت إضافة القسم الجديد بنجاح');
     }
 
     setCategoryForm({
@@ -1019,22 +804,13 @@ export const AdminDashboard: React.FC = () => {
 
   const handleEditCategory = (cat: Category) => {
     setEditingCategoryId(cat.id);
-    const instant = instantTranslateArabic(cat.name || '');
-    const arabicRegex = /[\u0600-\u06FF]/;
-    const effEn = cat.nameEn && !arabicRegex.test(cat.nameEn) ? cat.nameEn : instant.en;
-    const effKu = cat.nameKu && cat.nameKu !== cat.name ? cat.nameKu : instant.ku;
-
-    const instantDesc = instantTranslateArabic(cat.description || '');
-    const effDescEn = cat.descriptionEn && !arabicRegex.test(cat.descriptionEn) ? cat.descriptionEn : instantDesc.en;
-    const effDescKu = cat.descriptionKu && cat.descriptionKu !== cat.description ? cat.descriptionKu : instantDesc.ku;
-
     setCategoryForm({
       name: cat.name || '',
-      nameEn: effEn || '',
-      nameKu: effKu || '',
+      nameEn: '',
+      nameKu: '',
       description: cat.description || '',
-      descriptionEn: effDescEn || '',
-      descriptionKu: effDescKu || '',
+      descriptionEn: '',
+      descriptionKu: '',
       image: cat.image || '',
       icon: cat.icon || 'Heart',
     });
@@ -1282,122 +1058,10 @@ export const AdminDashboard: React.FC = () => {
       showNotification('عذراً، الصلاحية محصورة بالمدير العام فقط');
       return;
     }
-    if (confirm('هل أنتِ متأكدة من استعادة الأسماء الافتراضية لجميع الأزرار باللغات الثلاث (العربية، الإنجليزية، الكردية)؟')) {
+    if (confirm('هل أنتِ متأكدة من استعادة الأسماء الافتراضية لجميع أزرار الموقع؟')) {
       resetButtonTextsToDefault();
       setButtonsForm(JSON.parse(JSON.stringify(initialButtonTranslations)));
       showNotification('تمت استعادة الأسماء الافتراضية بنجاح');
-    }
-  };
-
-  // Auto-fill and translate all English language fields
-  const handleFillAllEnglishTranslations = () => {
-    if (currentUser?.role !== 'admin') {
-      showNotification('عذراً، الصلاحية محصورة بالمدير العام فقط');
-      return;
-    }
-    const updated: Record<string, Record<SupportedLanguage, string>> = JSON.parse(JSON.stringify(siteTextsForm));
-    Object.keys(initialSiteTexts).forEach((key) => {
-      if (!updated[key]) {
-        updated[key] = { ...initialSiteTexts[key] };
-      } else {
-        updated[key].en = initialSiteTexts[key]?.en || updated[key].en || '';
-      }
-    });
-    setSiteTextsForm(updated);
-    updateSiteTexts(updated);
-    showNotification('تم وضع وترجمة كافة خانات اللغة الإنجليزية وحفظها للمتجر بنجاح');
-  };
-
-  // Auto-translate all site phrases and buttons from Arabic to both English and Kurdish
-  const handleTranslateAllPhrases = async () => {
-    if (currentUser?.role !== 'admin') {
-      showNotification('عذراً، الصلاحية محصورة بالمدير العام فقط');
-      return;
-    }
-    setIsTranslatingAllPhrases(true);
-    showNotification('جارِ ترجمة وتحويل جميع الأزرار والعبارات إلى الكردية والإنجليزية...');
-
-    try {
-      const updatedButtons: Record<string, Record<SupportedLanguage, string>> = JSON.parse(
-        JSON.stringify(buttonsForm)
-      );
-      const updatedTexts: Record<string, Record<SupportedLanguage, string>> = JSON.parse(
-        JSON.stringify(siteTextsForm)
-      );
-
-      for (const btn of customizableButtonsConfig) {
-        const current = buttonsForm[btn.key] || initialButtonTranslations[btn.key] || { ar: '', en: '', ku: '' };
-        const arText = (current.ar && current.ar.trim()) || initialButtonTranslations[btn.key]?.ar || btn.title;
-        const trans = await translateArabicToEnAndKu(arText);
-
-        updatedButtons[btn.key] = {
-          ar: arText,
-          en: trans.en || current.en || initialButtonTranslations[btn.key]?.en || '',
-          ku: trans.ku || current.ku || initialButtonTranslations[btn.key]?.ku || '',
-        };
-
-        updatedTexts[btn.key] = {
-          ar: arText,
-          en: updatedButtons[btn.key].en,
-          ku: updatedButtons[btn.key].ku,
-        };
-      }
-
-      for (const [key, initialVal] of Object.entries(initialSiteTexts)) {
-        if (!updatedTexts[key]) {
-          const trans = await translateArabicToEnAndKu(initialVal.ar);
-          updatedTexts[key] = {
-            ar: initialVal.ar,
-            en: trans.en || initialVal.en,
-            ku: trans.ku || initialVal.ku,
-          };
-        } else {
-          const ar = updatedTexts[key].ar || initialVal.ar;
-          const trans = await translateArabicToEnAndKu(ar);
-          if (!updatedTexts[key].en) updatedTexts[key].en = trans.en;
-          if (!updatedTexts[key].ku) updatedTexts[key].ku = trans.ku;
-        }
-      }
-
-      setButtonsForm(updatedButtons);
-      setSiteTextsForm(updatedTexts);
-      updateSiteTexts(updatedTexts);
-      updateButtonTexts(updatedButtons);
-      showNotification('تمت ترجمة وتحويل جميع أزرار وعبارات الموقع إلى الكردية والإنجليزية بنجاح!');
-    } catch {
-      showNotification('حدث خطأ أثناء الترجمة الجماعية');
-    } finally {
-      setIsTranslatingAllPhrases(false);
-    }
-  };
-
-  const handleTranslateSingleButton = async (btnKey: string) => {
-    const current = buttonsForm[btnKey] || initialButtonTranslations[btnKey] || { ar: '', en: '', ku: '' };
-    const arText = (current.ar && current.ar.trim()) || initialButtonTranslations[btnKey]?.ar;
-    if (!arText) {
-      showNotification('يرجى إدخال النص العربي للزر أولاً');
-      return;
-    }
-    showNotification('جارِ الترجمة...');
-    try {
-      const trans = await translateArabicToEnAndKu(arText);
-      const updated = {
-        ...buttonsForm,
-        [btnKey]: {
-          ar: arText,
-          en: trans.en || current.en,
-          ku: trans.ku || current.ku,
-        },
-      };
-      setButtonsForm(updated);
-
-      const updatedTexts = { ...siteTextsForm, [btnKey]: updated[btnKey] };
-      setSiteTextsForm(updatedTexts);
-      updateSiteTexts(updatedTexts);
-      updateButtonTexts(updated);
-      showNotification(`تمت ترجمة "${arText}" إلى الكردية: "${trans.ku}" والإنجليزية: "${trans.en}"`);
-    } catch {
-      showNotification('حدث خطأ أثناء الترجمة');
     }
   };
 
@@ -3085,36 +2749,6 @@ export const AdminDashboard: React.FC = () => {
                 <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
                   <button
                     type="button"
-                    disabled={isTranslatingAllPhrases}
-                    onClick={handleTranslateAllPhrases}
-                    className="px-4 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md disabled:opacity-60"
-                    title="تحويل وترجمة جميع الأزرار والعبارات إلى الكردية والإنجليزية تلقائياً"
-                  >
-                    {isTranslatingAllPhrases ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>جارِ الترجمة التلقائية...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Languages className="w-3.5 h-3.5 text-amber-300" />
-                        <span>ترجمة كل العبارات (العربية إلى EN و KU)</span>
-                      </>
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleFillAllEnglishTranslations}
-                    className="px-4 py-2.5 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-                    title="وضع وترجمة كافة خانات اللغة الإنجليزية في الموقع بضغطة واحدة"
-                  >
-                    <Globe className="w-3.5 h-3.5 text-blue-600" />
-                    <span>ملء الإنجليزية فقط</span>
-                  </button>
-
-                  <button
-                    type="button"
                     onClick={handleResetButtonTexts}
                     className="px-4 py-2.5 rounded-full border border-stone-200 hover:bg-stone-50 text-stone-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
@@ -3174,36 +2808,9 @@ export const AdminDashboard: React.FC = () => {
                 ))}
               </div>
 
-              {/* Language Filters & Search */}
+              {/* Search in buttons */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-rose-50">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold text-stone-600 flex items-center gap-1">
-                    <Globe className="w-3.5 h-3.5 text-stone-400" />
-                    <span>عرض خانة اللغة:</span>
-                  </span>
-                  {[
-                    { id: 'all', label: 'كافة اللغات معاً' },
-                    { id: 'ar', label: 'العربية فقط (AR)' },
-                    { id: 'en', label: 'الإنجليزية فقط (EN)' },
-                    { id: 'ku', label: 'الكردية فقط (KU)' },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveBtnLangTab(tab.id as any)}
-                      className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                        activeBtnLangTab === tab.id
-                          ? 'bg-stone-900 text-white border-stone-900 shadow-2xs'
-                          : 'bg-white text-stone-600 border-stone-200 hover:border-rose-300'
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Search in buttons */}
-                <div className="relative w-full sm:w-64">
+                <div className="relative w-full sm:w-80">
                   <input
                     type="text"
                     value={buttonSearchQuery}
@@ -3230,17 +2837,13 @@ export const AdminDashboard: React.FC = () => {
                       b.title.toLowerCase().includes(q) ||
                       b.description.toLowerCase().includes(q) ||
                       String(b.key).toLowerCase().includes(q) ||
-                      buttonsForm[b.key]?.ar?.toLowerCase().includes(q) ||
-                      buttonsForm[b.key]?.en?.toLowerCase().includes(q) ||
-                      buttonsForm[b.key]?.ku?.toLowerCase().includes(q)
+                      buttonsForm[b.key]?.ar?.toLowerCase().includes(q)
                     );
                   })
                   .map((btn) => {
-                    const fallbackValues = initialSiteTexts[btn.key] || initialButtonTranslations[btn.key] || { ar: '', en: '', ku: '' };
+                    const fallbackValues = initialSiteTexts[btn.key] || initialButtonTranslations[btn.key] || { ar: '' };
                     const currentValues = buttonsForm[btn.key] || fallbackValues;
-                    const effectiveEn = (currentValues.en && currentValues.en.trim() !== '') ? currentValues.en : (fallbackValues.en || '');
                     const effectiveAr = (currentValues.ar && currentValues.ar.trim() !== '') ? currentValues.ar : (fallbackValues.ar || '');
-                    const effectiveKu = (currentValues.ku && currentValues.ku.trim() !== '') ? currentValues.ku : (fallbackValues.ku || '');
 
                     return (
                       <div
@@ -3273,148 +2876,44 @@ export const AdminDashboard: React.FC = () => {
 
                           {/* Live Button Preview */}
                           <div className="mt-3 p-3 rounded-2xl bg-stone-50/70 border border-stone-100 space-y-1.5">
-                            <div className="flex items-center justify-between text-[10px] text-stone-400 font-semibold">
+                            <div className="text-[10px] text-stone-400 font-semibold text-right">
                               <span>معاينة مظهر الزر المباشر للزوار:</span>
-                              <div className="flex items-center gap-1 font-mono">
-                                <span className="bg-white px-1.5 py-0.5 rounded border border-stone-200">
-                                  AR {effectiveAr}
-                                </span>
-                                <span className="bg-white px-1.5 py-0.5 rounded border border-stone-200 font-sans">
-                                  EN {effectiveEn}
-                                </span>
-                                <span className="bg-white px-1.5 py-0.5 rounded border border-stone-200">
-                                  KU {effectiveKu}
-                                </span>
-                              </div>
                             </div>
 
                             {/* Rendered Preview Button */}
                             <div className="flex items-center justify-center pt-1">
                               <div className="px-5 py-2 rounded-full bg-gradient-to-r from-rose-600 to-pink-500 text-white font-bold text-xs shadow-xs text-center">
-                                <span>{currentLanguage === 'en' ? effectiveEn : currentLanguage === 'ku' ? effectiveKu : effectiveAr}</span>
+                                <span>{effectiveAr}</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        {/* Input Fields for the 3 Languages */}
+                        {/* Input Field for Button Text */}
                         <div className="space-y-3 pt-2 border-t border-rose-50">
-                          {/* Arabic Input */}
-                          {(activeBtnLangTab === 'all' || activeBtnLangTab === 'ar') && (
-                            <div>
-                              <div className="flex items-center justify-between mb-1">
-                                <label className="text-[11px] font-bold text-stone-800 flex items-center gap-1">
-                                  <span>الاسم بالعربية (Arabic):</span>
-                                </label>
-                                <button
-                                  type="button"
-                                  onClick={() => handleTranslateSingleButton(btn.key)}
-                                  className="text-[10px] text-emerald-800 bg-emerald-50 hover:bg-emerald-100 font-bold px-2 py-0.5 rounded-md border border-emerald-200 shadow-2xs flex items-center gap-1 cursor-pointer transition-colors"
-                                  title="ترجمة النص العربي لهذا الزر فوراً إلى الكردية والإنجليزية"
-                                >
-                                  <Languages className="w-3 h-3 text-emerald-600" />
-                                  <span>ترجمة تلقائية (العربية إلى EN و KU)</span>
-                                </button>
-                              </div>
-                              <input
-                                type="text"
-                                dir="rtl"
-                                value={effectiveAr}
-                                onChange={(e) =>
-                                  setButtonsForm({
-                                    ...buttonsForm,
-                                    [btn.key]: {
-                                      ...currentValues,
-                                      ar: e.target.value,
-                                    },
-                                  })
-                                }
-                                placeholder={fallbackValues.ar}
-                                className="w-full text-xs font-semibold border border-rose-200 rounded-xl px-3.5 py-2 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-500 transition-colors"
-                              />
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <label className="text-[11px] font-bold text-stone-800 flex items-center gap-1">
+                                <span>نص الزر / العبارة (بالعربية):</span>
+                              </label>
                             </div>
-                          )}
-
-                          {/* English Input */}
-                          {(activeBtnLangTab === 'all' || activeBtnLangTab === 'en') && (
-                            <div className="bg-blue-50/30 p-2.5 rounded-2xl border border-blue-100">
-                              <div className="flex items-center justify-between mb-1.5">
-                                <label className="text-[11px] font-bold text-blue-900 flex items-center gap-1">
-                                  <span>خانة اللغة الإنجليزية (English):</span>
-                                </label>
-                                <div className="flex items-center gap-1.5">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const defaultEn = fallbackValues.en || '';
-                                      setButtonsForm({
-                                        ...buttonsForm,
-                                        [btn.key]: {
-                                          ...currentValues,
-                                          en: defaultEn,
-                                        },
-                                      });
-                                      showNotification(`تم وضع الترجمة الإنجليزية: "${defaultEn}"`);
-                                    }}
-                                    className="text-[10px] text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1 hover:underline cursor-pointer bg-white px-2 py-0.5 rounded-md border border-blue-200 shadow-2xs"
-                                    title="وضع الترجمة الإنجليزية النموذجية في هذه الخانة"
-                                  >
-                                    <Globe className="w-3 h-3 text-blue-600" />
-                                    <span>وضع وترجمة الإنجليزية</span>
-                                  </button>
-                                  <span className="text-[10px] text-stone-400 font-mono hidden sm:inline">
-                                    Default: {fallbackValues.en}
-                                  </span>
-                                </div>
-                              </div>
-                              <input
-                                type="text"
-                                dir="ltr"
-                                value={effectiveEn}
-                                onChange={(e) =>
-                                  setButtonsForm({
-                                    ...buttonsForm,
-                                    [btn.key]: {
-                                      ...currentValues,
-                                      en: e.target.value,
-                                    },
-                                  })
-                                }
-                                placeholder={fallbackValues.en}
-                                className="w-full text-xs font-semibold border border-blue-200 rounded-xl px-3.5 py-2 bg-white focus:bg-white outline-hidden focus:border-blue-500 transition-colors font-sans"
-                              />
-                            </div>
-                          )}
-
-                          {/* Kurdish Input */}
-                          {(activeBtnLangTab === 'all' || activeBtnLangTab === 'ku') && (
-                            <div>
-                              <div className="flex items-center justify-between mb-1">
-                                <label className="text-[11px] font-bold text-stone-800 flex items-center gap-1">
-                                  <span>الاسم بالكردية (Kurdish / کوردی):</span>
-                                </label>
-                                <span className="text-[10px] text-stone-400 font-mono">
-                                  بنەڕەتی: {fallbackValues.ku}
-                                </span>
-                              </div>
-                              <input
-                                type="text"
-                                dir="rtl"
-                                value={effectiveKu}
-                                onChange={(e) =>
-                                  setButtonsForm({
-                                    ...buttonsForm,
-                                    [btn.key]: {
-                                      ...currentValues,
-                                      ku: e.target.value,
-                                    },
-                                  })
-                                }
-                                placeholder={fallbackValues.ku}
-                                className="w-full text-xs font-semibold border border-amber-200 rounded-xl px-3.5 py-2 bg-amber-50/20 focus:bg-white outline-hidden focus:border-amber-500 transition-colors"
-                              />
-                            </div>
-                          )}
+                            <input
+                              type="text"
+                              dir="rtl"
+                              value={effectiveAr}
+                              onChange={(e) =>
+                                setButtonsForm({
+                                  ...buttonsForm,
+                                  [btn.key]: {
+                                    ...currentValues,
+                                    ar: e.target.value,
+                                  },
+                                })
+                              }
+                              placeholder={fallbackValues.ar}
+                              className="w-full text-xs font-semibold border border-rose-200 rounded-xl px-3.5 py-2 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-500 transition-colors"
+                            />
+                          </div>
 
                           {/* Reset Single Button to Default */}
                           <div className="flex justify-end pt-1">
@@ -3548,14 +3047,6 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-stone-900 text-sm truncate">{cat.name}</h4>
-                        <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                          <span className="inline-flex items-center text-[10px] font-medium bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md font-sans">
-                            EN {cat.nameEn || instantTranslateArabic(cat.name).en}
-                          </span>
-                          <span className="inline-flex items-center text-[10px] font-medium bg-amber-50 text-amber-800 px-2 py-0.5 rounded-md font-sans">
-                            KU {cat.nameKu || instantTranslateArabic(cat.name).ku}
-                          </span>
-                        </div>
                         <p className="text-xs text-stone-500 line-clamp-2 mt-1.5">
                           {cat.description || 'لا يوجد وصف'}
                         </p>
@@ -4616,37 +4107,10 @@ export const AdminDashboard: React.FC = () => {
                       className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-rose-200 outline-none"
                     />
                   </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      العنوان الرئيسي بالإنجليزية (Title EN)
-                    </label>
-                    <input
-                      type="text"
-                      dir="ltr"
-                      value={aboutForm.titleEn}
-                      onChange={(e) => setAboutForm({ ...aboutForm, titleEn: e.target.value })}
-                      placeholder="e.g. About Us | KAZAKI.IQ Luxury Flowers"
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-rose-200 outline-none font-sans"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      العنوان الرئيسي بالكردية (Title KU)
-                    </label>
-                    <input
-                      type="text"
-                      value={aboutForm.titleKu}
-                      onChange={(e) => setAboutForm({ ...aboutForm, titleKu: e.target.value })}
-                      placeholder="نموونە: دەربارەی ئێمە | جیهانی گوڵی لێکۆ"
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-rose-200 outline-none"
-                    />
-                  </div>
                 </div>
 
                 {/* Subtitle Inputs */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                <div className="pt-2">
                   <div>
                     <label className="block text-xs font-semibold text-stone-700 mb-1">
                       العنوان الفرعي والشعار (بالعربية)
@@ -4656,33 +4120,6 @@ export const AdminDashboard: React.FC = () => {
                       value={aboutForm.subtitle}
                       onChange={(e) => setAboutForm({ ...aboutForm, subtitle: e.target.value })}
                       placeholder="أول وأرقى متجر متخصص في بوكسات وورود ليغو الفاخرة..."
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-rose-200 outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      العنوان الفرعي بالإنجليزية (Subtitle EN)
-                    </label>
-                    <input
-                      type="text"
-                      dir="ltr"
-                      value={aboutForm.subtitleEn}
-                      onChange={(e) => setAboutForm({ ...aboutForm, subtitleEn: e.target.value })}
-                      placeholder="e.g. The premier boutique specialized in everlasting Lego flowers"
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-rose-200 outline-none font-sans"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      العنوان الفرعي بالكردية (Subtitle KU)
-                    </label>
-                    <input
-                      type="text"
-                      value={aboutForm.subtitleKu}
-                      onChange={(e) => setAboutForm({ ...aboutForm, subtitleKu: e.target.value })}
-                      placeholder="نموونە: یەکەمین فرۆشگای شایستە بۆ چەپکەگوڵی لێکۆ"
                       className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-rose-200 outline-none"
                     />
                   </div>
@@ -4710,35 +4147,6 @@ export const AdminDashboard: React.FC = () => {
                       className="w-full text-xs border border-rose-200 rounded-xl p-3.5 bg-rose-50/10 focus:bg-white focus:ring-2 focus:ring-rose-200 outline-none leading-relaxed"
                     />
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-stone-700 mb-1">
-                        قصة المتجر بالإنجليزية (Story EN)
-                      </label>
-                      <textarea
-                        rows={4}
-                        dir="ltr"
-                        value={aboutForm.storyEn}
-                        onChange={(e) => setAboutForm({ ...aboutForm, storyEn: e.target.value })}
-                        placeholder="Write the boutique story in English here..."
-                        className="w-full text-xs border border-rose-200 rounded-xl p-3.5 bg-rose-50/10 focus:bg-white focus:ring-2 focus:ring-rose-200 outline-none font-sans leading-relaxed"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-stone-700 mb-1">
-                        قصة المتجر بالكردية (Story KU)
-                      </label>
-                      <textarea
-                        rows={4}
-                        value={aboutForm.storyKu}
-                        onChange={(e) => setAboutForm({ ...aboutForm, storyKu: e.target.value })}
-                        placeholder="چیرۆکی فرۆشگا بە زمانی کوردی لێرە بنووسە..."
-                        className="w-full text-xs border border-rose-200 rounded-xl p-3.5 bg-rose-50/10 focus:bg-white focus:ring-2 focus:ring-rose-200 outline-none leading-relaxed"
-                      />
-                    </div>
-                  </div>
                 </div>
               </div>
 
@@ -4761,35 +4169,6 @@ export const AdminDashboard: React.FC = () => {
                       placeholder="رسالتنا هي تحويل كل مناسبة إهداء إلى لحظة لا تُنسى..."
                       className="w-full text-xs border border-rose-200 rounded-xl p-3.5 bg-rose-50/10 focus:bg-white focus:ring-2 focus:ring-rose-200 outline-none leading-relaxed"
                     />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-stone-700 mb-1">
-                        رسالة المتجر بالإنجليزية (Mission EN)
-                      </label>
-                      <textarea
-                        rows={2}
-                        dir="ltr"
-                        value={aboutForm.missionEn}
-                        onChange={(e) => setAboutForm({ ...aboutForm, missionEn: e.target.value })}
-                        placeholder="Our mission statement in English..."
-                        className="w-full text-xs border border-rose-200 rounded-xl p-3.5 bg-rose-50/10 focus:bg-white focus:ring-2 focus:ring-rose-200 outline-none font-sans leading-relaxed"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-stone-700 mb-1">
-                        رسالة المتجر بالكردية (Mission KU)
-                      </label>
-                      <textarea
-                        rows={2}
-                        value={aboutForm.missionKu}
-                        onChange={(e) => setAboutForm({ ...aboutForm, missionKu: e.target.value })}
-                        placeholder="پەیامی فرۆشگا بە زمانی کوردی..."
-                        className="w-full text-xs border border-rose-200 rounded-xl p-3.5 bg-rose-50/10 focus:bg-white focus:ring-2 focus:ring-rose-200 outline-none leading-relaxed"
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
@@ -5073,24 +4452,6 @@ export const AdminDashboard: React.FC = () => {
                   <label className="text-xs font-semibold text-stone-700">
                     اسم وعنوان المنتج (بالعربية) <span className="text-rose-600">*</span>
                   </label>
-                  <button
-                    type="button"
-                    disabled={isTranslatingProduct}
-                    onClick={handleAutoTranslateProduct}
-                    className="text-[11px] font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    {isTranslatingProduct ? (
-                      <>
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                        <span>جارِ الترجمة...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Languages className="w-3 h-3 text-emerald-600" />
-                        <span>ترجمة المنتج فوراً (العربية إلى EN و KU)</span>
-                      </>
-                    )}
-                  </button>
                 </div>
                 <input
                   type="text"
@@ -5100,35 +4461,6 @@ export const AdminDashboard: React.FC = () => {
                   placeholder="مثال: ورد الليكو الجوري الفاخر"
                   className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
                 />
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-stone-600 mb-1">
-                      اسم المنتج بالإنجليزية (English)
-                    </label>
-                    <input
-                      type="text"
-                      dir="ltr"
-                      value={productForm.titleEn}
-                      onChange={(e) => setProductForm({ ...productForm, titleEn: e.target.value })}
-                      placeholder="e.g. Luxury Red Lego Rose"
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 font-sans"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-stone-600 mb-1">
-                      ناوی بەرهەم بە کوردی (Kurdish)
-                    </label>
-                    <input
-                      type="text"
-                      dir="rtl"
-                      value={productForm.titleKu}
-                      onChange={(e) => setProductForm({ ...productForm, titleKu: e.target.value })}
-                      placeholder="نموونە: گوڵی لێکۆی شایستە"
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 font-sans"
-                    />
-                  </div>
-                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -5266,35 +4598,6 @@ export const AdminDashboard: React.FC = () => {
                   placeholder="اكتبي وصفاً جذاباً لمكونات وميزات هذا المنتج..."
                   className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
                 />
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-stone-600 mb-1">
-                      وصف المنتج بالإنجليزية (English)
-                    </label>
-                    <textarea
-                      rows={2}
-                      dir="ltr"
-                      value={productForm.descriptionEn}
-                      onChange={(e) => setProductForm({ ...productForm, descriptionEn: e.target.value })}
-                      placeholder="e.g. Elegant handmade everlasting Lego flowers..."
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 font-sans"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-stone-600 mb-1">
-                      وەسفی بەرهەم بە کوردی (Kurdish)
-                    </label>
-                    <textarea
-                      rows={2}
-                      dir="rtl"
-                      value={productForm.descriptionKu}
-                      onChange={(e) => setProductForm({ ...productForm, descriptionKu: e.target.value })}
-                      placeholder="نموونە: دیزاینێکی شاهانەی گوڵی لێکۆ..."
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 font-sans"
-                    />
-                  </div>
-                </div>
               </div>
 
               <div>
@@ -5380,24 +4683,6 @@ export const AdminDashboard: React.FC = () => {
                   <label className="text-xs font-semibold text-stone-700">
                     اسم القسم (بالعربية) <span className="text-rose-600">*</span>
                   </label>
-                  <button
-                    type="button"
-                    disabled={isTranslatingCategory}
-                    onClick={handleAutoTranslateCategory}
-                    className="text-[11px] font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    {isTranslatingCategory ? (
-                      <>
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                        <span>جارِ الترجمة...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Languages className="w-3 h-3 text-emerald-600" />
-                        <span>ترجمة القسم فوراً (العربية إلى EN و KU)</span>
-                      </>
-                    )}
-                  </button>
                 </div>
                 <input
                   type="text"
@@ -5407,35 +4692,6 @@ export const AdminDashboard: React.FC = () => {
                   placeholder="مثال: ورد الليكو الفاخر"
                   className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
                 />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    اسم القسم بالإنجليزية (English)
-                  </label>
-                  <input
-                    type="text"
-                    dir="ltr"
-                    value={categoryForm.nameEn}
-                    onChange={(e) => setCategoryForm({ ...categoryForm, nameEn: e.target.value })}
-                    placeholder="e.g. Luxury Lego Flowers"
-                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 font-sans"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    اسم القسم بالكردية (Kurdish)
-                  </label>
-                  <input
-                    type="text"
-                    value={categoryForm.nameKu}
-                    onChange={(e) => setCategoryForm({ ...categoryForm, nameKu: e.target.value })}
-                    placeholder="نموونە: گوڵی لێکۆی شایستە"
-                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 font-sans"
-                  />
-                </div>
               </div>
 
               <div>
@@ -5449,35 +4705,6 @@ export const AdminDashboard: React.FC = () => {
                   placeholder="تصاميم ورد الليكو الفاخرة التي لا تذبل ومصممة لتبقى معك للأبد"
                   className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
                 />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    وصف القسم بالإنجليزية (English)
-                  </label>
-                  <input
-                    type="text"
-                    dir="ltr"
-                    value={categoryForm.descriptionEn}
-                    onChange={(e) => setCategoryForm({ ...categoryForm, descriptionEn: e.target.value })}
-                    placeholder="e.g. Everlasting luxury Lego flowers"
-                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 font-sans"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    وصف القسم بالكردية (Kurdish)
-                  </label>
-                  <input
-                    type="text"
-                    value={categoryForm.descriptionKu}
-                    onChange={(e) => setCategoryForm({ ...categoryForm, descriptionKu: e.target.value })}
-                    placeholder="نموونە: دیزاینە شاهانەکانی گوڵی لێکۆ"
-                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 font-sans"
-                  />
-                </div>
               </div>
 
               <StudioMediaUploader

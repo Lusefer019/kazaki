@@ -133,7 +133,7 @@ export const initialCategories: Category[] = [
 
 export const initialProducts: Product[] = [];
 
-export const initialSiteTexts: Record<string, Record<SupportedLanguage, string>> = {
+export const initialSiteTexts: Record<string, { ar: string; en?: string; ku?: string }> = {
   // --- الأزرار الرئيسية (Buttons) ---
   home: {
     ar: 'الرئيسية',

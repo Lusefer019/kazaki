@@ -118,7 +118,7 @@ const AmbientVectorRose: React.FC<{
 };
 
 export const IntroScreen: React.FC = () => {
-  const { settings, isIntroActive, dismissIntro, currentLanguage } = useStore();
+  const { settings, isIntroActive, dismissIntro } = useStore();
   const [isExiting, setIsExiting] = useState(false);
 
   if (!isIntroActive) {
@@ -132,13 +132,10 @@ export const IntroScreen: React.FC = () => {
     }, 450);
   };
 
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
-
   return (
     <div
-      dir={isEn ? 'ltr' : 'rtl'}
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-[#09070A] text-white overflow-hidden select-none transition-all duration-500 ease-out ${
+      dir="rtl"
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-[#09070A] text-white overflow-hidden select-none transition-all duration-500 ease-out font-cairo ${
         isExiting ? 'opacity-0 scale-105 pointer-events-none' : 'opacity-100 scale-100'
       }`}
     >
@@ -247,11 +244,7 @@ export const IntroScreen: React.FC = () => {
 
         {/* Narrative Subtitle */}
         <p className="text-stone-300 text-xs sm:text-sm leading-relaxed mb-7 max-w-lg mx-auto font-normal">
-          {isEn
-            ? 'Blending the precision of botanical art with eternal roses that never wilt. The ultimate luxury gifting experience.'
-            : isKu
-            ? 'تێکەڵەیەک لە هونەری ئەندازەیی و جوانی گوڵی نەمر. ئەزموونێکی شایستە بۆ دیاری کە هەرگیز سیس نابێت.'
-            : 'نبتكر من قطع الليكو الفاخرة تحفاً فنية وأزهاراً أبدية لا تذبل أبداً. تجربة إهداء فاخرة مصممة لتخليد أجمل اللحظات والمناسبات.'}
+          نبتكر من قطع الليكو الفاخرة تحفاً فنية وأزهاراً أبدية لا تذبل أبداً. تجربة إهداء فاخرة مصممة لتخليد أجمل اللحظات والمناسبات.
         </p>
 
         {/* Main CTA Enter Store Button */}
@@ -265,20 +258,14 @@ export const IntroScreen: React.FC = () => {
             className="relative w-full py-4 px-8 rounded-full bg-gradient-to-r from-rose-600 via-pink-600 to-rose-500 hover:from-rose-500 hover:via-pink-500 hover:to-rose-600 text-white font-black text-sm sm:text-base tracking-wide shadow-xl transition-all duration-300 transform group-hover:-translate-y-0.5 active:translate-y-0 cursor-pointer flex items-center justify-center gap-3"
           >
             <Heart className="w-4 h-4 text-rose-200 fill-rose-200" />
-            <span>
-              {isEn ? 'Enter The Store' : isKu ? 'چوونەژوورەوەی فرۆشگا' : 'دخول إلى المتجر'}
-            </span>
-            <ArrowLeft className={`w-4 h-4 text-rose-100 transition-transform duration-300 ${isEn ? 'group-hover:translate-x-1' : 'group-hover:-translate-x-1'}`} />
+            <span>دخول إلى المتجر</span>
+            <ArrowLeft className="w-4 h-4 text-rose-100 transition-transform duration-300 group-hover:-translate-x-1" />
           </button>
         </div>
 
         {/* Footer Subtext (Clean text without emojis) */}
         <p className="mt-4 text-[10px] sm:text-[11px] text-stone-500">
-          {isEn
-            ? 'Bespoke handcraft • Instant order dispatch across Iraq'
-            : isKu
-            ? 'بەرهەمی ئەسڵی • ناردنی خێرا بۆ هەموو شارەکانی عێراق'
-            : 'متجر كازاكي الرسمي • تجهيز وتوصيل مباشر لكافة محافظات العراق'}
+          متجر كازاكي الرسمي • تجهيز وتوصيل مباشر لكافة محافظات العراق
         </p>
 
       </div>

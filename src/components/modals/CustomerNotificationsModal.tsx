@@ -6,17 +6,13 @@ import {
   Package,
   Truck,
   CheckCircle2,
-  Clock,
-  ExternalLink,
   Copy,
-  Smartphone,
   ShieldCheck,
-  MessageSquare,
   ArrowRight,
-  AlertCircle,
   Sparkles,
   Eye,
   ShoppingBag,
+  ExternalLink,
 } from 'lucide-react';
 import { OrderStatus } from '../../types';
 
@@ -38,19 +34,13 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
     adminNotifications,
     markNotificationAsRead,
     clearNotifications,
-    setIsPhoneNotifsModalOpen,
     setActiveView,
-    orders,
     myOrderIds,
     products,
     setSelectedProduct,
     setTargetOrderFilter,
-    currentLanguage,
     t,
   } = useStore();
-
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
 
   const [copiedTracking, setCopiedTracking] = useState<string | null>(null);
   const [adminTab, setAdminTab] = useState<'all' | 'orders' | 'messages'>('all');
@@ -83,32 +73,32 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
     switch (status) {
       case 'pending':
         return {
-          label: isEn ? 'Pending' : isKu ? 'چاوەڕوانکراو' : 'قيد الانتظار',
+          label: 'قيد الانتظار',
           color: 'bg-amber-100 text-amber-800 border-amber-200',
         };
       case 'processing':
         return {
-          label: isEn ? 'Processing & Packaging' : isKu ? 'ئامادەکردن و پاکێجکردن' : 'جاري التجهيز والتغليف',
+          label: 'جاري التجهيز والتغليف',
           color: 'bg-rose-100 text-rose-800 border-rose-200',
         };
       case 'shipped':
         return {
-          label: isEn ? 'Out with Delivery Courier' : isKu ? 'نێردرا لەگەڵ مەندووب' : 'انطلقت مع مندوب التوصيل',
+          label: 'انطلقت مع مندوب التوصيل',
           color: 'bg-blue-100 text-blue-800 border-blue-200',
         };
       case 'delivered':
         return {
-          label: isEn ? 'Delivered Successfully' : isKu ? 'بە سەرکەوتوویی گەیەندرا' : 'تم التوصيل بنجاح',
+          label: 'تم التوصيل بنجاح',
           color: 'bg-emerald-100 text-emerald-800 border-emerald-200',
         };
       case 'cancelled':
         return {
-          label: isEn ? 'Cancelled' : isKu ? 'هەڵوەشاوەتەوە' : 'طلب ملغي',
+          label: 'طلب ملغي',
           color: 'bg-red-100 text-red-800 border-red-200',
         };
       default:
         return {
-          label: isEn ? 'Status Update' : isKu ? 'نوێکردنەوەی بارودۆخ' : 'تحديث حالة',
+          label: 'تحديث حالة',
           color: 'bg-stone-100 text-stone-700 border-stone-200',
         };
     }
@@ -117,11 +107,9 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
       <div
-        className={`relative bg-white rounded-3xl max-w-xl w-full overflow-hidden shadow-2xl border border-rose-100 animate-in fade-in zoom-in-95 duration-200 ${
-          isEn ? 'text-left font-sans' : isKu ? 'text-right font-kurdish' : 'text-right font-cairo'
-        }`}
+        className="relative bg-white rounded-3xl max-w-xl w-full overflow-hidden shadow-2xl border border-rose-100 animate-in fade-in zoom-in-95 duration-200 text-right font-cairo"
         onClick={(e) => e.stopPropagation()}
-        dir={isEn ? 'ltr' : 'rtl'}
+        dir="rtl"
       >
         {/* Modal Header */}
         <div className="p-5 border-b border-rose-100 flex items-center justify-between bg-gradient-to-r from-rose-50/90 via-pink-50/50 to-white">
@@ -139,19 +127,19 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-bold text-stone-900">
                   {isAdmin
-                    ? (isEn ? 'Admin Notification Center' : isKu ? 'ناوەندی ئاگادارییەکانی بەڕێوەبەر' : 'مركز تنبيهات وإشعارات الإدارة')
-                    : (isEn ? 'Order Updates & Notifications' : isKu ? 'ئاگاداری و نوێکردنەوەی داواکارییەکانم' : 'إشعارات وتحديثات طلباتي')}
+                    ? 'مركز تنبيهات وإشعارات الإدارة'
+                    : 'إشعارات وتحديثات طلباتي'}
                 </h2>
                 <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-rose-100 text-rose-800">
                   {isAdmin
-                    ? (isEn ? 'General Admin' : isKu ? 'بەڕێوەبەری گشتی' : 'الإدارة العامة')
-                    : (isEn ? 'Your Orders Only' : isKu ? 'تەنها بۆ داواکارییەکانت' : 'خاص بحالة طلباتكِ فقط')}
+                    ? 'الإدارة العامة'
+                    : 'خاص بحالة طلباتكِ فقط'}
                 </span>
               </div>
               <p className="text-[11px] text-stone-500 mt-0.5">
                 {isAdmin
-                  ? (isEn ? 'Monitor new orders, customer inquiries, and activity' : isKu ? 'بەدواداچوون بۆ داواکاری نوێ، پرسیاری کڕیاران و جووڵە' : 'متابعة الطلبات الجديدة، استفسارات الدعم، وحركة المتجر')
-                  : (isEn ? 'Track shipment milestones and delivery alerts in real-time' : isKu ? 'بەدواداچوون بۆ بارەکانت و ئاگادارییەکان سات بە سات' : 'تتبعي مسار شحناتكِ وإشعارات التوصيل لحظة بلحظة')}
+                  ? 'متابعة الطلبات الجديدة، استفسارات الدعم، وحركة المتجر'
+                  : 'تتبعي مسار شحناتكِ وإشعارات التوصيل لحظة بلحظة'}
               </p>
             </div>
           </div>
@@ -159,7 +147,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:bg-rose-100 text-stone-500 hover:text-stone-800 transition-colors cursor-pointer"
-            aria-label={isEn ? 'Close' : isKu ? 'داخستن' : 'إغلاق'}
+            aria-label="إغلاق"
           >
             <X className="w-5 h-5" />
           </button>
@@ -174,7 +162,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                 <div className="flex items-center gap-2 text-amber-900 font-bold">
                   <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
                   <span>
-                    {isEn ? 'Logged in as Store Administrator' : isKu ? 'تۆ وەک بەڕێوەبەری گشتی چوویتە ژوورەوە' : 'أنت مسجّل دخولك بصلاحية المدير العام للمتجر'}
+                    أنت مسجّل دخولك بصلاحية المدير العام للمتجر
                   </span>
                 </div>
                 <button
@@ -185,7 +173,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                   }}
                   className="px-3.5 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs cursor-pointer shadow-xs"
                 >
-                  {isEn ? 'Open Admin Panel' : isKu ? 'کردنەوەی داشبۆرد' : 'فتح لوحة التحكم'}
+                  فتح لوحة التحكم
                 </button>
               </div>
 
@@ -199,7 +187,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                       adminTab === 'all' ? 'bg-white text-stone-900 shadow-2xs' : 'text-stone-500 hover:text-stone-800'
                     }`}
                   >
-                    {isEn ? 'All' : isKu ? 'هەموو' : 'الكل'} ({adminNotifications.length})
+                    الكل ({adminNotifications.length})
                   </button>
                   <button
                     type="button"
@@ -208,7 +196,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                       adminTab === 'orders' ? 'bg-rose-600 text-white shadow-2xs' : 'text-stone-500 hover:text-stone-800'
                     }`}
                   >
-                    {isEn ? 'New Orders' : isKu ? 'داواکارییە نوێیەکان' : 'الطلبات الجديدة'} ({orderNotifs.length})
+                    الطلبات الجديدة ({orderNotifs.length})
                   </button>
                   <button
                     type="button"
@@ -217,7 +205,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                       adminTab === 'messages' ? 'bg-white text-stone-900 shadow-2xs' : 'text-stone-500 hover:text-stone-800'
                     }`}
                   >
-                    {isEn ? 'Messages' : isKu ? 'نامەکان' : 'الرسائل'} ({messageNotifs.length})
+                    الرسائل ({messageNotifs.length})
                   </button>
                 </div>
 
@@ -225,13 +213,13 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                   <button
                     type="button"
                     onClick={() => {
-                      if (confirm(isEn ? 'Clear all admin notifications?' : 'هل تود مسح جميع تنبيهات الإدارة؟')) {
+                      if (confirm('هل تود مسح جميع تنبيهات الإدارة؟')) {
                         clearNotifications();
                       }
                     }}
                     className="text-[11px] font-bold text-stone-400 hover:text-rose-600 transition-colors cursor-pointer"
                   >
-                    {isEn ? 'Clear All' : isKu ? 'سڕینەوەی هەموو' : 'مسح السجل'}
+                    مسح السجل
                   </button>
                 )}
               </div>
@@ -243,11 +231,11 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                   </div>
                   <h4 className="font-bold text-stone-700 text-sm">
                     {adminTab === 'orders'
-                      ? (isEn ? 'No pending new orders' : isKu ? 'هیچ داواکارییەکی نوێ نییە' : 'لا توجد طلبات جديدة معلقة حالياً')
-                      : (isEn ? 'No new admin notifications' : isKu ? 'هیچ ئاگادارییەکی نوێی کارگێڕی نییە' : 'لا توجد تنبيهات إدارية جديدة حالياً')}
+                      ? 'لا توجد طلبات جديدة معلقة حالياً'
+                      : 'لا توجد تنبيهات إدارية جديدة حالياً'}
                   </h4>
                   <p className="text-xs text-stone-400">
-                    {isEn ? 'Instant alerts for new orders will appear here immediately.' : isKu ? 'ئاگاداری دەستبەجێ لێرە دەردەکەوێت لەگەڵ هەر داواکارییەکی نوێ.' : 'ستصلك التنبيهات الفورية هنا فور ورود أي طلب جديد.'}
+                    ستصلك التنبيهات الفورية هنا فور ورود أي طلب جديد.
                   </p>
                 </div>
               ) : (
@@ -273,7 +261,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                         )}
                       </span>
                       <span className="text-[10px] text-stone-400 font-mono">
-                        {new Date(notif.timestamp).toLocaleTimeString(isEn ? 'en-US' : 'ar-IQ', {
+                        {new Date(notif.timestamp).toLocaleTimeString('ar-IQ', {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}
@@ -302,7 +290,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                             className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs cursor-pointer shadow-xs flex items-center gap-1"
                           >
                             <span>معاينة وتجهيز الطلب</span>
-                            <ArrowRight className="w-3 h-3 rtl:rotate-180" />
+                            <ArrowRight className="w-3 h-3 rotate-180" />
                           </button>
                         )}
 
@@ -312,7 +300,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                             onClick={() => markNotificationAsRead(notif.id)}
                             className="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-600 font-bold text-[11px] cursor-pointer"
                           >
-                            {isEn ? 'Mark as read' : isKu ? 'دیاریکردن وەک خوێندراوە' : 'تحديد كمقروء'}
+                            تحديد كمقروء
                           </button>
                         )}
                       </div>
@@ -328,11 +316,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
               <div className="p-3 bg-stone-50 rounded-2xl border border-stone-200/80 text-[11px] text-stone-600 flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                 <span>
-                  {isEn
-                    ? 'Dedicated Notifications: Real-time updates for your Lego flower orders and delivery progress.'
-                    : isKu
-                    ? 'سیستەمی تایبەتی ئاگاداری: لێرە نوێکردنەوەکانی داواکاری و گەیاندنی گوڵی لیگۆ دەردەکەون.'
-                    : 'نظام الإشعارات المخصص: تظهر هنا حصرياً تحديثات شحناتكِ وطلباتكِ من ورد الليكو.'}
+                  نظام الإشعارات المخصص: تظهر هنا حصرياً تحديثات شحناتكِ وطلباتكِ من ورد الليكو.
                 </span>
               </div>
 
@@ -342,14 +326,10 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                     <Package className="w-7 h-7" />
                   </div>
                   <h4 className="font-bold text-stone-800 text-sm">
-                    {isEn ? 'No notifications for your orders yet' : isKu ? 'هیچ ئاگادارییەک نییە بۆ داواکارییەکانت' : 'لا توجد إشعارات لطلباتكِ حالياً'}
+                    لا توجد إشعارات لطلباتكِ حالياً
                   </h4>
                   <p className="text-xs text-stone-500 max-w-sm mx-auto leading-relaxed">
-                    {isEn
-                      ? 'When you complete an order, you will receive real-time preparation and courier tracking alerts right here.'
-                      : isKu
-                      ? 'کاتێک داواکاری دەکەیت، ئاگادارییە خێراکان لەسەر ئامادەکردن و مەندووب لێرە پێتدەگەن.'
-                      : 'عند إتمام أي طلب في المتجر، ستصلكِ هنا تنبيهات فورية بحالة التجهيز والشحن مع مندوب التوصيل لحظة بلحظة.'}
+                    عند إتمام أي طلب في المتجر، ستصلكِ هنا تنبيهات فورية بحالة التجهيز والشحن مع مندوب التوصيل لحظة بلحظة.
                   </p>
                   {myOrderIds.length > 0 && onOpenOrders && (
                     <button
@@ -362,7 +342,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                     >
                       <Package className="w-3.5 h-3.5" />
                       <span>
-                        {isEn ? 'View My Orders History' : isKu ? 'بینینی تۆماری داواکارییەکانم' : 'عرض سجل طلباتي السابقة'} ({myOrderIds.length})
+                        عرض سجل طلباتي السابقة ({myOrderIds.length})
                       </span>
                     </button>
                   )}
@@ -383,15 +363,15 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                           <div className="flex items-center gap-2">
                             <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-rose-100 text-rose-800 border-rose-200 flex items-center gap-1">
                               <Sparkles className="w-3 h-3 text-rose-600" />
-                              <span>{isEn ? 'New Arrival' : isKu ? 'تازە گەیشتوو' : 'وصل حديثاً'}</span>
+                              <span>وصل حديثاً</span>
                             </span>
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
-                              {isEn ? 'In Stock' : isKu ? 'بەردەستە' : 'متوفر الآن'}
+                              متوفر الآن
                             </span>
                           </div>
                           <span className="text-[10px] text-stone-400 font-mono">
-                            {new Date(notif.timestamp).toLocaleDateString(isEn ? 'en-US' : 'ar-IQ')} -{' '}
-                            {new Date(notif.timestamp).toLocaleTimeString(isEn ? 'en-US' : 'ar-IQ', {
+                            {new Date(notif.timestamp).toLocaleDateString('ar-IQ')} -{' '}
+                            {new Date(notif.timestamp).toLocaleTimeString('ar-IQ', {
                               hour: '2-digit',
                               minute: '2-digit',
                             })}
@@ -440,7 +420,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                             className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
                           >
                             <Eye className="w-3.5 h-3.5" />
-                            <span>{isEn ? 'View Product Details' : isKu ? 'بینینی وردەکاری بەرهەم' : 'معاينة المنتج والطلب'}</span>
+                            <span>معاينة المنتج والطلب</span>
                           </button>
 
                           {!notif.read && (
@@ -449,7 +429,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                               onClick={() => markNotificationAsRead(notif.id)}
                               className="text-[11px] font-bold text-stone-500 hover:text-stone-800 cursor-pointer"
                             >
-                              {isEn ? 'Dismiss' : isKu ? 'لابردن' : 'تحديد كمقروء'}
+                              تحديد كمقروء
                             </button>
                           )}
                         </div>
@@ -476,8 +456,8 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                           )}
                         </div>
                         <span className="text-[10px] text-stone-400 font-mono">
-                          {new Date(notif.timestamp).toLocaleDateString(isEn ? 'en-US' : 'ar-IQ')} -{' '}
-                          {new Date(notif.timestamp).toLocaleTimeString(isEn ? 'en-US' : 'ar-IQ', {
+                          {new Date(notif.timestamp).toLocaleDateString('ar-IQ')} -{' '}
+                          {new Date(notif.timestamp).toLocaleTimeString('ar-IQ', {
                             hour: '2-digit',
                             minute: '2-digit',
                           })}
@@ -498,7 +478,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                           <div className="flex items-center gap-1.5">
                             <Truck className="w-3.5 h-3.5 text-rose-600" />
                             <span className="text-stone-600 text-[11px]">
-                              {isEn ? 'Tracking No:' : isKu ? 'ژمارەی تتبع:' : 'رقم التتبع:'}
+                              رقم التتبع:
                             </span>
                             <strong className="font-mono font-bold text-rose-700 bg-white px-2 py-0.5 rounded-md border border-rose-200" dir="ltr">
                               {notif.trackingNumber}
@@ -512,8 +492,8 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                             <Copy className="w-3 h-3" />
                             <span>
                               {copiedTracking === notif.trackingNumber
-                                ? (isEn ? 'Copied!' : isKu ? 'کۆپیکرا!' : 'تم النسخ!')
-                                : (isEn ? 'Copy' : isKu ? 'کۆپیکردن' : 'نسخ')}
+                                ? 'تم النسخ!'
+                                : 'نسخ'}
                             </span>
                           </button>
                         </div>
@@ -521,7 +501,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
 
                       {/* Link to open orders modal */}
                       {onOpenOrders && (
-                        <div className={`pt-1 flex ${isEn ? 'justify-start' : 'justify-end'}`}>
+                        <div className="pt-1 flex justify-end">
                           <button
                             type="button"
                             onClick={() => {
@@ -530,7 +510,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
                             }}
                             className="text-[11px] font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1 cursor-pointer"
                           >
-                            <span>{isEn ? 'Track Full Shipment Details' : isKu ? 'بینینی تەواوی بەدواداچوونی بار' : 'تتبع مسار الشحنة بالكامل'}</span>
+                            <span>تتبع مسار الشحنة بالكامل</span>
                             <ExternalLink className="w-3 h-3" />
                           </button>
                         </div>
@@ -547,7 +527,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
         <div className="p-4 bg-stone-50 border-t border-stone-100 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 text-xs text-stone-500 font-medium">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>{isEn ? 'Live In-Store Alerts Active' : isKu ? 'ئاگادارییەکانی ناو ماڵپەڕ چالاکن' : 'التنبيهات الفورية داخل المتجر مفعلة'}</span>
+            <span>التنبيهات الفورية داخل المتجر مفعلة</span>
           </div>
 
           <button
@@ -555,7 +535,7 @@ export const CustomerNotificationsModal: React.FC<CustomerNotificationsModalProp
             onClick={onClose}
             className="py-2 px-6 rounded-full bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs transition-colors cursor-pointer"
           >
-            {isEn ? 'Close' : isKu ? 'داخستن' : 'إغلاق'}
+            إغلاق
           </button>
         </div>
       </div>

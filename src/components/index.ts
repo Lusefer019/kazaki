@@ -24,7 +24,6 @@ export { CartDrawer } from './modals/CartDrawer';
 export { CheckoutModal } from './modals/CheckoutModal';
 export { OrdersModal } from './modals/OrdersModal';
 export { ProductDetailsModal } from './modals/ProductDetailsModal';
-export { LanguageModal } from './modals/LanguageModal';
 export { PhoneNotificationsModal } from './modals/PhoneNotificationsModal';
 export { CustomerNotificationsModal } from './modals/CustomerNotificationsModal';
 
@@ -34,4 +33,3 @@ export { StudioMediaUploader } from './common/StudioMediaUploader';
 export { FloatingFlowersCanvas } from './common/FloatingFlowersCanvas';
 export { ScrollLegoFlowerCanvas } from './common/ScrollLegoFlowerCanvas';
 export { ErrorBoundary } from './common/ErrorBoundary';
-export { CookieNotificationBanner } from './common/CookieNotificationBanner';

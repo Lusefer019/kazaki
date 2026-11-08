@@ -12,7 +12,6 @@ import {
   Eye,
   EyeOff,
   CheckCircle2,
-  ShieldCheck,
 } from 'lucide-react';
 
 interface AuthModalProps {
@@ -21,31 +20,29 @@ interface AuthModalProps {
   initialMode?: 'login' | 'register';
 }
 
-const IRAQI_CITIES_DATA = [
-  { ar: 'بغداد', en: 'Baghdad', ku: 'بەغدا' },
-  { ar: 'أربيل', en: 'Erbil', ku: 'هەولێر' },
-  { ar: 'البصرة', en: 'Basra', ku: 'بەسرە' },
-  { ar: 'النجف الأشرف', en: 'Najaf', ku: 'نەجەف' },
-  { ar: 'كربلاء المقدسة', en: 'Karbala', ku: 'کەربەلا' },
-  { ar: 'السليمانية', en: 'Sulaymaniyah', ku: 'سلێمانی' },
-  { ar: 'دهوك', en: 'Duhok', ku: 'دهۆک' },
-  { ar: 'كركوك', en: 'Kirkuk', ku: 'کەرکووک' },
-  { ar: 'بابل / الحلة', en: 'Babylon / Hilla', ku: 'بابل / حللە' },
-  { ar: 'ديالى', en: 'Diyala', ku: 'دیالە' },
-  { ar: 'الأنبار', en: 'Anbar', ku: 'ئەنبار' },
-  { ar: 'صلاح الدين', en: 'Saladin', ku: 'سەڵاحەدین' },
-  { ar: 'واسط / الكوت', en: 'Wasit / Kut', ku: 'واسیت / کووت' },
-  { ar: 'المثنى / السماوة', en: 'Muthanna / Samawah', ku: 'موسەننا / سەماوە' },
-  { ar: 'ميسان / العمارة', en: 'Maysan / Amarah', ku: 'مەیسان / عەمارە' },
-  { ar: 'ذي قار / الناصرية', en: 'Dhi Qar / Nasiriyah', ku: 'زی قار / ناسریە' },
-  { ar: 'نينوى / الموصل', en: 'Nineveh / Mosul', ku: 'نەینەوا / مووسڵ' },
-  { ar: 'الديوانية / القادسية', en: 'Diwaniyah / Qadisiyyah', ku: 'دیوانیە / قادسیە' },
+const IRAQI_CITIES = [
+  'بغداد',
+  'أربيل',
+  'البصرة',
+  'النجف الأشرف',
+  'كربلاء المقدسة',
+  'السليمانية',
+  'دهوك',
+  'كركوك',
+  'بابل / الحلة',
+  'ديالى',
+  'الأنبار',
+  'صلاح الدين',
+  'واسط / الكوت',
+  'المثنى / السماوة',
+  'ميسان / العمارة',
+  'ذي قار / الناصرية',
+  'نينوى / الموصل',
+  'الديوانية / القادسية',
 ];
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login' }) => {
-  const { login, register, loginAdminAsync, getBtnText, currentLanguage } = useStore();
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
+  const { login, register, loginAdminAsync, getBtnText } = useStore();
 
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
@@ -86,13 +83,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
     const password = loginPassword.trim();
 
     if (!identifier || !password) {
-      setErrorMessage(
-        isEn
-          ? 'Please enter your email or phone number and password'
-          : isKu
-          ? 'تکایە ئیمەیڵ یان ژمارەی مۆبایل و وشەی نهێنی بنووسە'
-          : 'يرجى إدخال البريد الإلكتروني أو رقم الهاتف وكلمة المرور'
-      );
+      setErrorMessage('يرجى إدخال البريد الإلكتروني أو رقم الهاتف وكلمة المرور');
       return;
     }
 
@@ -102,13 +93,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
       // Check admin credentials if applicable
       const adminRes = await loginAdminAsync(identifier, password);
       if (adminRes.success) {
-        setSuccessMessage(
-          isEn
-            ? 'Signed in successfully as store administrator'
-            : isKu
-            ? 'بە سەرکەوتوویی وەک بەڕێوەبەر چوویتە ژوورەوە'
-            : 'تم تسجيل الدخول بنجاح كمدير للمتجر'
-        );
+        setSuccessMessage('تم تسجيل الدخول بنجاح كمدير للمتجر');
         setTimeout(() => {
           setIsSubmitting(false);
           onClose();
@@ -124,24 +109,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
     setIsSubmitting(false);
 
     if (success) {
-      setSuccessMessage(
-        isEn
-          ? 'Logged in successfully! Welcome to KAZAKI.IQ'
-          : isKu
-          ? 'بە سەرکەوتوویی چوویتە ژوورەوە! بەخێربێیت بۆ KAZAKI.IQ'
-          : 'تم تسجيل الدخول بنجاح! أهلاً بك في متجر KAZAKI.IQ'
-      );
+      setSuccessMessage('تم تسجيل الدخول بنجاح! أهلاً بك في متجر KAZAKI.IQ');
       setTimeout(() => {
         onClose();
       }, 700);
     } else {
-      setErrorMessage(
-        isEn
-          ? 'Invalid credentials or password, please check and try again'
-          : isKu
-          ? 'زانیاری چوونەژوورەوە یان وشەی نهێنی هەڵەیە، تکایە دڵنیابەرەوە'
-          : 'بيانات تسجيل الدخول أو رمز المرور غير صحيحة، يرجى المحاولة ثانية'
-      );
+      setErrorMessage('بيانات تسجيل الدخول أو رمز المرور غير صحيحة، يرجى المحاولة ثانية');
     }
   };
 
@@ -156,24 +129,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
     const password = regPassword.trim();
 
     if (!name || !email || !password) {
-      setErrorMessage(
-        isEn
-          ? 'Please fill in all required fields (Name, Email, Password)'
-          : isKu
-          ? 'تکایە هەموو خانە پێویستەکان پڕبکەرەوە (ناو، ئیمەیڵ، وشەی نهێنی)'
-          : 'يرجى ملء جميع الحقول الإلزامية (الاسم، البريد الإلكتروني، كلمة المرور)'
-      );
+      setErrorMessage('يرجى ملء جميع الحقول الإلزامية (الاسم، البريد الإلكتروني، كلمة المرور)');
       return;
     }
 
     if (password.length < 6) {
-      setErrorMessage(
-        isEn
-          ? 'Password must be at least 6 characters long'
-          : isKu
-          ? 'وشەی نهێنی دەبێت لانیکەم ٦ پیت یان ژمارە بێت'
-          : 'يجب أن تتكون كلمة المرور من 6 أحرف أو أرقام على الأقل'
-      );
+      setErrorMessage('يجب أن تتكون كلمة المرور من 6 أحرف أو أرقام على الأقل');
       return;
     }
 
@@ -190,35 +151,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
     setIsSubmitting(false);
 
     if (success) {
-      setSuccessMessage(
-        isEn
-          ? 'Account created successfully! Welcome to KAZAKI.IQ'
-          : isKu
-          ? 'هەژمارەکەت بە سەرکەوتوویی دروستکرا! بەخێربێیت بۆ KAZAKI.IQ'
-          : 'تم إنشاء حسابك بنجاح! مرحباً بك في KAZAKI.IQ'
-      );
+      setSuccessMessage('تم إنشاء حسابك بنجاح! مرحباً بك في KAZAKI.IQ');
       setTimeout(() => {
         onClose();
       }, 800);
     } else {
-      setErrorMessage(
-        isEn
-          ? 'An error occurred while creating your account, please try again'
-          : isKu
-          ? 'هەڵەیەک ڕوویدا لە کاتی دروستکردنی هەژمار، تکایە دووبارە هەوڵبدەرەوە'
-          : 'حدث خطأ أثناء إنشاء الحساب، يرجى المحاولة ثانية'
-      );
+      setErrorMessage('حدث خطأ أثناء إنشاء الحساب، يرجى المحاولة ثانية');
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex min-h-full items-center justify-center p-2.5 sm:p-4">
       <div
-        className={`my-auto relative bg-white rounded-2xl sm:rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-rose-100 animate-in fade-in zoom-in-95 duration-200 ${
-          isEn ? 'text-left font-sans' : isKu ? 'text-right font-kurdish' : 'text-right font-cairo'
-        }`}
+        className="my-auto relative bg-white rounded-2xl sm:rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-rose-100 animate-in fade-in zoom-in-95 duration-200 text-right font-cairo"
         onClick={(e) => e.stopPropagation()}
-        dir={isEn ? 'ltr' : 'rtl'}
+        dir="rtl"
       >
         {/* Header */}
         <div className="p-5 border-b border-rose-100 flex items-center justify-between bg-gradient-to-r from-rose-50/80 via-pink-50/50 to-white">
@@ -228,21 +175,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
             </div>
             <div>
               <h2 className="text-base font-extrabold text-stone-900">
-                {mode === 'login'
-                  ? (isEn ? 'Customer Sign In' : isKu ? 'چوونەژوورەوەی کڕیار' : 'تسجيل دخول الزبون')
-                  : (isEn ? 'Create New Account' : isKu ? 'دروستکردنی هەژماری نوێ' : 'إنشاء حساب زبون جديد')}
+                {mode === 'login' ? 'تسجيل دخول الزبون' : 'إنشاء حساب زبون جديد'}
               </h2>
               <p className="text-[11px] text-stone-500">
                 {mode === 'login'
-                  ? (isEn ? 'Sign in to track orders and manage shipments' : isKu ? 'بچۆ ژوورەوە بۆ بەدواداچوونی داواکارییەکانت' : 'سجل دخولك لمتابعة مشترياتك وتتبع شحناتك')
-                  : (isEn ? 'Join KAZAKI.IQ to discover luxury eternal Lego flowers' : isKu ? 'ببەرە هاوبەشی KAZAKI.IQ بۆ بینینی جوانترین گوڵی لیگۆ' : 'انضم لزبائن KAZAKI.IQ واستمتع بأجمل تشكيلات ورد الليكو')}
+                  ? 'سجل دخولك لمتابعة مشترياتك وتتبع شحناتك'
+                  : 'انضم لزبائن KAZAKI.IQ واستمتع بأجمل تشكيلات ورد الليكو'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:bg-rose-100 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
-            aria-label={isEn ? 'Close' : isKu ? 'داخستن' : 'إغلاق'}
+            aria-label="إغلاق"
           >
             <X className="w-5 h-5" />
           </button>
@@ -265,7 +210,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
               }`}
             >
               <LogIn className="w-3.5 h-3.5" />
-              <span>{isEn ? 'Sign In' : isKu ? 'چوونەژوورەوە' : 'تسجيل الدخول'}</span>
+              <span>تسجيل الدخول</span>
             </button>
             <button
               type="button"
@@ -281,13 +226,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
               }`}
             >
               <UserPlus className="w-3.5 h-3.5" />
-              <span>{isEn ? 'Register' : isKu ? 'دروستکردنی هەژمار' : 'إنشاء حساب'}</span>
+              <span>إنشاء حساب</span>
             </button>
           </div>
         </div>
 
         {/* Content Body */}
-        <div className={`p-6 space-y-4 ${isEn ? 'text-left' : 'text-right'}`}>
+        <div className="p-6 space-y-4 text-right">
           {/* Feedback Messages */}
           {errorMessage && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
@@ -308,7 +253,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-stone-700 mb-1.5">
-                  {isEn ? 'Email or Phone Number' : isKu ? 'ئیمەیڵ یان ژمارەی مۆبایل' : 'البريد الإلكتروني أو رقم الهاتف'}
+                  البريد الإلكتروني أو رقم الهاتف
                 </label>
                 <div className="relative">
                   <input
@@ -316,18 +261,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                     required
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
-                    placeholder={isEn ? 'name@example.com or 07701234567' : isKu ? 'name@example.com یان 07701234567' : 'مثال: name@example.com أو 07701234567'}
-                    className={`w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 ${
-                      isEn ? 'pl-9 pr-3 text-left' : 'pr-9 pl-3 text-right'
-                    } bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 focus:ring-2 focus:ring-rose-200 transition-all`}
+                    placeholder="مثال: name@example.com أو 07701234567"
+                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 pr-9 pl-3 text-right bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 focus:ring-2 focus:ring-rose-200 transition-all"
                   />
-                  <Mail className={`w-4 h-4 text-stone-400 absolute ${isEn ? 'left-3' : 'right-3'} top-2.5 pointer-events-none`} />
+                  <Mail className="w-4 h-4 text-stone-400 absolute right-3 top-2.5 pointer-events-none" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-stone-700 mb-1.5">
-                  {isEn ? 'Password' : isKu ? 'وشەی نهێنی' : 'كلمة المرور'}
+                  كلمة المرور
                 </label>
                 <div className="relative">
                   <input
@@ -336,16 +279,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     placeholder="••••••••"
-                    className={`w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 ${
-                      isEn ? 'pl-9 pr-9 text-left' : 'pr-9 pl-9 text-right'
-                    } bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 focus:ring-2 focus:ring-rose-200 transition-all`}
+                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 pr-9 pl-9 text-right bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 focus:ring-2 focus:ring-rose-200 transition-all"
                   />
-                  <Lock className={`w-4 h-4 text-stone-400 absolute ${isEn ? 'left-3' : 'right-3'} top-2.5 pointer-events-none`} />
+                  <Lock className="w-4 h-4 text-stone-400 absolute right-3 top-2.5 pointer-events-none" />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className={`absolute ${isEn ? 'right-3' : 'left-3'} top-2.5 text-stone-400 hover:text-stone-600 cursor-pointer`}
-                    aria-label={isEn ? 'Toggle password visibility' : isKu ? 'بینینی وشەی نهێنی' : 'إظهار أو إخفاء كلمة المرور'}
+                    className="absolute left-3 top-2.5 text-stone-400 hover:text-stone-600 cursor-pointer"
+                    aria-label="إظهار أو إخفاء كلمة المرور"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -360,8 +301,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                 <LogIn className="w-3.5 h-3.5" />
                 <span>
                   {isSubmitting
-                    ? (isEn ? 'Verifying...' : isKu ? 'پشکنین...' : 'جاري التحقق...')
-                    : getBtnText('login', isEn ? 'Sign In' : isKu ? 'چوونەژوورەوە' : 'تسجيل الدخول')}
+                    ? 'جاري التحقق...'
+                    : getBtnText('login', 'تسجيل الدخول')}
                 </span>
               </button>
 
@@ -375,11 +316,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                   }}
                   className="text-xs text-rose-600 font-bold hover:underline cursor-pointer"
                 >
-                  {isEn
-                    ? "Don't have an account? Click here to register"
-                    : isKu
-                    ? 'هەژمارت نییە؟ لێرە کرتە بکە بۆ دروستکردنی هەژمار'
-                    : 'ليس لديك حساب؟ اضغط هنا لإنشاء حساب جديد'}
+                  ليس لديك حساب؟ اضغط هنا لإنشاء حساب جديد
                 </button>
               </div>
             </form>
@@ -388,7 +325,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
               <div>
                 <label className="block text-xs font-bold text-stone-700 mb-1">
-                  {isEn ? 'Full Name' : isKu ? 'ناوی تەواو' : 'الاسم الكامل'} <span className="text-rose-600">*</span>
+                  الاسم الكامل <span className="text-rose-600">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -396,18 +333,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                     required
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
-                    placeholder={isEn ? 'e.g. Sarah Smith' : isKu ? 'بۆ نموونە: سارا ئەحمەد' : 'مثال: مروان العراقي'}
-                    className={`w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 ${
-                      isEn ? 'pl-9 pr-3 text-left' : 'pr-9 pl-3 text-right'
-                    } bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 focus:ring-2 focus:ring-rose-200 transition-all`}
+                    placeholder="مثال: مروان العراقي"
+                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 pr-9 pl-3 text-right bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 focus:ring-2 focus:ring-rose-200 transition-all"
                   />
-                  <User className={`w-4 h-4 text-stone-400 absolute ${isEn ? 'left-3' : 'right-3'} top-2.5 pointer-events-none`} />
+                  <User className="w-4 h-4 text-stone-400 absolute right-3 top-2.5 pointer-events-none" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-stone-700 mb-1">
-                  {isEn ? 'Email Address' : isKu ? 'ئیمەیڵ' : 'البريد الإلكتروني'} <span className="text-rose-600">*</span>
+                  البريد الإلكتروني <span className="text-rose-600">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -416,18 +351,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     placeholder="name@example.com"
-                    className={`w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 ${
-                      isEn ? 'pl-9 pr-3 text-left' : 'pr-9 pl-3 text-right'
-                    } bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 focus:ring-2 focus:ring-rose-200 transition-all`}
+                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 pr-9 pl-3 text-right bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 focus:ring-2 focus:ring-rose-200 transition-all"
                   />
-                  <Mail className={`w-4 h-4 text-stone-400 absolute ${isEn ? 'left-3' : 'right-3'} top-2.5 pointer-events-none`} />
+                  <Mail className="w-4 h-4 text-stone-400 absolute right-3 top-2.5 pointer-events-none" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    {isEn ? 'Phone Number' : isKu ? 'ژمارەی مۆبایل' : 'رقم الهاتف'} <span className="text-stone-400 font-normal">({isEn ? 'for delivery' : isKu ? 'بۆ گەیاندن' : 'للتوصيل'})</span>
+                    رقم الهاتف <span className="text-stone-400 font-normal">(للتوصيل)</span>
                   </label>
                   <div className="relative">
                     <input
@@ -435,41 +368,37 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                       value={regPhone}
                       onChange={(e) => setRegPhone(e.target.value)}
                       placeholder="07701234567"
-                      className={`w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 ${
-                        isEn ? 'pl-9 pr-3' : 'pr-9 pl-3'
-                      } bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 focus:ring-2 focus:ring-rose-200 transition-all text-left`}
+                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 pr-9 pl-3 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 focus:ring-2 focus:ring-rose-200 transition-all text-left"
                       dir="ltr"
                     />
-                    <Phone className={`w-4 h-4 text-stone-400 absolute ${isEn ? 'left-3' : 'right-3'} top-2.5 pointer-events-none`} />
+                    <Phone className="w-4 h-4 text-stone-400 absolute right-3 top-2.5 pointer-events-none" />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    {isEn ? 'Governorate / City' : isKu ? 'پارێزگا / شار' : 'المحافظة / المدينة'}
+                    المحافظة / المدينة
                   </label>
                   <div className="relative">
                     <select
                       value={regCity}
                       onChange={(e) => setRegCity(e.target.value)}
-                      className={`w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 ${
-                        isEn ? 'pl-9 pr-3 text-left' : 'pr-9 pl-3 text-right'
-                      } bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 focus:ring-2 focus:ring-rose-200 transition-all cursor-pointer`}
+                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 pr-9 pl-3 text-right bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 focus:ring-2 focus:ring-rose-200 transition-all cursor-pointer"
                     >
-                      {IRAQI_CITIES_DATA.map((city) => (
-                        <option key={city.ar} value={city.ar}>
-                          {isEn ? city.en : isKu ? city.ku : city.ar}
+                      {IRAQI_CITIES.map((city) => (
+                        <option key={city} value={city}>
+                          {city}
                         </option>
                       ))}
                     </select>
-                    <MapPin className={`w-4 h-4 text-stone-400 absolute ${isEn ? 'left-3' : 'right-3'} top-2.5 pointer-events-none`} />
+                    <MapPin className="w-4 h-4 text-stone-400 absolute right-3 top-2.5 pointer-events-none" />
                   </div>
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-stone-700 mb-1">
-                  {isEn ? 'Password' : isKu ? 'وشەی نهێنی' : 'كلمة المرور'} <span className="text-rose-600">*</span>
+                  كلمة المرور <span className="text-rose-600">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -477,17 +406,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                     required
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
-                    placeholder={isEn ? 'At least 6 characters' : isKu ? 'لانیکەم ٦ پیت یان ژمارە' : 'كلمة مرور لا تقل عن 6 أحرف'}
-                    className={`w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 ${
-                      isEn ? 'pl-9 pr-9 text-left' : 'pr-9 pl-9 text-right'
-                    } bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 focus:ring-2 focus:ring-rose-200 transition-all`}
+                    placeholder="كلمة مرور لا تقل عن 6 أحرف"
+                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 pr-9 pl-9 text-right bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 focus:ring-2 focus:ring-rose-200 transition-all"
                   />
-                  <Lock className={`w-4 h-4 text-stone-400 absolute ${isEn ? 'left-3' : 'right-3'} top-2.5 pointer-events-none`} />
+                  <Lock className="w-4 h-4 text-stone-400 absolute right-3 top-2.5 pointer-events-none" />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className={`absolute ${isEn ? 'right-3' : 'left-3'} top-2.5 text-stone-400 hover:text-stone-600 cursor-pointer`}
-                    aria-label={isEn ? 'Toggle password visibility' : isKu ? 'بینینی وشەی نهێنی' : 'إظهار أو إخفاء كلمة المرور'}
+                    className="absolute left-3 top-2.5 text-stone-400 hover:text-stone-600 cursor-pointer"
+                    aria-label="إظهار أو إخفاء كلمة المرور"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -502,8 +429,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                 <UserPlus className="w-3.5 h-3.5 text-white" />
                 <span>
                   {isSubmitting
-                    ? (isEn ? 'Creating account...' : isKu ? 'دروستکردن...' : 'جاري الإنشاء...')
-                    : (isEn ? 'Create Customer Account' : isKu ? 'دروستکردنی هەژمار' : 'إنشاء حساب الزبون')}
+                    ? 'جاري الإنشاء...'
+                    : 'إنشاء حساب الزبون'}
                 </span>
               </button>
 
@@ -517,11 +444,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                   }}
                   className="text-xs text-rose-600 font-bold hover:underline cursor-pointer"
                 >
-                  {isEn
-                    ? 'Already have an account? Sign In here'
-                    : isKu
-                    ? 'هەژمارت هەیە؟ لێرە بچۆ ژوورەوە'
-                    : 'لديك حساب بالفعل؟ اضغط هنا لتسجيل الدخول'}
+                  لديك حساب بالفعل؟ اضغط هنا لتسجيل الدخول
                 </button>
               </div>
             </form>

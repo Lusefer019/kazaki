@@ -9,8 +9,6 @@ import {
   Tag,
   ArrowLeft,
   CheckCircle2,
-  AlertCircle,
-  ShieldAlert,
 } from 'lucide-react';
 import { checkClickAllowed, checkRateLimit } from '../../utils/antiSpam';
 
@@ -25,7 +23,6 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
     setIsCartOpen,
     updateCartQuantity,
     removeFromCart,
-    clearCart,
     cartTotals,
     applyPromoCode,
     appliedPromo,
@@ -33,13 +30,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
     settings,
     getBtnText,
     getText,
-    t,
     currencyLabel,
-    currentLanguage,
   } = useStore();
-
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
 
   const [couponInput, setCouponInput] = useState('');
   const [couponMsg, setCouponMsg] = useState<{ text: string; error: boolean } | null>(null);
@@ -83,12 +75,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
   const freeShippingPercent = freeShippingThreshold > 0 ? Math.min(100, (cartTotals.subtotal / freeShippingThreshold) * 100) : 0;
 
   return (
-    <div className={`fixed inset-0 z-50 overflow-hidden bg-stone-900/60 backdrop-blur-xs flex ${isEn ? 'justify-end' : 'justify-start'}`}>
+    <div className="fixed inset-0 z-50 overflow-hidden bg-stone-900/60 backdrop-blur-xs flex justify-start">
       <div
-        className={`w-full sm:max-w-md bg-white h-full h-[100dvh] max-h-[100dvh] shadow-2xl flex flex-col justify-between animate-in ${
-          isEn ? 'slide-in-from-left text-left' : 'slide-in-from-right text-right'
-        } duration-300 border-l border-rose-100`}
-        dir={isEn ? 'ltr' : 'rtl'}
+        className="w-full sm:max-w-md bg-white h-full h-[100dvh] max-h-[100dvh] shadow-2xl flex flex-col justify-between animate-in slide-in-from-right text-right duration-300 border-l border-rose-100"
+        dir="rtl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Header */}
@@ -99,16 +89,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
             </div>
             <div>
               <h2 className="text-base font-bold text-stone-900">
-                {getText('cartTitle', isEn ? 'Shopping Cart' : 'سلة المشتريات')}
+                {getText('cartTitle', 'سلة المشتريات')}
               </h2>
               <p className="text-[11px] text-stone-500">
                 {cart.length > 0
-                  ? isEn
-                    ? `${cart.length} items selected`
-                    : isKu
-                    ? `${cart.length} بەرهەمی هەڵبژێردراو`
-                    : `${cart.length} منتجات مختارة`
-                  : getText('emptyCartMsg', isEn ? 'Cart is empty' : 'السلة فارغة')}
+                  ? `${cart.length} منتجات مختارة`
+                  : getText('emptyCartMsg', 'السلة فارغة')}
               </p>
             </div>
           </div>
@@ -126,18 +112,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
             <div className="flex items-center justify-between text-xs mb-1.5 font-medium">
               {remainingForFreeShipping > 0 ? (
                 <span className="text-stone-700">
-                  {isEn ? (
-                    <>Add <strong className="text-rose-600">{remainingForFreeShipping} {currencyLabel}</strong> for free shipping!</>
-                  ) : isKu ? (
-                    <>بڕی <strong className="text-rose-600">{remainingForFreeShipping} {currencyLabel}</strong> زیاد بکە بۆ گەیاندنی بێبەرامبەر!</>
-                  ) : (
-                    <>أضيفي بقيمة <strong className="text-rose-600">{remainingForFreeShipping} {currencyLabel}</strong> للشحن المجاني!</>
-                  )}
+                  أضيفي بقيمة <strong className="text-rose-600">{remainingForFreeShipping} {currencyLabel}</strong> للشحن المجاني!
                 </span>
               ) : (
                 <span className="text-emerald-700 font-bold flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  {isEn ? 'Congratulations! You unlocked free shipping' : isKu ? 'پیرۆزە! گەیاندنی بێبەرامبەرت بەدەستهێنا' : 'تهانينا! لقد حصلتِ على شحن مجاني'}
+                  تهانينا! لقد حصلتِ على شحن مجاني
                 </span>
               )}
               <span className="text-rose-600 font-bold">{Math.round(freeShippingPercent)}%</span>
@@ -159,20 +139,16 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
                 <ShoppingBag className="w-10 h-10" />
               </div>
               <h3 className="text-base font-bold text-stone-800">
-                {getText('emptyCartMsg', isEn ? 'Your shopping cart is empty' : isKu ? 'سەبەتەی کڕینەکەت بەتاڵە' : 'سلة المشتريات فارغة')}
+                {getText('emptyCartMsg', 'سلة المشتريات فارغة')}
               </h3>
               <p className="text-xs text-stone-500 max-w-xs leading-relaxed">
-                {isEn
-                  ? 'Explore our unique Lego flower collections designed to last forever!'
-                  : isKu
-                  ? 'سەیری گوڵە ناوازەکانی لێکۆ بکەن و بە دڵی خۆتان هەڵبژێرن بۆ سەبەتەکەتان!'
-                  : 'تصفحي تشكيلات ورد الليكو الفاخرة التي لا تذبل وأضيفي ما يعجبكِ للسلة!'}
+                تصفحي تشكيلات ورد الليكو الفاخرة التي لا تذبل وأضيفي ما يعجبكِ للسلة!
               </p>
               <button
                 onClick={() => setIsCartOpen(false)}
                 className="px-6 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-md transition-colors cursor-pointer"
               >
-                {getText('shop', isEn ? 'Explore Collection' : isKu ? 'گەڕان بەناو بەرهەمەکان' : 'تصفحي المنتجات')}
+                {getText('shop', 'تصفحي المنتجات')}
               </button>
             </div>
           ) : (
@@ -187,9 +163,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
                   className="w-16 h-16 rounded-xl object-cover border border-rose-100 shrink-0 bg-white"
                 />
 
-                <div className={`flex-1 min-w-0 ${isEn ? 'text-left' : 'text-right'}`}>
+                <div className="flex-1 min-w-0 text-right">
                   <h4 className="text-xs font-bold text-stone-900 truncate">
-                    {isEn ? (item.product.titleEn || item.product.title) : isKu ? (item.product.titleKu || item.product.title) : item.product.title}
+                    {item.product.title}
                   </h4>
                   <div className="text-xs font-extrabold text-rose-600 mt-0.5">
                     {item.product.price} {currencyLabel}
@@ -218,7 +194,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
                     <button
                       onClick={() => removeFromCart(item.product.id)}
                       className="text-stone-400 hover:text-red-500 p-1 transition-colors cursor-pointer"
-                      title={isEn ? 'Remove' : isKu ? 'سڕینەوە' : 'حذف'}
+                      title="حذف"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -239,18 +215,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
                   <div className="flex items-center gap-1.5 text-emerald-800 font-bold">
                     <Tag className="w-3.5 h-3.5" />
                     <span>
-                      {isEn
-                        ? `Promo (${appliedPromo.code}): ${appliedPromo.discountPercent}% OFF`
-                        : isKu
-                        ? `کۆدی داشکاندن (${appliedPromo.code}): ${appliedPromo.discountPercent}% داشکاندن`
-                        : `كود الخصم (${appliedPromo.code}): خصم ${appliedPromo.discountPercent}%`}
+                      كود الخصم ({appliedPromo.code}): خصم {appliedPromo.discountPercent}%
                     </span>
                   </div>
                   <button
                     onClick={removePromoCode}
                     className="text-stone-400 hover:text-red-600 font-semibold text-xs cursor-pointer"
                   >
-                    {isEn ? 'Cancel' : isKu ? 'هەڵوەشاندنەوە' : 'إلغاء'}
+                    إلغاء
                   </button>
                 </div>
               ) : (
@@ -259,14 +231,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
                     type="text"
                     value={couponInput}
                     onChange={(e) => setCouponInput(e.target.value)}
-                    placeholder={isEn ? 'Promo code (e.g. KAZAKI20)' : isKu ? 'کۆدی داشکاندن (وەک: KAZAKI20)' : 'كود الخصم (مثال: KAZAKI20)'}
+                    placeholder="كود الخصم (مثال: KAZAKI20)"
                     className="flex-1 text-xs border border-rose-200 rounded-xl px-3 py-2 bg-rose-50/30 outline-hidden focus:border-rose-400"
                   />
                   <button
                     type="submit"
                     className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold transition-colors cursor-pointer"
                   >
-                    {isEn ? 'Apply' : isKu ? 'جێبەجێکردن' : 'تطبيق'}
+                    تطبيق
                   </button>
                 </form>
               )}
@@ -280,21 +252,21 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
             {/* Calculations Breakdown */}
             <div className="space-y-1.5 text-xs text-stone-600 pt-1">
               <div className="flex justify-between">
-                <span>{getText('subtotalLabel', isEn ? 'Subtotal:' : isKu ? 'کۆی بەرهەمەکان:' : 'مجموع المنتجات:')}</span>
+                <span>{getText('subtotalLabel', 'مجموع المنتجات:')}</span>
                 <span className="font-bold text-stone-800">{cartTotals.subtotal} {currencyLabel}</span>
               </div>
               {cartTotals.discount > 0 && (
                 <div className="flex justify-between text-emerald-600 font-bold">
-                  <span>{getText('discountAppliedLabel', isEn ? 'Discount Applied:' : isKu ? 'داشکاندنی جێبەجێکراو:' : 'الخصم المطبق:')}</span>
+                  <span>{getText('discountAppliedLabel', 'الخصم المطبق:')}</span>
                   <span>- {cartTotals.discount} {currencyLabel}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span>{getText('shippingLabel', isEn ? 'Delivery Fee:' : isKu ? 'کرێی گەیاندن:' : 'رسوم التوصيل:')}</span>
+                <span>{getText('shippingLabel', 'رسوم التوصيل:')}</span>
                 <span>
                   {cartTotals.shipping === 0 ? (
                     <strong className="text-emerald-600 font-bold">
-                      {getText('freeShippingText', isEn ? 'Free' : isKu ? 'بێبەرامبەر' : 'مجاني')}
+                      {getText('freeShippingText', 'مجاني')}
                     </strong>
                   ) : (
                     `${cartTotals.shipping} ${currencyLabel}`
@@ -302,7 +274,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
                 </span>
               </div>
               <div className="flex justify-between text-sm font-extrabold text-stone-900 pt-2 border-t border-rose-100">
-                <span>{getText('totalAmountLabel', isEn ? 'Final Total:' : isKu ? 'کۆی گشتی کۆتایی:' : 'الإجمالي النهائي:')}</span>
+                <span>{getText('totalAmountLabel', 'الإجمالي النهائي:')}</span>
                 <span className="text-rose-600">{cartTotals.total} {currencyLabel}</span>
               </div>
             </div>
@@ -316,8 +288,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
               }}
               className="w-full py-3.5 rounded-full bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white text-sm font-bold shadow-lg shadow-rose-300 hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>{getBtnText('checkout', isEn ? 'Proceed to Checkout' : isKu ? 'بەردەوامبوون بۆ داواکردن' : 'متابعة إتمام الطلب')}</span>
-              <ArrowLeft className={`w-4 h-4 ${isEn ? 'rotate-180' : ''}`} />
+              <span>{getBtnText('checkout', 'متابعة إتمام الطلب')}</span>
+              <ArrowLeft className="w-4 h-4" />
             </button>
           </div>
         )}

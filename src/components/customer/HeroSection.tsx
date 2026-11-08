@@ -1,40 +1,30 @@
 import React from 'react';
 import { useStore } from '../../context/StoreContext';
-import { Heart, Layers, ArrowLeft, Shield, Truck, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Heart, Shield, Truck, RefreshCw, Layers } from 'lucide-react';
 
 export const HeroSection: React.FC = () => {
   const {
-    products,
     settings,
+    products,
     setActiveView,
     setSelectedCategory,
     setSelectedProduct,
     categories,
     getBtnText,
     getText,
-    t,
-    currentLanguage,
     getCategoryName,
     getCategoryDescription,
     currencyLabel,
   } = useStore();
 
   const banner = settings.heroBanner;
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
 
   // The latest product added to the store (connected to "وصل حديثاً")
   const latestProduct = products.length > 0 ? (products.find((p) => p.isNew) || products[0]) : null;
-  const effectiveLatestTitle = latestProduct
-    ? isEn
-      ? latestProduct.titleEn || latestProduct.title
-      : isKu
-      ? latestProduct.titleKu || latestProduct.title
-      : latestProduct.title
-    : '';
+  const effectiveLatestTitle = latestProduct ? latestProduct.title : '';
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-b from-rose-50/50 via-white/70 to-rose-50/30 backdrop-blur-[1px] pt-8 pb-16">
+    <div className="relative overflow-hidden bg-gradient-to-b from-rose-50/50 via-white/70 to-rose-50/30 backdrop-blur-[1px] pt-8 pb-16 font-cairo" dir="rtl">
       {/* Subtle background blur rings */}
       <div className="absolute top-0 right-10 w-96 h-96 bg-rose-200/30 rounded-full blur-3xl pointer-events-none -z-10" />
       <div className="absolute bottom-0 left-10 w-80 h-80 bg-pink-200/20 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -42,7 +32,7 @@ export const HeroSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Text Content */}
-          <div className={`lg:col-span-7 space-y-6 ${isEn ? 'text-left' : 'text-right'}`}>
+          <div className="lg:col-span-7 space-y-6 text-right">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-100/90 text-rose-800 text-xs font-bold border border-rose-200 shadow-2xs">
               <Heart className="w-3.5 h-3.5 text-rose-600 fill-rose-600" />
               <span>{getText('heroBadge', banner.discountBadge || 'ورد الليكو الدائم للأبد')}</span>
@@ -65,7 +55,7 @@ export const HeroSection: React.FC = () => {
                 className="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white font-semibold text-sm shadow-md shadow-rose-300 hover:shadow-lg hover:shadow-rose-300/60 transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer"
               >
                 <span>{getText('announcementLink', banner.ctaText || 'استكشف ورد الليكو')}</span>
-                <ArrowLeft className={`w-4 h-4 transition-transform ${isEn ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'}`} />
+                <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
               </button>
             </div>
 
@@ -80,7 +70,7 @@ export const HeroSection: React.FC = () => {
                     {getText('guaranteeFastShipping', 'شحن لجميع العراق')}
                   </h4>
                   <p className="text-[11px] text-stone-500">
-                    {isEn ? 'Within 24-48 Hours' : isKu ? 'لە ماوەی ٢٤-٤٨ کاتژمێردا' : 'خلال 24-48 ساعة'}
+                    خلال 24-48 ساعة
                   </p>
                 </div>
               </div>
@@ -94,7 +84,7 @@ export const HeroSection: React.FC = () => {
                     {getText('guaranteeOriginal', 'منتجات أصلية 100%')}
                   </h4>
                   <p className="text-[11px] text-stone-500">
-                    {isEn ? 'Guaranteed Quality' : isKu ? 'کوالیتی مسۆگەرکراو' : 'ضمان ذهبي للمنتجات'}
+                    ضمان ذهبي للمنتجات
                   </p>
                 </div>
               </div>
@@ -108,7 +98,7 @@ export const HeroSection: React.FC = () => {
                     {getText('guaranteeEasyReturn', 'إرجاع سهل ومرن')}
                   </h4>
                   <p className="text-[11px] text-stone-500">
-                    {isEn ? 'Easy 14-day policy' : isKu ? 'لە ماوەی ١٤ ڕۆژدا بە ئاسانی' : 'خلال 14 يوماً بسهولة'}
+                    خلال 14 يوماً بسهولة
                   </p>
                 </div>
               </div>
@@ -139,9 +129,7 @@ export const HeroSection: React.FC = () => {
                 {latestProduct ? (
                   <div
                     onClick={() => setSelectedProduct(latestProduct)}
-                    className={`absolute bottom-6 right-6 left-6 p-3.5 sm:p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-rose-100/90 shadow-xl flex items-center justify-between gap-3 cursor-pointer hover:border-rose-300 hover:shadow-2xl transition-all duration-300 group/tag ${
-                      isEn ? 'text-left' : 'text-right'
-                    }`}
+                    className="absolute bottom-6 right-6 left-6 p-3.5 sm:p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-rose-100/90 shadow-xl flex items-center justify-between gap-3 cursor-pointer hover:border-rose-300 hover:shadow-2xl transition-all duration-300 group/tag text-right"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       {latestProduct.image && (
@@ -160,14 +148,14 @@ export const HeroSection: React.FC = () => {
                         <div className="flex items-center gap-1.5 mb-0.5">
                           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                           <span className="text-[11px] font-bold text-rose-600 block truncate">
-                            {isEn ? 'New Arrival' : isKu ? 'تازە گەیشتوو' : 'وصل حديثاً'}
+                            وصل حديثاً
                           </span>
                         </div>
                         <h3 className="text-xs sm:text-sm font-extrabold text-stone-900 truncate group-hover/tag:text-rose-600 transition-colors">
                           {effectiveLatestTitle}
                         </h3>
                         <span className="text-[11px] font-bold text-rose-600">
-                          {Number(latestProduct.price || 0).toLocaleString(isEn ? 'en-US' : 'ar-IQ')} {currencyLabel}
+                          {Number(latestProduct.price || 0).toLocaleString('ar-IQ')} {currencyLabel}
                         </span>
                       </div>
                     </div>
@@ -178,9 +166,9 @@ export const HeroSection: React.FC = () => {
                         setSelectedProduct(latestProduct);
                       }}
                       className="p-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white transition-colors shrink-0 shadow-md cursor-pointer"
-                      title={isEn ? 'View Product' : 'عرض تفاصيل المنتج'}
+                      title="عرض تفاصيل المنتج"
                     >
-                      <ArrowLeft className={`w-4 h-4 transition-transform group-hover/tag:-translate-x-1 ${isEn ? 'rotate-180 group-hover/tag:translate-x-1' : ''}`} />
+                      <ArrowLeft className="w-4 h-4 transition-transform group-hover/tag:-translate-x-1" />
                     </button>
                   </div>
                 ) : (
@@ -189,20 +177,18 @@ export const HeroSection: React.FC = () => {
                       setActiveView('products');
                       setSelectedCategory('all');
                     }}
-                    className={`absolute bottom-6 right-6 left-6 p-4 rounded-2xl bg-white/90 backdrop-blur-md border border-rose-100/80 shadow-lg flex items-center justify-between cursor-pointer ${
-                      isEn ? 'text-left' : 'text-right'
-                    }`}
+                    className="absolute bottom-6 right-6 left-6 p-4 rounded-2xl bg-white/90 backdrop-blur-md border border-rose-100/80 shadow-lg flex items-center justify-between cursor-pointer text-right"
                   >
                     <div>
                       <span className="text-[11px] font-semibold text-rose-600 block">
-                        {isEn ? 'Explore Collection' : isKu ? 'کۆمەڵەکان ببینە' : 'استكشف التشكيلة'}
+                        استكشف التشكيلة
                       </span>
                       <h3 className="text-sm font-bold text-stone-900">
-                        {isEn ? 'Kazaki Luxury Lego Flowers' : isKu ? 'گوڵی لێکۆی فەخیمی کازاکی' : 'ورد الليكو الفاخر الدائم'}
+                        ورد الليكو الفاخر الدائم
                       </h3>
                     </div>
                     <div className="p-2 rounded-full bg-rose-500 text-white">
-                      <ArrowLeft className={`w-4 h-4 ${isEn ? 'rotate-180' : ''}`} />
+                      <ArrowLeft className="w-4 h-4" />
                     </div>
                   </div>
                 )}
@@ -215,7 +201,7 @@ export const HeroSection: React.FC = () => {
         <div className="mt-16 pt-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-bold text-stone-900">
-              {isEn ? 'Shop by Category' : isKu ? 'کڕین بەپێی بەشەکان' : 'التسوق حسب القسم'}
+              التسوق حسب القسم
             </h2>
             <button
               onClick={() => {
@@ -225,7 +211,7 @@ export const HeroSection: React.FC = () => {
               className="text-xs font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1 cursor-pointer"
             >
               <span>{getBtnText('filterAll', 'عرض الكل')}</span>
-              <ArrowLeft className={`w-3.5 h-3.5 ${isEn ? 'rotate-180' : ''}`} />
+              <ArrowLeft className="w-3.5 h-3.5" />
             </button>
           </div>
 

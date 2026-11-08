@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { ProductCard } from './ProductCard';
-import { Filter, SlidersHorizontal, Search, X, Settings } from 'lucide-react';
+import { SlidersHorizontal, Search, X, Settings } from 'lucide-react';
 
 export const ProductsView: React.FC = () => {
   const {
@@ -12,16 +12,11 @@ export const ProductsView: React.FC = () => {
     searchQuery,
     setSearchQuery,
     getText,
-    t,
-    currentLanguage,
     currentUser,
     setActiveView,
     getCategoryName,
     getCategoryDescription,
   } = useStore();
-
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
 
   const [sortBy, setSortBy] = useState<'featured' | 'newest' | 'price-asc' | 'price-desc' | 'rating'>('featured');
 
@@ -66,7 +61,7 @@ export const ProductsView: React.FC = () => {
   const activeCategoryObj = categories.find((c) => c.id === selectedCategory);
 
   return (
-    <div className={`max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 ${isEn ? 'text-left' : 'text-right'}`}>
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 text-right font-cairo" dir="rtl">
       {/* Header & Filter Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
         <div>
@@ -77,7 +72,7 @@ export const ProductsView: React.FC = () => {
                 : getText('allProductsTitle', 'تشكيلة ورد الليكو الفاخرة')}
             </h1>
             <span className="text-xs font-semibold text-rose-600 bg-rose-100/70 px-2.5 py-0.5 rounded-full shrink-0">
-              {filteredProducts.length} {isEn ? 'products' : isKu ? 'بەرهەم' : 'منتج'}
+              {filteredProducts.length} منتج
             </span>
           </div>
           <p className="text-xs text-stone-500">
@@ -92,18 +87,18 @@ export const ProductsView: React.FC = () => {
           <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-rose-200 text-xs shadow-2xs w-full sm:w-auto justify-between sm:justify-start">
             <div className="flex items-center gap-1.5 text-stone-500">
               <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>{isEn ? 'Sort by:' : isKu ? 'ڕیزکردن:' : 'الترتيب:'}</span>
+              <span>الترتيب:</span>
             </div>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
               className="font-bold text-stone-800 bg-transparent outline-hidden cursor-pointer text-xs"
             >
-              <option value="featured">{isEn ? 'Featured & Popular' : isKu ? 'دیاریکراو و پڕداواکاری' : 'المميزة والأكثر طلباً'}</option>
-              <option value="newest">{isEn ? 'New Arrivals (Latest)' : isKu ? 'تازە گەیشتوو (نوێترین)' : 'وصل حديثاً (الأحدث أولاً)'}</option>
-              <option value="price-asc">{isEn ? 'Price: Low to High' : isKu ? 'نرخ: لە کەمەوە بۆ زۆر' : 'السعر: من الأقل للأعلى'}</option>
-              <option value="price-desc">{isEn ? 'Price: High to Low' : isKu ? 'نرخ: لە زۆرەوە بۆ کەم' : 'السعر: من الأعلى للأقل'}</option>
-              <option value="rating">{isEn ? 'Top Rated' : isKu ? 'بەرزترین هەڵسەنگاندن' : 'الأعلى تقييماً'}</option>
+              <option value="featured">المميزة والأكثر طلباً</option>
+              <option value="newest">وصل حديثاً (الأحدث أولاً)</option>
+              <option value="price-asc">السعر: من الأقل للأعلى</option>
+              <option value="price-desc">السعر: من الأعلى للأقل</option>
+              <option value="rating">الأعلى تقييماً</option>
             </select>
           </div>
         </div>
@@ -119,7 +114,7 @@ export const ProductsView: React.FC = () => {
               : 'bg-white text-stone-700 border border-rose-100 hover:border-rose-300'
           }`}
         >
-          {getText('filterAll', isEn ? 'View All' : isKu ? 'بینینی هەمووی' : 'عرض الكل')}
+          {getText('filterAll', 'عرض الكل')}
         </button>
 
         {categories
@@ -143,10 +138,10 @@ export const ProductsView: React.FC = () => {
           <button
             onClick={() => setActiveView('admin')}
             className="px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer bg-stone-900 hover:bg-stone-800 text-amber-300 border border-stone-800 flex items-center gap-1.5 shadow-2xs"
-            title={isEn ? 'Manage Categories (Admin)' : isKu ? 'بەڕێوەبردنی بەشەکان' : 'إدارة وتعديل الأقسام (خاص بالمدير)'}
+            title="إدارة وتعديل الأقسام (خاص بالمدير)"
           >
             <Settings className="w-3.5 h-3.5" />
-            <span>{isEn ? 'Manage Categories' : isKu ? 'بەڕێوەبردنی بەشەکان' : 'إدارة وتعديل الأقسام (خاص بالمدير)'}</span>
+            <span>إدارة وتعديل الأقسام (خاص بالمدير)</span>
           </button>
         )}
       </div>
@@ -155,12 +150,12 @@ export const ProductsView: React.FC = () => {
       {searchQuery && (
         <div className="flex items-center gap-2 mb-6 bg-rose-50 p-3 rounded-xl border border-rose-200">
           <span className="text-xs text-stone-600">
-            {isEn ? 'Search results for: ' : isKu ? 'ئەنجامەکانی گەڕان بۆ: ' : 'نتائج البحث عن: '}<strong className="text-rose-700">"{searchQuery}"</strong>
+            نتائج البحث عن: <strong className="text-rose-700">"{searchQuery}"</strong>
           </span>
           <button
             onClick={() => setSearchQuery('')}
-            className={`p-1 rounded-full text-stone-400 hover:text-stone-700 hover:bg-rose-100 transition-colors cursor-pointer ${isEn ? 'ml-auto' : 'mr-auto'}`}
-            title={isEn ? 'Clear search' : isKu ? 'پاککردنەوەی گەڕان' : 'إلغاء البحث'}
+            className="p-1 rounded-full text-stone-400 hover:text-stone-700 hover:bg-rose-100 transition-colors cursor-pointer mr-auto"
+            title="إلغاء البحث"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -175,28 +170,12 @@ export const ProductsView: React.FC = () => {
           </div>
           <h3 className="text-base font-bold text-stone-900">
             {products.length === 0
-              ? isEn
-                ? 'No products added yet'
-                : isKu
-                ? 'هێشتا هیچ بەرهەمێک زیاد نەکراوە'
-                : 'لا توجد منتجات معروضة حالياً'
-              : isEn
-              ? 'No matching products found'
-              : isKu
-              ? 'هیچ بەرهەمێکی گونجاو نەدۆزرایەوە'
+              ? 'لا توجد منتجات معروضة حالياً'
               : 'لم يتم العثور على منتجات مطابقة'}
           </h3>
           <p className="text-xs text-stone-500 max-w-sm mx-auto">
             {products.length === 0
-              ? isEn
-                ? 'The store is clean and ready. Add products and set prices from the admin dashboard.'
-                : isKu
-                ? 'فرۆشگاکە ئامادەیە. بەرهەمەکان و نرخەکان لە دەستەی بەڕێوەبردنەوە زیاد بکە.'
-                : 'المتجر مجهز وفارغ بالكامل، ويمكنك كمدير البدء بإضافة المنتجات وتحديد أسعارها من لوحة التحكم.'
-              : isEn
-              ? 'Try searching with different keywords or browse another category.'
-              : isKu
-              ? 'وشەی تر تاقی بکەرەوە یان بەشێکی تر بگەڕێ.'
+              ? 'المتجر مجهز وفارغ بالكامل، ويمكنك كمدير البدء بإضافة المنتجات وتحديد أسعارها من لوحة التحكم.'
               : 'جربي البحث بكلمات أخرى أو تصفح قسم مختلف من أقسام المتجر.'}
           </p>
           {products.length === 0 && currentUser?.role === 'admin' ? (
@@ -204,7 +183,7 @@ export const ProductsView: React.FC = () => {
               onClick={() => setActiveView('admin')}
               className="px-6 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all shadow-md shadow-rose-200 cursor-pointer inline-flex items-center gap-2"
             >
-              <span>{isEn ? 'Add Products from Admin Dashboard' : isKu ? 'زیادکردنی بەرهەم لە دەستەی بەڕێوەبردن' : 'إضافة المنتجات والأسعار من لوحة التحكم'}</span>
+              <span>إضافة المنتجات والأسعار من لوحة التحكم</span>
             </button>
           ) : products.length > 0 ? (
             <button
@@ -214,7 +193,7 @@ export const ProductsView: React.FC = () => {
               }}
               className="px-6 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition-colors cursor-pointer"
             >
-              {isEn ? 'Reset Filters' : isKu ? 'ڕێکخستنەوەی فلتەر' : 'إعادة تعيين التصفية'}
+              إعادة تعيين التصفية
             </button>
           ) : null}
         </div>

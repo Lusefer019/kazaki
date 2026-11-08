@@ -1,7 +1,7 @@
 import React from 'react';
 import { Product } from '../../types';
 import { useStore } from '../../context/StoreContext';
-import { Star, ShoppingBag, Eye, Check, Edit2 } from 'lucide-react';
+import { ShoppingBag, Star, Eye, Check, Edit2 } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -15,17 +15,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     settings,
     getBtnText,
     getText,
-    currentLanguage,
     currentUser,
     updateProduct,
     currencyLabel,
-    t,
     getCategoryName,
   } = useStore();
   const [justAdded, setJustAdded] = React.useState(false);
 
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
   const category = categories.find((c) => c.id === product.categoryId);
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -41,16 +37,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
       : null;
 
-  const effectiveTitle = isEn
-    ? product.titleEn || product.title
-    : isKu
-    ? product.titleKu || product.title
-    : product.title;
-
   return (
     <div
       onClick={() => setSelectedProduct(product)}
-      className="group relative bg-white rounded-2xl border border-rose-100 hover:border-rose-300 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden cursor-pointer"
+      className="group relative bg-white rounded-2xl border border-rose-100 hover:border-rose-300 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden cursor-pointer font-cairo"
+      dir="rtl"
     >
       {/* Product Image Box */}
       <div className="relative aspect-square w-full overflow-hidden bg-rose-50/50">
@@ -78,7 +69,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 }
               }
             }}
-            className={`absolute top-2.5 ${isEn ? 'right-2.5' : 'left-2.5'} z-20 px-2.5 py-1 rounded-lg bg-stone-900/90 hover:bg-stone-900 text-amber-300 font-bold text-[10px] shadow-md flex items-center gap-1 border border-stone-700 transition-all cursor-pointer`}
+            className="absolute top-2.5 left-2.5 z-20 px-2.5 py-1 rounded-lg bg-stone-900/90 hover:bg-stone-900 text-amber-300 font-bold text-[10px] shadow-md flex items-center gap-1 border border-stone-700 transition-all cursor-pointer"
             title="تعديل سعر المنتج مباشرة (خاص بالمدير)"
           >
             <Edit2 className="w-3 h-3 text-amber-400" />
@@ -87,15 +78,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         )}
 
         {/* Sale / New Tag */}
-        <div className={`absolute top-3 ${isEn ? 'left-3 items-start' : 'right-3 items-end'} flex flex-col gap-1 z-10 pointer-events-none`}>
+        <div className="absolute top-3 right-3 flex flex-col items-end gap-1 z-10 pointer-events-none">
           {discountPercent && (
             <span className="bg-rose-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-md shadow-xs">
-              {isEn ? `${discountPercent}% OFF` : isKu ? `${discountPercent}% داشکاندن` : `خصم ${discountPercent}%`}
+              خصم {discountPercent}%
             </span>
           )}
           {product.isNew && (
             <span className="bg-stone-900 text-white text-[10px] font-medium px-2 py-0.5 rounded-md shadow-xs">
-              {getText('newBadge', isEn ? 'New' : isKu ? 'نوێ' : 'جديد')}
+              {getText('newBadge', 'جديد')}
             </span>
           )}
         </div>
@@ -108,16 +99,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               setSelectedProduct(product);
             }}
             className="p-2.5 rounded-full bg-white text-stone-800 hover:bg-rose-50 hover:text-rose-600 shadow-md transition-transform transform hover:scale-110 cursor-pointer flex items-center gap-1.5 text-xs font-bold px-3.5"
-            title={getBtnText('viewProduct', isEn ? 'View Details' : isKu ? 'بینینی وردەکاری' : 'عرض التفاصيل')}
+            title={getBtnText('viewProduct', 'عرض التفاصيل')}
           >
             <Eye className="w-4 h-4" />
-            <span className="text-[11px]">{getBtnText('viewProduct', isEn ? 'View Details' : isKu ? 'بینینی وردەکاری' : 'عرض التفاصيل')}</span>
+            <span className="text-[11px]">{getBtnText('viewProduct', 'عرض التفاصيل')}</span>
           </button>
         </div>
       </div>
 
       {/* Content */}
-      <div className={`p-3 sm:p-4 flex-1 flex flex-col ${isEn ? 'text-left' : 'text-right'}`}>
+      <div className="p-3 sm:p-4 flex-1 flex flex-col text-right">
         {/* Anti-slop: clean unboxed metadata with dot separator */}
         <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-stone-500 mb-1.5 truncate">
           <span className="truncate">
@@ -132,7 +123,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
 
         <h3 className="font-bold text-xs sm:text-sm text-stone-900 leading-snug line-clamp-2 mb-2 group-hover:text-rose-600 transition-colors">
-          {effectiveTitle}
+          {product.title}
         </h3>
 
         {/* Rating */}
@@ -159,7 +150,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
             {!product.inStock && (
               <span className="text-[10px] text-red-500 font-semibold block mt-0.5">
-                {getText('outOfStock', isEn ? 'Out of Stock' : isKu ? 'تەواو بووە' : 'نفدت الكمية')}
+                {getText('outOfStock', 'نفدت الكمية')}
               </span>
             )}
           </div>
@@ -174,7 +165,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 ? 'bg-rose-50 text-rose-700 hover:bg-rose-600 hover:text-white'
                 : 'bg-stone-100 text-stone-400 cursor-not-allowed'
             }`}
-            title={product.inStock ? getBtnText('addToCart', isEn ? 'Add to Cart' : isKu ? 'زیادکردن بۆ سەبەتە' : 'أضف إلى السلة') : (isEn ? 'Out of Stock' : isKu ? 'تەواو بووە' : 'غير متوفر')}
+            title={product.inStock ? getBtnText('addToCart', 'أضف إلى السلة') : 'غير متوفر'}
           >
             {justAdded ? (
               <Check className="w-4 h-4 animate-in zoom-in" />

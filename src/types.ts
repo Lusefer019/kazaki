@@ -121,27 +121,27 @@ export interface IntroConfig {
   autoCloseSeconds: number; // 0 means do not auto close
 }
 
-export type SupportedLanguage = 'ar' | 'en' | 'ku';
+export type SupportedLanguage = 'ar';
 
-export type SitePhrasesTranslations = Record<string, Record<SupportedLanguage, string>>;
+export type SitePhrasesTranslations = Record<string, { ar: string; en?: string; ku?: string }>;
 
 export interface ButtonTranslations {
-  home: Record<SupportedLanguage, string>;
-  shop: Record<SupportedLanguage, string>;
-  categories: Record<SupportedLanguage, string>;
-  addToCart: Record<SupportedLanguage, string>;
-  buyNow: Record<SupportedLanguage, string>;
-  login: Record<SupportedLanguage, string>;
-  contactUs: Record<SupportedLanguage, string>;
-  customerService: Record<SupportedLanguage, string>;
-  checkout: Record<SupportedLanguage, string>;
-  trackOrder: Record<SupportedLanguage, string>;
-  viewCart: Record<SupportedLanguage, string>;
-  register: Record<SupportedLanguage, string>;
-  sendMessage: Record<SupportedLanguage, string>;
-  viewProduct: Record<SupportedLanguage, string>;
-  aboutUs: Record<SupportedLanguage, string>;
-  [key: string]: Record<SupportedLanguage, string>;
+  home: { ar: string; en?: string; ku?: string };
+  shop: { ar: string; en?: string; ku?: string };
+  categories: { ar: string; en?: string; ku?: string };
+  addToCart: { ar: string; en?: string; ku?: string };
+  buyNow: { ar: string; en?: string; ku?: string };
+  login: { ar: string; en?: string; ku?: string };
+  contactUs: { ar: string; en?: string; ku?: string };
+  customerService: { ar: string; en?: string; ku?: string };
+  checkout: { ar: string; en?: string; ku?: string };
+  trackOrder: { ar: string; en?: string; ku?: string };
+  viewCart: { ar: string; en?: string; ku?: string };
+  register: { ar: string; en?: string; ku?: string };
+  sendMessage: { ar: string; en?: string; ku?: string };
+  viewProduct: { ar: string; en?: string; ku?: string };
+  aboutUs: { ar: string; en?: string; ku?: string };
+  [key: string]: { ar: string; en?: string; ku?: string };
 }
 
 export interface AboutUsFeature {

@@ -891,49 +891,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   }, []);
 
-  // Multilingual & Button texts customization
-  const [currentLanguage, setCurrentLanguageState] = useState<SupportedLanguage>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.LANGUAGE);
-      return (saved as SupportedLanguage) || 'ar';
-    } catch {
-      return 'ar';
-    }
-  });
-
-  const setCurrentLanguage = (lang: SupportedLanguage) => {
-    setCurrentLanguageState(lang);
-    try {
-      localStorage.setItem(STORAGE_KEYS.LANGUAGE, lang);
-    } catch {}
-    document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
-    document.documentElement.lang = lang;
-    document.body.setAttribute('data-lang', lang);
-    if (lang === 'ku') {
-      document.documentElement.classList.add('font-kurdish');
-      document.body.classList.add('font-kurdish');
-    } else {
-      document.documentElement.classList.remove('font-kurdish');
-      document.body.classList.remove('font-kurdish');
-    }
-  };
+  // Multilingual & Button texts customization (Arabic Only)
+  const currentLanguage: SupportedLanguage = 'ar';
+  const setCurrentLanguage = (_lang: SupportedLanguage) => {};
 
   useEffect(() => {
-    document.documentElement.dir = currentLanguage === 'en' ? 'ltr' : 'rtl';
-    document.documentElement.lang = currentLanguage;
-    document.body.setAttribute('data-lang', currentLanguage);
-    if (currentLanguage === 'ku') {
-      document.documentElement.classList.add('font-kurdish');
-      document.body.classList.add('font-kurdish');
-    } else {
-      document.documentElement.classList.remove('font-kurdish');
-      document.body.classList.remove('font-kurdish');
-    }
-
-    // Automatically translate all Arabic content across the entire page & DOM
-    const cleanup = syncGlobalPageTranslation(currentLanguage);
-    return cleanup;
-  }, [currentLanguage]);
+    document.documentElement.dir = 'rtl';
+    document.documentElement.lang = 'ar';
+    document.body.setAttribute('data-lang', 'ar');
+    document.documentElement.classList.remove('font-kurdish');
+    document.body.classList.remove('font-kurdish');
+  }, []);
 
   // Unlock audio on first user gesture for clear in-website chime sounds
   useEffect(() => {
@@ -961,11 +929,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     Object.keys(initialSiteTexts).forEach((k) => {
       if (!merged[k]) {
         merged[k] = { ...initialSiteTexts[k] };
-      } else if (!merged[k].en || merged[k].en.trim() === '') {
-        merged[k] = {
-          ...merged[k],
-          en: initialSiteTexts[k]?.en || '',
-        };
       }
     });
     return merged;
@@ -981,48 +944,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const getText = (key: string, fallback?: string): string => {
     const val =
-      settings.siteTexts?.[key]?.[currentLanguage] ||
-      settings.buttonTexts?.[key]?.[currentLanguage];
+      settings.siteTexts?.[key]?.['ar'] ||
+      settings.buttonTexts?.[key]?.['ar'];
     if (val && val.trim() !== '') return val;
 
-    // Base Arabic string: fallback or defaults
-    const arabicVal =
+    return (
       fallback ||
-      settings.siteTexts?.[key]?.['ar'] ||
-      settings.buttonTexts?.[key]?.['ar'] ||
       initialSiteTexts[key]?.['ar'] ||
       initialButtonTranslations[key]?.['ar'] ||
-      '';
-
-    if (currentLanguage === 'ar') {
-      return arabicVal;
-    }
-
-    // If fallback is provided and different from default Arabic, translate custom fallback directly
-    const initAr = initialSiteTexts[key]?.['ar'] || initialButtonTranslations[key]?.['ar'];
-    if (fallback && initAr && fallback.trim() !== initAr.trim()) {
-      const auto = instantTranslateArabic(fallback);
-      if (currentLanguage === 'en' && auto.en && auto.en.trim() !== '') return auto.en;
-      if (currentLanguage === 'ku' && auto.ku && auto.ku.trim() !== '') return auto.ku;
-    }
-
-    const def =
-      initialSiteTexts[key]?.[currentLanguage] ||
-      initialButtonTranslations[key]?.[currentLanguage];
-    if (def && def.trim() !== '') return def;
-
-    // Dynamic auto-translation fallback for English & Kurdish:
-    if (arabicVal && arabicVal.trim() !== '') {
-      const auto = instantTranslateArabic(arabicVal);
-      if (currentLanguage === 'en' && auto.en && auto.en.trim() !== '') {
-        return auto.en;
-      }
-      if (currentLanguage === 'ku' && auto.ku && auto.ku.trim() !== '') {
-        return auto.ku;
-      }
-    }
-
-    return arabicVal;
+      ''
+    );
   };
 
   const getBtnText = (key: string, fallback?: string): string => {
@@ -1031,49 +962,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const getCategoryName = (category?: Category | null): string => {
     if (!category) return '';
-    if (currentLanguage === 'ar') return category.name || '';
-    const arabicRegex = /[\u0600-\u06FF]/;
-    if (currentLanguage === 'en') {
-      if (category.nameEn && category.nameEn.trim() && category.nameEn !== category.name && !arabicRegex.test(category.nameEn)) {
-        return category.nameEn;
-      }
-      const trans = instantTranslateArabic(category.name);
-      return trans.en || category.name;
-    }
-    if (currentLanguage === 'ku') {
-      if (category.nameKu && category.nameKu.trim() && category.nameKu !== category.name) {
-        return category.nameKu;
-      }
-      const trans = instantTranslateArabic(category.name);
-      return trans.ku || category.name;
-    }
     return category.name || '';
   };
 
   const getCategoryDescription = (category?: Category | null): string => {
     if (!category || !category.description) return '';
-    if (currentLanguage === 'ar') return category.description;
-    const arabicRegex = /[\u0600-\u06FF]/;
-    if (currentLanguage === 'en') {
-      if (category.descriptionEn && category.descriptionEn.trim() && category.descriptionEn !== category.description && !arabicRegex.test(category.descriptionEn)) {
-        return category.descriptionEn;
-      }
-      const trans = instantTranslateArabic(category.description);
-      return trans.en || category.description;
-    }
-    if (currentLanguage === 'ku') {
-      if (category.descriptionKu && category.descriptionKu.trim() && category.descriptionKu !== category.description) {
-        return category.descriptionKu;
-      }
-      const trans = instantTranslateArabic(category.description);
-      return trans.ku || category.description;
-    }
     return category.description;
   };
 
   const t = (text: string, key?: string): string => {
     if (!text) return '';
-    if (currentLanguage === 'ar') return text;
     if (key) {
       const found = getText(key, text);
       if (found && found !== text) return found;
@@ -1082,11 +980,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (matchingCat) {
       return getCategoryName(matchingCat);
     }
-    const auto = instantTranslateArabic(text);
-    return currentLanguage === 'en' ? (auto.en || text) : (auto.ku || text);
+    return text;
   };
 
-  const currencyLabel = currentLanguage === 'en' ? 'IQD' : 'د.ع';
+  const currencyLabel = 'د.ع';
 
   const updateSiteTexts = (newTexts: Record<string, Record<SupportedLanguage, string>>) => {
     if (currentUser?.role !== 'admin') {

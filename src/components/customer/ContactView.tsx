@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   Instagram,
   Heart,
-  ShieldCheck,
   Truck,
   CreditCard,
   MessageCircle,
@@ -17,14 +16,11 @@ import {
   Edit2,
   ExternalLink,
   MessageSquare,
-  Globe,
   Banknote,
   Video,
   Trash2,
-  User,
   Sparkles,
   AlertCircle,
-  RefreshCw,
 } from 'lucide-react';
 import { checkClickAllowed, checkRateLimit } from '../../utils/antiSpam';
 import { defaultCustomerServiceChannels } from '../../data/initialData';
@@ -36,18 +32,11 @@ export const ContactView: React.FC = () => {
     sendSupportMessage,
     currentUser,
     getBtnText,
-    getText,
-    t,
-    currentLanguage,
     setActiveView,
     activeCustomerChat,
     sendTempChatMessage,
     endTempChat,
-    refreshTempChats,
   } = useStore();
-
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
 
   // Temporary Live Chat state (24-Hour session)
   const [liveChatMsg, setLiveChatMsg] = useState('');
@@ -79,37 +68,23 @@ export const ContactView: React.FC = () => {
       }
       const diff = new Date(activeCustomerChat.expiresAt).getTime() - Date.now();
       if (diff <= 0) {
-        setChatTimeRemaining(
-          isEn ? 'Session Expired' : isKu ? 'کاتەکەی بەسەرچوو' : 'انتهت مدة الجلسة (24 ساعة)'
-        );
+        setChatTimeRemaining('انتهت مدة الجلسة (24 ساعة)');
         return;
       }
       const totalMinutes = Math.floor(diff / 60000);
       const hours = Math.floor(totalMinutes / 60);
       const minutes = totalMinutes % 60;
       if (hours > 0) {
-        setChatTimeRemaining(
-          isEn
-            ? `${hours}h ${minutes}m remaining`
-            : isKu
-            ? `${hours} کاتژمێر و ${minutes} خولەک ماوە`
-            : `${hours} ساعة و ${minutes} دقيقة متبقية`
-        );
+        setChatTimeRemaining(`${hours} ساعة و ${minutes} دقيقة متبقية`);
       } else {
-        setChatTimeRemaining(
-          isEn
-            ? `${minutes}m remaining`
-            : isKu
-            ? `${minutes} خولەک ماوە`
-            : `${minutes} دقيقة متبقية`
-        );
+        setChatTimeRemaining(`${minutes} دقيقة متبقية`);
       }
     };
 
     calculateTimeRemaining();
     const timer = setInterval(calculateTimeRemaining, 10000);
     return () => clearInterval(timer);
-  }, [activeCustomerChat?.expiresAt, isEn, isKu]);
+  }, [activeCustomerChat?.expiresAt]);
 
   const handleStartChat = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -126,7 +101,7 @@ export const ContactView: React.FC = () => {
     });
     setIsStartingChat(false);
     if (!res.success) {
-      setChatError(res.message || (isEn ? 'Failed to start chat' : 'تعذر بدء المحادثة'));
+      setChatError(res.message || 'تعذر بدء المحادثة');
     } else {
       setStartChatForm((prev) => ({ ...prev, initialMessage: '' }));
     }
@@ -145,7 +120,7 @@ export const ContactView: React.FC = () => {
     const res = await sendTempChatMessage(textToSend);
     setIsSendingLiveMsg(false);
     if (!res.success) {
-      setChatError(res.message || (isEn ? 'Failed to send message' : 'تعذر إرسال الرسالة'));
+      setChatError(res.message || 'تعذر إرسال الرسالة');
       setLiveChatMsg(textToSend);
     }
   };
@@ -156,26 +131,10 @@ export const ContactView: React.FC = () => {
   };
 
   const quickQuestions = [
-    {
-      ar: 'استفسار عن موعد وطريقة التوصيل لعنواني',
-      en: 'Inquiry about delivery schedule to my address',
-      ku: 'پرسیار دەربارەی کاتی گەیاندن',
-    },
-    {
-      ar: 'هل الدفع عند الاستلام متاح في محافظتي؟',
-      en: 'Is cash on delivery supported for my city?',
-      ku: 'ئایا پارەدان لە کاتی وەرگرتن بەردەستە؟',
-    },
-    {
-      ar: 'أريد التأكد من توفر مقاس أو لون معين لمنتج',
-      en: 'Checking availability of a specific size or color',
-      ku: 'دەربارەی بەردەستبوونی قەبارە یان ڕەنگ',
-    },
-    {
-      ar: 'متابعة تفاصيل وحالة طلب أرسلته سابقاً',
-      en: 'Track status of an order I submitted earlier',
-      ku: 'بەدواداچوونی داواکاری',
-    },
+    'استفسار عن موعد وطريقة التوصيل لعنواني',
+    'هل الدفع عند الاستلام متاح في محافظتي؟',
+    'أريد التأكد من توفر مقاس أو لون معين لمنتج',
+    'متابعة تفاصيل وحالة طلب أرسلته سابقاً',
   ];
 
   const [form, setForm] = useState({
@@ -257,7 +216,7 @@ export const ContactView: React.FC = () => {
           className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold transition-colors w-full justify-center"
         >
           <MessageCircle className="w-4 h-4 text-emerald-600" />
-          <span>{isEn ? `WhatsApp Chat (${val})` : isKu ? `چاتی واتسئاپ (${val})` : `محادثة واتساب فورية (${val})`}</span>
+          <span>محادثة واتساب فورية ({val})</span>
         </a>
       );
     }
@@ -294,7 +253,7 @@ export const ContactView: React.FC = () => {
           className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-pink-50 to-rose-50 text-pink-800 hover:bg-pink-100 text-xs font-bold transition-colors w-full justify-center"
         >
           <Instagram className="w-4 h-4 text-pink-600" />
-          <span>{isEn ? `Instagram (${val.includes('instagram.com') ? '@kazaki.iq' : val})` : isKu ? `ئینستاگرام (${val.includes('instagram.com') ? '@kazaki.iq' : val})` : `متابعة انستغرام (${val.includes('instagram.com') ? '@kazaki.iq' : val})`}</span>
+          <span>متابعة انستغرام ({val.includes('instagram.com') ? '@kazaki.iq' : val})</span>
         </a>
       );
     }
@@ -308,7 +267,7 @@ export const ContactView: React.FC = () => {
           className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-100 text-stone-800 hover:bg-stone-200 text-xs font-bold transition-colors w-full justify-center"
         >
           <Video className="w-4 h-4 text-stone-700" />
-          <span>{isEn ? 'Official TikTok' : isKu ? 'تیکتۆکی فەرمی' : 'حساب تيك توك الرسمي'}</span>
+          <span>حساب تيك توك الرسمي</span>
         </a>
       );
     }
@@ -322,7 +281,7 @@ export const ContactView: React.FC = () => {
         className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-bold transition-colors w-full justify-center"
       >
         <ExternalLink className="w-4 h-4 text-blue-600" />
-        <span>{isEn ? 'Visit Link / Connect' : isKu ? 'سەردانی بەستەر / پەیوەندی' : 'زيارة الرابط / التواصل'}</span>
+        <span>زيارة الرابط / التواصل</span>
       </a>
     );
   };
@@ -347,21 +306,21 @@ export const ContactView: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen bg-rose-50/20 py-12 px-4 sm:px-6 lg:px-8 ${isEn ? 'text-left' : 'text-right'}`} dir={isEn ? 'ltr' : 'rtl'}>
+    <div className="min-h-screen bg-rose-50/20 py-12 px-4 sm:px-6 lg:px-8 text-right" dir="rtl">
       <div className="max-w-6xl mx-auto space-y-10">
         {/* Admin Quick Control Banner */}
         {currentUser?.role === 'admin' && (
           <div className="bg-gradient-to-r from-stone-900 to-stone-800 text-white rounded-2xl p-4 px-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg border border-stone-700">
-            <div className={`flex items-center gap-3 ${isEn ? 'text-left' : 'text-right'}`}>
+            <div className="flex items-center gap-3 text-right">
               <div className="p-2 rounded-xl bg-amber-400/20 text-amber-300">
                 <Headphones className="w-5 h-5" />
               </div>
               <div>
                 <h4 className="text-xs sm:text-sm font-bold text-amber-300">
-                  {isEn ? 'Admin Controls: Manage Customer Service Channels' : isKu ? 'کۆنترۆڵی بەڕێوەبەر: بەڕێوەبردنی کەناڵەکانی خزمەتگوزاری' : 'لوحة تحكم المدير: حذف وتعديل وسائل وقنوات خدمة العملاء'}
+                  لوحة تحكم المدير: حذف وتعديل وسائل وقنوات خدمة العملاء
                 </h4>
                 <p className="text-[11px] text-stone-300">
-                  {isEn ? 'You can add, edit WhatsApp/phone numbers, remove channels or hide customer service.' : isKu ? 'دەتوانیت ژمارەی مۆبایل یان واتسئاپ زیاد یان دەستکاری بکەیت، یان هەر کەناڵێک بسڕیتەوە.' : 'يمكنكِ إضافة، تعديل أرقام الهواتف أو الواتساب، أو حذف أي وسيلة تواصل أو إخفاء خدمة العملاء بالكامل.'}
+                  يمكنكِ إضافة، تعديل أرقام الهواتف أو الواتساب، أو حذف أي وسيلة تواصل أو إخفاء خدمة العملاء بالكامل.
                 </p>
               </div>
             </div>
@@ -370,7 +329,7 @@ export const ContactView: React.FC = () => {
               className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-900 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0"
             >
               <Edit2 className="w-3.5 h-3.5" />
-              <span>{isEn ? 'Manage Customer Service' : isKu ? 'بەڕێوەبردنی خزمەتگوزاری' : 'إدارة وتعديل خدمة العملاء'}</span>
+              <span>إدارة وتعديل خدمة العملاء</span>
             </button>
           </div>
         )}
@@ -382,17 +341,17 @@ export const ContactView: React.FC = () => {
               <Headphones className="w-8 h-8" />
             </div>
             <h2 className="text-xl font-bold text-stone-900">
-              {isEn ? 'Customer service temporarily unavailable for maintenance' : isKu ? 'خزمەتگوزاری کڕیاران بۆ ماوەیەکی کاتی ڕاگیراوە' : 'خدمة العملاء متوقفة مؤقتاً للتحديث'}
+              خدمة العملاء متوقفة مؤقتاً للتحديث
             </h2>
             <p className="text-xs sm:text-sm text-stone-500 max-w-md mx-auto">
-              {isEn ? 'Customer service channels are temporarily paused by management. You can track your orders directly in the tracking section.' : isKu ? 'کەناڵەکانی خزمەتگوزاری کڕیاران لەلایەن بەڕێوەبەرایەتییەوە ڕاگیراون. دەتوانن لە بەشی بەدواداچوون داواکارییەکانتان بپشکنن.' : 'تم إخفاء أو تعطيل قنوات خدمة العملاء مؤقتاً من قبل الإدارة. يمكنكم متابعة واستعراض الطلبات مباشرة من قسم التتبع.'}
+              تم إخفاء أو تعطيل قنوات خدمة العملاء مؤقتاً من قبل الإدارة. يمكنكم متابعة واستعراض الطلبات مباشرة من قسم التتبع.
             </p>
             {currentUser?.role === 'admin' && (
               <button
                 onClick={() => setActiveView('admin')}
                 className="px-6 py-2.5 rounded-full bg-rose-600 text-white font-bold text-xs hover:bg-rose-700 transition-colors"
               >
-                {isEn ? 'Reactivate in Admin Panel' : isKu ? 'چالاککردنەوە لە بەڕێوەبەرایەتی' : 'إعادة تفعيل خدمة العملاء من لوحة التحكم'}
+                إعادة تفعيل خدمة العملاء من لوحة التحكم
               </button>
             )}
           </div>
@@ -400,19 +359,15 @@ export const ContactView: React.FC = () => {
           <>
             {/* Header Section */}
             <div className="text-center max-w-2xl mx-auto space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-100 text-rose-700 text-xs font-bold">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-100 text-rose-700 text-xs font-bold">
                 <Heart className="w-3.5 h-3.5 fill-rose-500" />
-                <span>{isEn ? 'Direct Support & Customer Care' : isKu ? 'خزمەتگوزاری کڕیاران و پەیوەندی ڕاستەوخۆ' : 'خدمة العملاء والتواصل المباشر'}</span>
+                <span>خدمة العملاء والتواصل المباشر</span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-black text-stone-900 tracking-tight">
-                {settings.contactInfo?.title
-                  ? (isEn ? t(settings.contactInfo.title) : isKu ? t(settings.contactInfo.title) : settings.contactInfo.title)
-                  : (isEn ? 'KAZAKI.IQ Customer Care Center' : isKu ? 'ناوەندی خزمەتگوزاری KAZAKI.IQ' : 'مركز خدمة عملاء KAZAKI.IQ')}
+                {settings.contactInfo?.title || 'مركز خدمة عملاء KAZAKI.IQ'}
               </h1>
               <p className="text-stone-600 text-xs sm:text-sm leading-relaxed">
-                {settings.contactInfo?.subtitle
-                  ? (isEn ? t(settings.contactInfo.subtitle) : isKu ? t(settings.contactInfo.subtitle) : settings.contactInfo.subtitle)
-                  : (isEn ? 'We are here to answer your inquiries and ensure a luxury shopping experience.' : isKu ? 'ئێمە لێرەین بۆ وەڵامدانەوەی پرسیارەکانتان و پێشکەشکردنی ئەزموونێکی شاهانە.' : 'نحن هنا للإجابة على استفساراتكِ ومساعدتكِ في كل خطوة لتجربة تسوق راقية تليق بكِ.')}
+                {settings.contactInfo?.subtitle || 'نحن هنا للإجابة على استفساراتكِ ومساعدتكِ في كل خطوة لتجربة تسوق راقية تليق بكِ.'}
               </p>
             </div>
 
@@ -430,44 +385,40 @@ export const ContactView: React.FC = () => {
                   <div>
                     <div className="flex items-center gap-2">
                       <h2 className="text-base sm:text-lg font-black text-white">
-                        {isEn ? 'Direct Live Chat with Management' : isKu ? 'چاتی ڕاستەوخۆ لەگەڵ بەڕێوەبەرایەتی' : 'شاشة المحادثة المباشرة المؤقتة مع الإدارة'}
+                        شاشة المحادثة المباشرة المؤقتة مع الإدارة
                       </h2>
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        {isEn ? '24h Live Session' : isKu ? '٢٤ کاتژمێر کارایە' : 'محادثة صالحة لمدة 24 ساعة'}
+                        محادثة صالحة لمدة 24 ساعة
                       </span>
                     </div>
                     <p className="text-xs text-stone-300 mt-0.5">
-                      {isEn
-                        ? 'Temporary chat session directly connected to the store administration.'
-                        : isKu
-                        ? 'چاتی ڕاستەوخۆی کاتی بەستراوەتەوە بە بەڕێوەبەرایەتی فرۆشگا بۆ وەڵامدانەوەی خێرا.'
-                        : 'جلسة محادثة مباشرة وفورية مع إدارة المتجر تُحفظ وتستمر لمدة 24 ساعة فقط.'}
+                      جلسة محادثة مباشرة وفورية مع إدارة المتجر تُحفظ وتستمر لمدة 24 ساعة فقط.
                     </p>
                   </div>
                 </div>
 
-                {/* Right / Left countdown & actions */}
+                {/* Left countdown & actions */}
                 <div className="flex items-center gap-3">
                   {activeCustomerChat ? (
                     <div className="flex items-center gap-2.5">
                       <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-500/20 border border-rose-400/30 text-rose-200 text-xs font-bold">
                         <Clock className="w-4 h-4 text-rose-400 shrink-0" />
-                        <span>{chatTimeRemaining || (isEn ? '24 Hours' : '24 ساعة')}</span>
+                        <span>{chatTimeRemaining || '24 ساعة'}</span>
                       </div>
                       <button
                         type="button"
                         onClick={() => setConfirmEndModal(true)}
                         className="px-3 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white border border-stone-700 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
-                        title={isEn ? 'End this session' : 'إنهاء هذه المحادثة'}
+                        title="إنهاء هذه المحادثة"
                       >
                         <Trash2 className="w-3.5 h-3.5 text-stone-400" />
-                        <span>{isEn ? 'End' : 'إنهاء'}</span>
+                        <span>إنهاء</span>
                       </button>
                     </div>
                   ) : (
                     <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-400/20 border border-amber-300/30 text-amber-200 text-xs font-bold">
                       <Clock className="w-4 h-4 text-amber-300 shrink-0" />
-                      <span>{isEn ? 'Duration: 24 Hours' : isKu ? 'ماوە: ٢٤ کاتژمێر' : 'المدة: 24 ساعة من أول رسالة'}</span>
+                      <span>المدة: 24 ساعة من أول رسالة</span>
                     </div>
                   )}
                 </div>
@@ -483,14 +434,10 @@ export const ContactView: React.FC = () => {
                       <Sparkles className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                       <div>
                         <span className="font-bold">
-                          {isEn ? 'Live Temporary Chat Opened' : isKu ? 'چاتی ڕاستەوخۆ دەستیپێکرد' : 'بدأت المحادثة المباشرة المؤقتة بنجاح'}
+                          بدأت المحادثة المباشرة المؤقتة بنجاح
                         </span>
                         <p className="text-[11px] text-rose-700 mt-0.5">
-                          {isEn
-                            ? 'Welcome! This direct conversation with KAZAKI.IQ management is active for 24 hours. Admin responses will appear here instantly.'
-                            : isKu
-                            ? 'بەخێربێن! ئەم گفتوگۆیە لەگەڵ بەڕێوەبەرایەتی KAZAKI.IQ بۆ ماوەی ٢٤ کاتژمێر کارایە.'
-                            : 'أهلاً بكِ! هذه المحادثة الفورية مع إدارة KAZAKI.IQ نشطة لمدة 24 ساعة. ردود الإدارة ستصلكِ هنا مباشرة.'}
+                          أهلاً بكِ! هذه المحادثة الفورية مع إدارة KAZAKI.IQ نشطة لمدة 24 ساعة. ردود الإدارة ستصلكِ هنا مباشرة.
                         </p>
                       </div>
                     </div>
@@ -505,7 +452,7 @@ export const ContactView: React.FC = () => {
                         >
                           <div className="flex items-center gap-1.5 mb-1 px-1">
                             <span className="text-[10px] font-bold text-stone-500">
-                              {isCustomer ? msg.senderName || (isEn ? 'You' : 'أنتِ') : isEn ? 'Store Administration' : 'إدارة KAZAKI.IQ'}
+                              {isCustomer ? msg.senderName || 'أنتِ' : 'إدارة KAZAKI.IQ'}
                             </span>
                             <span className="text-[9px] text-stone-400">
                               {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -531,17 +478,17 @@ export const ContactView: React.FC = () => {
                   {/* Quick question suggestions */}
                   <div className="space-y-1.5">
                     <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">
-                      {isEn ? 'Quick Questions' : isKu ? 'پرسیارە خێراکان' : 'أسئلة واستفسارات شائعة وسريعة:'}
+                      أسئلة واستفسارات شائعة وسريعة:
                     </span>
                     <div className="flex flex-wrap gap-2">
                       {quickQuestions.map((q, idx) => (
                         <button
                           key={idx}
                           type="button"
-                          onClick={() => setLiveChatMsg(isEn ? q.en : isKu ? q.ku : q.ar)}
+                          onClick={() => setLiveChatMsg(q)}
                           className="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-rose-50 hover:text-rose-700 text-stone-600 text-[11px] font-medium transition-colors border border-stone-200/80 cursor-pointer"
                         >
-                          {isEn ? q.en : isKu ? q.ku : q.ar}
+                          {q}
                         </button>
                       ))}
                     </div>
@@ -561,7 +508,7 @@ export const ContactView: React.FC = () => {
                       type="text"
                       value={liveChatMsg}
                       onChange={(e) => setLiveChatMsg(e.target.value)}
-                      placeholder={isEn ? 'Type your message to administration...' : isKu ? 'پەیامەکەت بنووسە...' : 'اكتبي استفساركِ المباشر للإدارة هنا...'}
+                      placeholder="اكتبي استفساركِ المباشر للإدارة هنا..."
                       className="flex-1 text-xs border border-stone-300 rounded-xl px-4 py-3 bg-white focus:outline-hidden focus:border-rose-500 shadow-2xs"
                     />
                     <button
@@ -569,8 +516,8 @@ export const ContactView: React.FC = () => {
                       disabled={isSendingLiveMsg || !liveChatMsg.trim()}
                       className="px-5 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white font-bold text-xs shadow-md shadow-rose-200 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
                     >
-                      <Send className={`w-4 h-4 ${isSendingLiveMsg ? 'animate-pulse' : ''} ${isEn ? '' : 'rotate-180'}`} />
-                      <span>{isSendingLiveMsg ? (isEn ? 'Sending...' : 'جاري الإرسال...') : (isEn ? 'Send' : 'إرسال')}</span>
+                      <Send className={`w-4 h-4 ${isSendingLiveMsg ? 'animate-pulse' : ''} rotate-180`} />
+                      <span>{isSendingLiveMsg ? 'جاري الإرسال...' : 'إرسال'}</span>
                     </button>
                   </form>
                 </div>
@@ -579,14 +526,10 @@ export const ContactView: React.FC = () => {
                 <div className="p-6 sm:p-8 space-y-6">
                   <div className="max-w-xl space-y-2">
                     <h3 className="text-base sm:text-lg font-bold text-stone-900">
-                      {isEn ? 'Start a 24-Hour Temporary Live Chat Session' : isKu ? 'دەستپێکردنی چاتی کاتی بۆ ٢٤ کاتژمێر' : 'ابدأي جلسة محادثة مباشرة مؤقتة (24 ساعة)'}
+                      ابدأي جلسة محادثة مباشرة مؤقتة (24 ساعة)
                     </h3>
                     <p className="text-xs text-stone-500 leading-relaxed">
-                      {isEn
-                        ? 'Communicate directly with the store management team from within the website. Your session stays open for 24 hours so you can ask questions, follow up on items, and receive answers in real time.'
-                        : isKu
-                        ? 'پەیوەندی ڕاستەوخۆ لەگەڵ تیمی بەڕێوەبەرایەتی فرۆشگا. چاتەکەت بۆ ماوەی ٢٤ کاتژمێر دەمێنێتەوە بۆ وەڵامدانەوەی پرسیارەکانت.'
-                        : 'تواصلي مباشرة مع فريق إدارة المتجر من داخل الموقع. تبقى جلستكِ مفتوحة ومحفوظة لمدة 24 ساعة لتلقي الردود والمتابعة المباشرة لجميع استفساراتكِ.'}
+                      تواصلي مباشرة مع فريق إدارة المتجر من داخل الموقع. تبقى جلستكِ مفتوحة ومحفوظة لمدة 24 ساعة لتلقي الردود والمتابعة المباشرة لجميع استفساراتكِ.
                     </p>
                   </div>
 
@@ -602,21 +545,21 @@ export const ContactView: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-semibold text-stone-700 mb-1">
-                          {isEn ? 'Your Name' : isKu ? 'ناوەکەت' : 'الاسم الكريم'} <span className="text-rose-600">*</span>
+                          الاسم الكريم <span className="text-rose-600">*</span>
                         </label>
                         <input
                           type="text"
                           required
                           value={startChatForm.name}
                           onChange={(e) => setStartChatForm({ ...startChatForm, name: e.target.value })}
-                          placeholder={isEn ? 'e.g. Sarah' : 'مثال: سارة'}
+                          placeholder="مثال: سارة"
                           className="w-full text-xs border border-stone-200 rounded-xl px-3.5 py-2.5 bg-stone-50/50 focus:bg-white outline-hidden focus:border-rose-400"
                         />
                       </div>
 
                       <div>
                         <label className="block text-xs font-semibold text-stone-700 mb-1">
-                          {isEn ? 'Phone / WhatsApp (Optional)' : isKu ? 'مۆبایل یان واتسئاپ' : 'رقم الهاتف أو واتساب (اختياري)'}
+                          رقم الهاتف أو واتساب (اختياري)
                         </label>
                         <input
                           type="tel"
@@ -631,14 +574,14 @@ export const ContactView: React.FC = () => {
 
                     <div>
                       <label className="block text-xs font-semibold text-stone-700 mb-1">
-                        {isEn ? 'Your Inquiry or First Message' : isKu ? 'یەکەم پرسیار یان پەیام' : 'استفساركِ أو رسالتكِ الأولى للإدارة'} <span className="text-rose-600">*</span>
+                        استفساركِ أو رسالتكِ الأولى للإدارة <span className="text-rose-600">*</span>
                       </label>
                       <textarea
                         rows={3}
                         required
                         value={startChatForm.initialMessage}
                         onChange={(e) => setStartChatForm({ ...startChatForm, initialMessage: e.target.value })}
-                        placeholder={isEn ? 'Type your question here to initiate the 24-hour live chat session...' : isKu ? 'پرسیارەکەت بنووسە بۆ دەستپێکردنی چات...' : 'اكتبي استفساركِ هنا لبدء شاشة المحادثة المباشرة المؤقتة مع الإدارة...'}
+                        placeholder="اكتبي استفساركِ هنا لبدء شاشة المحادثة المباشرة المؤقتة مع الإدارة..."
                         className="w-full text-xs border border-stone-200 rounded-xl px-3.5 py-2.5 bg-stone-50/50 focus:bg-white outline-hidden focus:border-rose-400"
                       />
                     </div>
@@ -646,17 +589,17 @@ export const ContactView: React.FC = () => {
                     {/* Quick chips to fill initialMessage */}
                     <div className="space-y-1.5">
                       <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">
-                        {isEn ? 'Or choose a quick topic:' : isKu ? 'یان بابەتێکی خێرا هەڵبژێرە:' : 'أو اختاري استفساراً سريعاً:'}
+                        أو اختاري استفساراً سريعاً:
                       </span>
                       <div className="flex flex-wrap gap-2">
                         {quickQuestions.map((q, idx) => (
                           <button
                             key={idx}
                             type="button"
-                            onClick={() => setStartChatForm({ ...startChatForm, initialMessage: isEn ? q.en : isKu ? q.ku : q.ar })}
+                            onClick={() => setStartChatForm({ ...startChatForm, initialMessage: q })}
                             className="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-rose-50 hover:text-rose-700 text-stone-600 text-[11px] font-medium transition-colors border border-stone-200 cursor-pointer"
                           >
-                            {isEn ? q.en : isKu ? q.ku : q.ar}
+                            {q}
                           </button>
                         ))}
                       </div>
@@ -670,9 +613,7 @@ export const ContactView: React.FC = () => {
                       >
                         <MessageSquare className="w-4 h-4" />
                         <span>
-                          {isStartingChat
-                            ? (isEn ? 'Opening Chat Session...' : 'جاري فتح جلسة المحادثة...')
-                            : (isEn ? 'Start 24-Hour Live Chat' : 'بدء المحادثة المباشرة (24 ساعة)')}
+                          {isStartingChat ? 'جاري فتح جلسة المحادثة...' : 'بدء المحادثة المباشرة (24 ساعة)'}
                         </span>
                       </button>
                     </div>
@@ -690,14 +631,10 @@ export const ContactView: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-stone-900">
-                      {isEn ? 'End Live Chat Session?' : isKu ? 'کۆتاییهێنان بە چات؟' : 'إنهاء جلسة المحادثة المؤقتة؟'}
+                      إنهاء جلسة المحادثة المؤقتة؟
                     </h4>
                     <p className="text-xs text-stone-500 mt-1">
-                      {isEn
-                        ? 'Ending this chat will close this 24-hour session. You can start a new session whenever needed.'
-                        : isKu
-                        ? 'کۆتاییهێنان بە چات دانیشتنەکە دادەخات. دەتوانیت هەر کاتێک بتەوێت چاتێکی نوێ دەستپێبکەیت.'
-                        : 'سيتم إغلاق هذه المحادثة وحذف الجلسة المؤقتة. يمكنكِ دائماً بدء محادثة جديدة في أي وقت.'}
+                      سيتم إغلاق هذه المحادثة وحذف الجلسة المؤقتة. يمكنكِ دائماً بدء محادثة جديدة في أي وقت.
                     </p>
                   </div>
                   <div className="flex items-center gap-2 justify-center pt-2">
@@ -706,14 +643,14 @@ export const ContactView: React.FC = () => {
                       onClick={() => setConfirmEndModal(false)}
                       className="px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition-colors cursor-pointer"
                     >
-                      {isEn ? 'Cancel' : 'إلغاء'}
+                      إلغاء
                     </button>
                     <button
                       type="button"
                       onClick={handleEndChat}
                       className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors cursor-pointer"
                     >
-                      {isEn ? 'Yes, End Chat' : 'نعم، إنهاء المحادثة'}
+                      نعم، إنهاء المحادثة
                     </button>
                   </div>
                 </div>
@@ -733,11 +670,11 @@ export const ContactView: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="text-base font-bold text-stone-900 mb-1">
-                        {isEn ? (channel.nameEn || t(channel.name)) : isKu ? (channel.nameKu || t(channel.name)) : channel.name}
+                        {channel.name}
                       </h3>
                       {channel.subtitle && (
                         <p className="text-xs text-stone-500 leading-relaxed mb-3">
-                          {isEn ? (channel.subtitleEn || t(channel.subtitle)) : isKu ? (channel.subtitleKu || t(channel.subtitle)) : channel.subtitle}
+                          {channel.subtitle}
                         </p>
                       )}
                     </div>
@@ -755,15 +692,15 @@ export const ContactView: React.FC = () => {
         {/* Accepted Payment Methods Banner */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-rose-100 shadow-2xs">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className={`space-y-1 text-center ${isEn ? 'sm:text-left' : 'sm:text-right'}`}>
+            <div className="space-y-1 text-center sm:text-right">
               <span className="text-xs font-bold text-rose-600 uppercase tracking-wider">
-                {isEn ? 'Accepted Payment Methods at KAZAKI.IQ' : isKu ? 'شێوازەکانی پارەدانی پەسەندکراو لە KAZAKI.IQ' : 'طرق الدفع المعتمدة في KAZAKI.IQ'}
+                طرق الدفع المعتمدة في KAZAKI.IQ
               </span>
               <h3 className="text-lg font-bold text-stone-900">
-                {isEn ? 'Safe & reliable shopping with trusted Iraq payment methods' : isKu ? 'کڕینی پارێزراو و باوەڕپێکراو لە عێراق' : 'تسوق آمن وموثوق مع خيارات دفع متعددة في العراق'}
+                تسوق آمن وموثوق مع خيارات دفع متعددة في العراق
               </h3>
               <p className="text-xs text-stone-500">
-                {isEn ? 'Payment is exclusively Cash on Delivery and Al-Rafidain Mastercard.' : isKu ? 'پارەدان سنووردارە بە کاش لە کاتی وەرگرتن و ماستەرکاردی ڕافیدەین بۆ دڵنیابوون لە بەرزترین ئاستی پاراستن.' : 'الدفع محصور حصرياً بالدفع عند الاستلام وبطاقات ماستركارد مصرف الرافدين لضمان أعلى مستويات الأمان.'}
+                الدفع محصور حصرياً بالدفع عند الاستلام وبطاقات ماستركارد مصرف الرافدين لضمان أعلى مستويات الأمان.
               </p>
             </div>
 
@@ -773,10 +710,10 @@ export const ContactView: React.FC = () => {
                 <div>
                   <span className="text-xs font-bold flex items-center gap-1.5">
                     <Banknote className="w-4 h-4 text-emerald-600" />
-                    <span>{isEn ? 'Cash on Delivery (COD)' : isKu ? 'پارەدان لە کاتی وەرگرتندا' : 'الدفع عند الاستلام (COD)'}</span>
+                    <span>الدفع عند الاستلام (COD)</span>
                   </span>
                   <span className="text-[10px] text-emerald-700">
-                    {isEn ? 'All Iraq Governorates' : isKu ? 'بۆ هەموو پارێزگاکانی عێراق' : 'لكافة محافظات العراق'}
+                    لكافة محافظات العراق
                   </span>
                 </div>
               </div>
@@ -786,10 +723,10 @@ export const ContactView: React.FC = () => {
                 <div>
                   <span className="text-xs font-bold flex items-center gap-1.5">
                     <CreditCard className="w-4 h-4 text-amber-600" />
-                    <span>{isEn ? 'Mastercard – Al-Rafidain Bank' : isKu ? 'ماستەرکارد – بانکی ڕافیدەین' : 'Mastercard – مصرف الرافدين'}</span>
+                    <span>Mastercard – مصرف الرافدين</span>
                   </span>
                   <span className="text-[10px] text-amber-700">
-                    {isEn ? 'Instant & secure electronic payment' : isKu ? 'پارەدانی ئەلیکترۆنی خێرا و پارێزراو' : 'دفع إلكتروني فوري وآمن'}
+                    دفع إلكتروني فوري وآمن
                   </span>
                 </div>
               </div>
@@ -802,12 +739,10 @@ export const ContactView: React.FC = () => {
           <div className="max-w-2xl mx-auto space-y-6">
             <div className="text-center space-y-2">
               <h2 className="text-xl sm:text-2xl font-black text-stone-900">
-                {isEn ? 'Send us a message or inquiry' : isKu ? 'پەیام یان پرسیارێک بۆ تیمەکەمان بنێرە' : 'أرسلي رسالة أو استفسار لفريقنا'}
+                أرسلي رسالة أو استفسار لفريقنا
               </h2>
               <p className="text-xs text-stone-500 leading-relaxed">
-                {settings.contactInfo?.customerServiceNote
-                  ? (isEn ? t(settings.contactInfo.customerServiceNote) : isKu ? t(settings.contactInfo.customerServiceNote) : settings.contactInfo.customerServiceNote)
-                  : (isEn ? 'Our support team is ready to answer your inquiries with prompt attention.' : isKu ? 'تیمی خزمەتگوزاری ئامادەیە بە باشترین شێوە وەڵامی پرسیارەکانتان بداتەوە.' : 'فريق الدعم الفني متواجد للإجابة على استفساراتكم ومتابعة طلباتكم بكل اهتمام.')}
+                {settings.contactInfo?.customerServiceNote || 'فريق الدعم الفني متواجد للإجابة على استفساراتكم ومتابعة طلباتكم بكل اهتمام.'}
               </p>
             </div>
 
@@ -822,7 +757,7 @@ export const ContactView: React.FC = () => {
               <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-3 animate-in fade-in">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
                 <span>
-                  {isEn ? 'Your message has been sent successfully! Our team will respond shortly.' : isKu ? 'پەیامەکەت بە سەرکەوتوویی نێردرا! تیمەکەمان بەمزووانە وەڵامت دەداتەوە.' : 'تم إرسال رسالتكِ بنجاح! سيقوم فريق خدمة عملاء KAZAKI.IQ بالرد عليكِ في أقرب وقت.'}
+                  تم إرسال رسالتكِ بنجاح! سيقوم فريق خدمة عملاء KAZAKI.IQ بالرد عليكِ في أقرب وقت.
                 </span>
               </div>
             )}
@@ -831,21 +766,21 @@ export const ContactView: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    {isEn ? 'Full Name' : isKu ? 'ناوی تەواو' : 'الاسم الكريم'} <span className="text-rose-600">*</span>
+                    الاسم الكريم <span className="text-rose-600">*</span>
                   </label>
                   <input
                     type="text"
                     required
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder={isEn ? 'Sarah Smith' : isKu ? 'سارا ئەحمەد' : 'سارة علي'}
+                    placeholder="سارة علي"
                     className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    {isEn ? 'Phone / WhatsApp' : isKu ? 'ژمارەی مۆبایل / واتسئاپ' : 'رقم الهاتف / واتساب'}
+                    رقم الهاتف / واتساب
                   </label>
                   <input
                     type="tel"
@@ -853,7 +788,7 @@ export const ContactView: React.FC = () => {
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     placeholder="+964 770 123 4567"
-                    className={`w-full text-xs ${isEn ? 'text-left' : 'text-right'} border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400`}
+                    className="w-full text-xs text-right border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
                   />
                 </div>
               </div>
@@ -861,7 +796,7 @@ export const ContactView: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    {isEn ? 'Email Address' : isKu ? 'ئیمەیڵ' : 'البريد الإلكتروني'} <span className="text-rose-600">*</span>
+                    البريد الإلكتروني <span className="text-rose-600">*</span>
                   </label>
                   <input
                     type="email"
@@ -875,13 +810,13 @@ export const ContactView: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    {isEn ? 'Subject' : isKu ? 'بابەت' : 'موضوع الرسالة'}
+                    موضوع الرسالة
                   </label>
                   <input
                     type="text"
                     value={form.subject}
                     onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                    placeholder={isEn ? 'Inquiry about product or delivery' : isKu ? 'پرسیار دەربارەی بەرهەم یان گەیاندن' : 'استفسار عن توفر منتج أو موعد الشحن'}
+                    placeholder="استفسار عن توفر منتج أو موعد الشحن"
                     className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
                   />
                 </div>
@@ -889,29 +824,29 @@ export const ContactView: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  {isEn ? 'Your Message or Inquiry' : isKu ? 'دەقی پەیام یان پرسیار' : 'نص الرسالة أو الاستفسار'} <span className="text-rose-600">*</span>
+                  نص الرسالة أو الاستفسار <span className="text-rose-600">*</span>
                 </label>
                 <textarea
                   rows={4}
                   required
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  placeholder={isEn ? 'Write your message details here, we are happy to assist...' : isKu ? 'وردەکارییەکانی پرسیارەکەت لێرە بنووسە...' : 'اكتبي تفاصيل استفساركِ هنا، ويسعدنا تقديم المساعدة فوراً...'}
+                  placeholder="اكتبي تفاصيل استفساركِ هنا، ويسعدنا تقديم المساعدة فوراً..."
                   className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
                 />
               </div>
 
-              <div className={`pt-2 flex ${isEn ? 'justify-start' : 'justify-end'}`}>
+              <div className="pt-2 flex justify-end">
                 <button
                   type="submit"
                   disabled={isSending}
                   className="px-8 py-3 rounded-full bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white font-bold text-xs shadow-md shadow-rose-300 hover:shadow-lg transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50"
                 >
-                  <Send className={`w-4 h-4 ${isSending ? 'animate-pulse' : ''} ${isEn ? '' : 'rotate-180'}`} />
+                  <Send className={`w-4 h-4 ${isSending ? 'animate-pulse' : ''} rotate-180`} />
                   <span>
                     {isSending
-                      ? (isEn ? 'Sending securely...' : isKu ? 'دەنێردرێت...' : 'جاري الإرسال بأمان...')
-                      : getBtnText('sendMessage', isEn ? 'Send Message to Support' : isKu ? 'ناردنی پەیام بۆ خزمەتگوزاری' : 'إرسال الرسالة إلى خدمة العملاء')}
+                      ? 'جاري الإرسال بأمان...'
+                      : getBtnText('sendMessage', 'إرسال الرسالة إلى خدمة العملاء')}
                   </span>
                 </button>
               </div>

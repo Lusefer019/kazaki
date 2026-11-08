@@ -12,7 +12,6 @@ import {
   Minus,
   Zap,
   Video,
-  Film,
   DollarSign,
   Edit2,
   Trash2,
@@ -29,13 +28,11 @@ export const ProductDetailsModal: React.FC = () => {
     setIsCartOpen,
     getBtnText,
     getText,
-    currentLanguage,
     currentUser,
     setActiveView,
     updateProduct,
     deleteProduct,
     currencyLabel,
-    t,
     getCategoryName,
   } = useStore();
   const [quantity, setQuantity] = useState(1);
@@ -49,9 +46,6 @@ export const ProductDetailsModal: React.FC = () => {
   }, [selectedProduct?.id]);
 
   if (!selectedProduct) return null;
-
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
 
   const category = categories.find((c) => c.id === selectedProduct.categoryId);
   const gallery = Array.from(
@@ -85,25 +79,14 @@ export const ProductDetailsModal: React.FC = () => {
         )
       : null;
 
-  const effectiveTitle = isEn
-    ? selectedProduct.titleEn || selectedProduct.title
-    : isKu
-    ? selectedProduct.titleKu || selectedProduct.title
-    : selectedProduct.title;
-
-  const effectiveDescription = isEn
-    ? selectedProduct.descriptionEn || selectedProduct.description
-    : isKu
-    ? selectedProduct.descriptionKu || selectedProduct.description
-    : selectedProduct.description;
+  const effectiveTitle = selectedProduct.title;
+  const effectiveDescription = selectedProduct.description;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex min-h-full items-center justify-center p-2.5 sm:p-4 md:p-6">
       <div
-        className={`my-auto relative bg-white rounded-2xl sm:rounded-3xl max-w-lg md:max-w-3xl w-full overflow-hidden shadow-2xl border border-rose-100 animate-in fade-in zoom-in-95 duration-200 ${
-          isEn ? 'text-left' : 'text-right'
-        }`}
-        dir={isEn ? 'ltr' : 'rtl'}
+        className="my-auto relative bg-white rounded-2xl sm:rounded-3xl max-w-lg md:max-w-3xl w-full overflow-hidden shadow-2xl border border-rose-100 animate-in fade-in zoom-in-95 duration-200 text-right"
+        dir="rtl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Manager Controls Bar (Visible ONLY to Admin) */}
@@ -178,8 +161,8 @@ export const ProductDetailsModal: React.FC = () => {
         {/* Close Button */}
         <button
           onClick={() => setSelectedProduct(null)}
-          className={`absolute ${currentUser?.role === 'admin' ? 'top-14' : 'top-4'} ${isEn ? 'right-4' : 'left-4'} z-20 p-2 rounded-full bg-stone-100 hover:bg-rose-100 text-stone-600 hover:text-rose-700 transition-colors cursor-pointer`}
-          aria-label={isEn ? 'Close' : 'إغلاق النافذة'}
+          className={`absolute ${currentUser?.role === 'admin' ? 'top-14' : 'top-4'} left-4 z-20 p-2 rounded-full bg-stone-100 hover:bg-rose-100 text-stone-600 hover:text-rose-700 transition-colors cursor-pointer`}
+          aria-label="إغلاق النافذة"
         >
           <X className="w-5 h-5" />
         </button>
@@ -200,7 +183,7 @@ export const ProductDetailsModal: React.FC = () => {
                   }`}
                 >
                   <Camera className="w-3.5 h-3.5" />
-                  <span>{isEn ? 'Photos' : 'الصور'}</span>
+                  <span>الصور</span>
                 </button>
                 <button
                   type="button"
@@ -212,7 +195,7 @@ export const ProductDetailsModal: React.FC = () => {
                   }`}
                 >
                   <Video className="w-3.5 h-3.5 text-amber-300" />
-                  <span>{isEn ? 'Video' : 'فيديو المنتج'}</span>
+                  <span>فيديو المنتج</span>
                 </button>
               </div>
             )}
@@ -235,7 +218,7 @@ export const ProductDetailsModal: React.FC = () => {
                   />
                   {discountPercent && (
                     <span className="absolute top-3 right-3 bg-rose-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg">
-                      {isEn ? `${discountPercent}% OFF` : isKu ? `${discountPercent}% داشکاندن` : `خصم ${discountPercent}%`}
+                      خصم {discountPercent}%
                     </span>
                   )}
                 </>
@@ -261,7 +244,7 @@ export const ProductDetailsModal: React.FC = () => {
           </div>
 
           {/* Details Content */}
-          <div className={`p-6 md:p-8 flex flex-col justify-between ${isEn ? 'text-left' : 'text-right'}`}>
+          <div className="p-6 md:p-8 flex flex-col justify-between text-right">
             <div>
               {/* Category & Tags */}
               <div className="flex items-center gap-2 text-xs text-stone-500 mb-2">
@@ -278,7 +261,7 @@ export const ProductDetailsModal: React.FC = () => {
                   <>
                     <span aria-hidden="true">·</span>
                     <span className="text-red-500 font-medium">
-                      {isEn ? 'Out of Stock' : isKu ? 'لە ئێستادا نەماوە' : 'غير متوفر حالياً'}
+                      غير متوفر حالياً
                     </span>
                   </>
                 )}
@@ -302,7 +285,7 @@ export const ProductDetailsModal: React.FC = () => {
                 </div>
                 <span className="font-bold text-stone-800">{selectedProduct.rating}</span>
                 <span className="text-stone-400">
-                  ({selectedProduct.reviewsCount} {isEn ? 'verified reviews' : isKu ? 'هەڵسەنگاندن' : 'تقييم حقيقي'})
+                  ({selectedProduct.reviewsCount} تقييم حقيقي)
                 </span>
               </div>
 
@@ -342,7 +325,7 @@ export const ProductDetailsModal: React.FC = () => {
             <div className="pt-4 border-t border-rose-100">
               <div className="flex items-center gap-4 mb-4">
                 <span className="text-xs font-bold text-stone-700">
-                  {isEn ? 'Quantity:' : isKu ? 'بڕ / ژمارە:' : 'الكمية:'}
+                  الكمية:
                 </span>
                 <div className="flex items-center border border-rose-200 rounded-full bg-rose-50/50 p-1">
                   <button
@@ -379,13 +362,13 @@ export const ProductDetailsModal: React.FC = () => {
                   {addedSuccess ? (
                     <>
                       <Check className="w-4 h-4" />
-                      <span>{isEn ? 'Added to cart successfully!' : isKu ? 'بە سەرکەوتوویی خرایە سەبەتەوە!' : 'تمت الإضافة بنجاح إلى السلة!'}</span>
+                      <span>تمت الإضافة بنجاح إلى السلة!</span>
                     </>
                   ) : (
                     <>
                       <ShoppingBag className="w-4 h-4" />
                       <span>
-                        {getBtnText('addToCart', isEn ? 'Add to Cart' : isKu ? 'زیادکردن بۆ سەبەتە' : 'أضف إلى السلة')} ({selectedProduct.price * quantity} {currencyLabel})
+                        {getBtnText('addToCart', 'أضف إلى السلة')} ({selectedProduct.price * quantity} {currencyLabel})
                       </span>
                     </>
                   )}
@@ -399,7 +382,7 @@ export const ProductDetailsModal: React.FC = () => {
                     className="w-full py-3 rounded-full font-bold text-xs bg-stone-900 hover:bg-stone-800 text-white transition-all duration-200 flex items-center justify-center gap-2 shadow-xs cursor-pointer border border-stone-800 disabled:opacity-50"
                   >
                     <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
-                    <span>{getBtnText('buyNow', isEn ? 'Buy Now' : isKu ? 'ئێستا بکڕە' : 'شراء الآن')}</span>
+                    <span>{getBtnText('buyNow', 'شراء الآن')}</span>
                   </button>
                 )}
               </div>
@@ -408,15 +391,15 @@ export const ProductDetailsModal: React.FC = () => {
               <div className="grid grid-cols-3 gap-2 mt-4 text-[10px] text-stone-500 text-center">
                 <div className="flex items-center justify-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-rose-500" />
-                  <span>{getText('guaranteeOriginal', isEn ? '100% Authentic' : isKu ? 'بەرهەمی ١٠٠٪ ئەسڵی' : 'منتج أصلي 100%')}</span>
+                  <span>{getText('guaranteeOriginal', 'منتج أصلي 100%')}</span>
                 </div>
                 <div className="flex items-center justify-center gap-1">
                   <Truck className="w-3.5 h-3.5 text-rose-500" />
-                  <span>{getText('guaranteeFastShipping', isEn ? 'All Iraq Shipping' : isKu ? 'گەیاندن بۆ هەموو عێراق' : 'شحن لجميع العراق')}</span>
+                  <span>{getText('guaranteeFastShipping', 'شحن لجميع العراق')}</span>
                 </div>
                 <div className="flex items-center justify-center gap-1">
                   <RotateCcw className="w-3.5 h-3.5 text-rose-500" />
-                  <span>{getText('guaranteeEasyReturn', isEn ? 'Easy Returns' : isKu ? 'گەڕاندنەوەی ئاسان' : 'إرجاع سهل')}</span>
+                  <span>{getText('guaranteeEasyReturn', 'إرجاع سهل')}</span>
                 </div>
               </div>
             </div>

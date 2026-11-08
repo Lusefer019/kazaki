@@ -1,19 +1,14 @@
 import React from 'react';
 import { useStore } from '../../context/StoreContext';
-import { Heart, Phone, Mail, Instagram, ShieldCheck, Award, Globe, MessageSquare, Video } from 'lucide-react';
+import { Heart, Phone, Mail, Instagram, ShieldCheck, Award, MessageSquare, Video } from 'lucide-react';
 
 export const Footer: React.FC = () => {
-  const { settings, setActiveView, getBtnText, setIsLanguageModalOpen, currentLanguage, t } = useStore();
-
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
+  const { settings, setActiveView, getBtnText } = useStore();
 
   return (
     <footer
-      className={`bg-white/70 backdrop-blur-md text-stone-700 pt-16 pb-12 border-t border-rose-200/60 shadow-2xs ${
-        isEn ? 'text-left font-sans' : isKu ? 'text-right font-kurdish' : 'text-right font-cairo'
-      }`}
-      dir={isEn ? 'ltr' : 'rtl'}
+      className="bg-white/70 backdrop-blur-md text-stone-700 pt-16 pb-12 border-t border-rose-200/60 shadow-2xs text-right font-cairo"
+      dir="rtl"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10 pb-12 border-b border-rose-100/80">
@@ -34,21 +29,17 @@ export const Footer: React.FC = () => {
             </div>
 
             <p className="text-xs text-stone-600 leading-relaxed max-w-sm">
-              {isEn
-                ? 'Your premier destination for luxury everlasting Lego floral arrangements, crafted to endure forever with premium packaging on every order.'
-                : isKu
-                ? 'پێشەنگی گوڵی هەمیشەیی لیگۆی شاهانە، دروستکراو بۆ مانەوە بۆ هەمیشە بە باشترین کوالێتی و پاکێجینگی فەرمی.'
-                : `${settings.tagline} - وجهتكم الأولى لأرقى تشكيلات ورد الليكو الفاخرة، صُممت لتبقى معكم للأبد مع ضمان الجودة والتغليف الفاخر لجميع الطلبات.`}
+              {settings.tagline} - وجهتكم الأولى لأرقى تشكيلات ورد الليكو الفاخرة، صُممت لتبقى معكم للأبد مع ضمان الجودة والتغليف الفاخر لجميع الطلبات.
             </p>
 
             <div className="flex flex-wrap items-center gap-4 text-xs text-stone-700 pt-2">
               <div className="flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-rose-600" />
-                <span>{isEn ? '100% Authentic Products' : isKu ? '١٠٠٪ بەرهەمی ئەسڵی' : 'منتجات أصلية 100%'}</span>
+                <span>منتجات أصلية 100%</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Award className="w-4 h-4 text-rose-600" />
-                <span>{isEn ? 'Golden Quality Guarantee' : isKu ? 'کوالێتی زێڕینی مسۆگەرکراو' : 'ضمان الجودة الذهبي'}</span>
+                <span>ضمان الجودة الذهبي</span>
               </div>
             </div>
           </div>
@@ -62,20 +53,16 @@ export const Footer: React.FC = () => {
               }}
               className="text-xs font-bold text-stone-900 uppercase tracking-wider hover:text-rose-600 cursor-pointer transition-colors flex items-center justify-between"
             >
-              <span>{getBtnText('customerService', isEn ? 'Customer Service' : isKu ? 'خزمەتگوزاری کڕیاران' : 'خدمة العملاء')}</span>
+              <span>{getBtnText('customerService', 'خدمة العملاء')}</span>
             </h4>
 
             {settings.contactInfo?.enabled === false ? (
               <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-[11px] space-y-1">
                 <span className="text-amber-800 font-bold block">
-                  {isEn ? 'Customer support currently paused' : isKu ? 'خزمەتگوزاری کڕیاران ڕاگیراوە' : 'خدمة العملاء مغلقة حالياً'}
+                  خدمة العملاء مغلقة حالياً
                 </span>
                 <span className="text-stone-600 leading-relaxed block">
-                  {isEn
-                    ? 'Support channels are undergoing scheduled maintenance. Store orders and checkout remain fully active.'
-                    : isKu
-                    ? 'کەناڵەکانی پەیوەندی بۆ چاکسازی ڕاگیراون، بەڵام پرۆسەی داواکردن و کڕین بەردەوامە.'
-                    : 'قنوات الدعم متوقفة مؤقتاً للصيانة، جميع عمليات الطلب والشراء تعمل تلقائياً.'}
+                  قنوات الدعم متوقفة مؤقتاً للصيانة، جميع عمليات الطلب والشراء تعمل تلقائياً.
                 </span>
               </div>
             ) : (
@@ -95,8 +82,7 @@ export const Footer: React.FC = () => {
                   >
                     <MessageSquare className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>
-                      {isEn ? 'WhatsApp: ' : isKu ? 'واتسئاپ: ' : 'واتساب: '}
-                      <span dir="ltr">{settings.whatsapp}</span>
+                      واتساب: <span dir="ltr">{settings.whatsapp}</span>
                     </span>
                   </a>
                 )}
@@ -113,7 +99,7 @@ export const Footer: React.FC = () => {
                   }}
                   className="mt-1 text-xs text-rose-600 hover:text-rose-700 underline font-semibold cursor-pointer block"
                 >
-                  {getBtnText('sendMessage', isEn ? 'Send Direct Message' : isKu ? 'ناردنی پەیامی ڕاستەوخۆ' : 'إرسال رسالة أو استفسار مباشر')} {isEn ? '→' : '←'}
+                  {getBtnText('sendMessage', 'إرسال رسالة أو استفسار مباشر')} ←
                 </button>
               </div>
             )}
@@ -122,7 +108,7 @@ export const Footer: React.FC = () => {
           {/* Social Media Links */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
-              {isEn ? 'Follow Us on Social Media' : isKu ? 'لە سۆشیاڵ میدیا فۆڵۆمان بکەن' : 'تابعينا على السوشيال ميديا'}
+              تابعينا على السوشيال ميديا
             </h4>
             <div className="space-y-2.5 text-xs">
               <a
@@ -161,27 +147,12 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom bar */}
-        <div className={`pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500 text-center ${isEn ? 'sm:text-left' : 'sm:text-right'}`}>
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500 text-center sm:text-right">
           <p>
-            {isEn
-              ? `© ${new Date().getFullYear()} ${settings.storeName}. All rights reserved for ${settings.storeName}.`
-              : isKu
-              ? `© ${new Date().getFullYear()} ${settings.storeName}. هەموو مافەکان پارێزراون بۆ فرۆشگای ${settings.storeName}.`
-              : `© ${new Date().getFullYear()} ${settings.storeName}. جميع الحقوق محفوظة لمتجر ${settings.storeName}.`}
+            © {new Date().getFullYear()} {settings.storeName}. جميع الحقوق محفوظة لمتجر {settings.storeName}.
           </p>
-          <button
-            onClick={() => setIsLanguageModalOpen(true)}
-            className="bg-white/90 hover:bg-white text-stone-700 hover:text-rose-700 px-3.5 py-1.5 rounded-full text-xs font-bold border border-rose-200/80 shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
-            title={isEn ? 'Change Store Language' : isKu ? 'گۆڕینی زمانی فرۆشگا' : 'تغيير لغة المتجر'}
-          >
-            <Globe className="w-3.5 h-3.5 text-rose-600" />
-            <span>
-              {currentLanguage === 'ar' ? 'العربية' : currentLanguage === 'en' ? 'English' : 'کوردی'}
-            </span>
-          </button>
         </div>
       </div>
     </footer>
   );
 };
-

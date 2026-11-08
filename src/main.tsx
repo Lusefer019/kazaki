@@ -38,7 +38,6 @@ class RootErrorBoundary extends Component<RootErrorBoundaryProps, RootErrorBound
       sessionStorage.clear();
       // Keep user login if possible, clear transient caches
       localStorage.removeItem('kazaki_notifications_v1');
-      localStorage.removeItem('kazaki_cookie_consent_v1');
     } catch {}
     window.location.reload();
   };

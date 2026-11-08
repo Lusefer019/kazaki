@@ -4,9 +4,7 @@ import {
   Heart,
   Award,
   ArrowLeft,
-  ArrowRight,
   Edit2,
-  ShieldCheck,
   Gift,
   Truck,
   Camera,
@@ -22,19 +20,15 @@ export const AboutHomeSection: React.FC = () => {
     setActiveView,
     setSelectedCategory,
     currentUser,
-    currentLanguage,
     getBtnText,
   } = useStore();
 
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
-
   const about = settings.aboutUs || defaultAboutUs;
 
-  const badgeText = isEn ? (about.badgeEn || about.badge) : isKu ? (about.badgeKu || about.badge) : about.badge;
-  const titleText = isEn ? (about.titleEn || about.title) : isKu ? (about.titleKu || about.title) : about.title;
-  const subtitleText = isEn ? (about.subtitleEn || about.subtitle) : isKu ? (about.subtitleKu || about.subtitle) : about.subtitle;
-  const storyText = isEn ? (about.storyEn || about.story) : isKu ? (about.storyKu || about.story) : about.story;
+  const badgeText = about.badge;
+  const titleText = about.title;
+  const subtitleText = about.subtitle;
+  const storyText = about.story;
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -73,10 +67,8 @@ export const AboutHomeSection: React.FC = () => {
       )}
 
       <div
-        className={`bg-white/90 backdrop-blur-sm rounded-3xl border border-rose-100 p-8 sm:p-12 shadow-sm relative overflow-hidden ${
-          isEn ? 'text-left' : 'text-right'
-        }`}
-        dir={isEn ? 'ltr' : 'rtl'}
+        className="bg-white/90 backdrop-blur-sm rounded-3xl border border-rose-100 p-8 sm:p-12 shadow-sm relative overflow-hidden text-right"
+        dir="rtl"
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           {/* Text Content */}
@@ -84,7 +76,7 @@ export const AboutHomeSection: React.FC = () => {
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-bold border border-rose-100">
                 <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
-                <span>{badgeText || (isEn ? 'About KAZAKI.IQ' : isKu ? 'دەربارەی ئێمە' : 'من نحن وقصتنا')}</span>
+                <span>{badgeText || 'من نحن وقصتنا'}</span>
               </span>
 
               {currentUser?.role === 'admin' && (
@@ -131,21 +123,21 @@ export const AboutHomeSection: React.FC = () => {
               <div className="p-3 rounded-2xl bg-rose-50/50 border border-rose-100 flex items-center gap-2.5">
                 <Heart className="w-5 h-5 text-rose-500 shrink-0" />
                 <span className="text-[11px] font-bold text-stone-800">
-                  {isEn ? 'Never Wilts' : isKu ? 'هەرگیز سیس نابێت' : 'لا يذبل للأبد'}
+                  لا يذبل للأبد
                 </span>
               </div>
 
               <div className="p-3 rounded-2xl bg-pink-50/50 border border-pink-100 flex items-center gap-2.5">
                 <Gift className="w-5 h-5 text-pink-500 shrink-0" />
                 <span className="text-[11px] font-bold text-stone-800">
-                  {isEn ? 'Luxury Box' : isKu ? 'تەغلیفی شایستە' : 'تغليف فاخر ومميز'}
+                  تغليف فاخر ومميز
                 </span>
               </div>
 
               <div className="p-3 rounded-2xl bg-amber-50/50 border border-amber-100 flex items-center gap-2.5 col-span-2 sm:col-span-1">
                 <Truck className="w-5 h-5 text-amber-600 shrink-0" />
                 <span className="text-[11px] font-bold text-stone-800">
-                  {isEn ? 'Fast Iraq Delivery' : isKu ? 'گەیاندنی خێرا' : 'شحن لكل العراق'}
+                  شحن لكل العراق
                 </span>
               </div>
             </div>
@@ -161,8 +153,8 @@ export const AboutHomeSection: React.FC = () => {
                 }}
                 className="px-6 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition-colors cursor-pointer flex items-center gap-1.5"
               >
-                <span>{getBtnText('shop', isEn ? 'View Products' : isKu ? 'بینینی بەرهەمەکان' : 'تصفح ورود ليغو')}</span>
-                {isEn ? <ArrowRight className="w-3.5 h-3.5" /> : <ArrowLeft className="w-3.5 h-3.5" />}
+                <span>{getBtnText('shop', 'تصفح ورود ليغو')}</span>
+                <ArrowLeft className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -195,18 +187,14 @@ export const AboutHomeSection: React.FC = () => {
             </div>
 
             {/* Floating Quality Badge */}
-            <div
-              className={`absolute bottom-2 sm:-bottom-4 ${
-                isEn ? 'left-2 sm:-left-4' : 'right-2 sm:-right-4'
-              } bg-stone-900/95 sm:bg-stone-900 text-white p-3 sm:p-4 rounded-2xl shadow-xl flex items-center gap-2.5 sm:gap-3 border border-stone-700 max-w-[calc(100%-1rem)] sm:max-w-xs backdrop-blur-xs`}
-            >
+            <div className="absolute bottom-2 sm:-bottom-4 right-2 sm:-right-4 bg-stone-900/95 sm:bg-stone-900 text-white p-3 sm:p-4 rounded-2xl shadow-xl flex items-center gap-2.5 sm:gap-3 border border-stone-700 max-w-[calc(100%-1rem)] sm:max-w-xs backdrop-blur-xs">
               <Award className="w-7 h-7 text-amber-400 shrink-0" />
               <div>
                 <span className="block font-black text-xs text-white">
-                  {isEn ? 'Original Lego Flowers' : isKu ? 'گوڵی لێکۆی ئەسڵی و مسۆگەرکراو' : 'ورد ليكو أصلي ومضمون'}
+                  ورد ليكو أصلي ومضمون
                 </span>
                 <span className="text-[10px] text-stone-300">
-                  {isEn ? 'Crafted to stay forever' : isKu ? 'بە وردی دروستکراوە تا هەتاهەتایە بمێنێتەوە' : 'صُممت بعناية لتبقى معك للأبد دون أن تذبل'}
+                  صُممت بعناية لتبقى معك للأبد دون أن تذبل
                 </span>
               </div>
             </div>

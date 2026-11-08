@@ -16,28 +16,27 @@ import {
   ShieldCheck,
   ShoppingBag,
   UserPlus,
-  Package,
 } from 'lucide-react';
 
-const IRAQI_CITIES_DATA = [
-  { ar: 'بغداد', en: 'Baghdad', ku: 'بەغدا' },
-  { ar: 'أربيل', en: 'Erbil', ku: 'هەولێر' },
-  { ar: 'البصرة', en: 'Basra', ku: 'بەسرە' },
-  { ar: 'النجف الأشرف', en: 'Najaf', ku: 'نەجەف' },
-  { ar: 'كربلاء المقدسة', en: 'Karbala', ku: 'کەربەلا' },
-  { ar: 'السليمانية', en: 'Sulaymaniyah', ku: 'سلێمانی' },
-  { ar: 'دهوك', en: 'Duhok', ku: 'دهۆک' },
-  { ar: 'كركوك', en: 'Kirkuk', ku: 'کەرکووک' },
-  { ar: 'بابل / الحلة', en: 'Babylon / Hilla', ku: 'بابل / حللە' },
-  { ar: 'ديالى', en: 'Diyala', ku: 'دیالە' },
-  { ar: 'الأنبار', en: 'Anbar', ku: 'ئەنبار' },
-  { ar: 'صلاح الدين', en: 'Saladin', ku: 'سەڵاحەدین' },
-  { ar: 'واسط / الكوت', en: 'Wasit / Kut', ku: 'واسیت / کووت' },
-  { ar: 'المثنى / السماوة', en: 'Muthanna / Samawah', ku: 'موسەننا / سەماوە' },
-  { ar: 'ميسان / العمارة', en: 'Maysan / Amarah', ku: 'مەیسان / عەمارە' },
-  { ar: 'ذي قار / الناصرية', en: 'Dhi Qar / Nasiriyah', ku: 'زی قار / ناسریە' },
-  { ar: 'نينوى / الموصل', en: 'Nineveh / Mosul', ku: 'نەینەوا / مووسڵ' },
-  { ar: 'الديوانية / القادسية', en: 'Diwaniyah / Qadisiyyah', ku: 'دیوانیە / قادسیە' },
+const IRAQI_CITIES = [
+  'بغداد',
+  'أربيل',
+  'البصرة',
+  'النجف الأشرف',
+  'كربلاء المقدسة',
+  'السليمانية',
+  'دهوك',
+  'كركوك',
+  'بابل / الحلة',
+  'ديالى',
+  'الأنبار',
+  'صلاح الدين',
+  'واسط / الكوت',
+  'المثنى / السماوة',
+  'ميسان / العمارة',
+  'ذي قار / الناصرية',
+  'نينوى / الموصل',
+  'الديوانية / القادسية',
 ];
 
 export const LoginView: React.FC = () => {
@@ -50,12 +49,7 @@ export const LoginView: React.FC = () => {
     setActiveView,
     getBtnText,
     orders,
-    currentLanguage,
-    t,
   } = useStore();
-
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [showPassword, setShowPassword] = useState(false);
@@ -92,13 +86,7 @@ export const LoginView: React.FC = () => {
     const password = loginPassword.trim();
 
     if (!email || !password) {
-      setErrorMessage(
-        isEn
-          ? 'Please enter your email or phone number and password'
-          : isKu
-          ? 'تکایە ئیمەیڵ یان ژمارەی مۆبایل و وشەی نهێنی بنووسە'
-          : 'يرجى إدخال البريد الإلكتروني أو رقم الهاتف وكلمة المرور'
-      );
+      setErrorMessage('يرجى إدخال البريد الإلكتروني أو رقم الهاتف وكلمة المرور');
       return;
     }
 
@@ -108,13 +96,7 @@ export const LoginView: React.FC = () => {
       // First attempt admin check
       const adminRes = await loginAdminAsync(email, password);
       if (adminRes.success) {
-        setSuccessMessage(
-          isEn
-            ? 'Signed in successfully as store administrator'
-            : isKu
-            ? 'بە سەرکەوتوویی وەک بەڕێوەبەر چوویتە ژوورەوە'
-            : 'تم تسجيل الدخول بنجاح كمدير للمتجر'
-        );
+        setSuccessMessage('تم تسجيل الدخول بنجاح كمدير للمتجر');
         setTimeout(() => {
           setActiveView('admin');
         }, 700);
@@ -129,24 +111,12 @@ export const LoginView: React.FC = () => {
     setIsLoading(false);
 
     if (success) {
-      setSuccessMessage(
-        isEn
-          ? 'Logged in successfully! Welcome to KAZAKI.IQ'
-          : isKu
-          ? 'بە سەرکەوتوویی چوویتە ژوورەوە! بەخێربێیت بۆ KAZAKI.IQ'
-          : 'تم تسجيل الدخول بنجاح! أهلاً بك في متجر KAZAKI.IQ'
-      );
+      setSuccessMessage('تم تسجيل الدخول بنجاح! أهلاً بك في متجر KAZAKI.IQ');
       setTimeout(() => {
         setActiveView('home');
       }, 700);
     } else {
-      setErrorMessage(
-        isEn
-          ? 'Invalid credentials or password, please check and try again'
-          : isKu
-          ? 'زانیاری چوونەژوورەوە یان وشەی نهێنی هەڵەیە، تکایە دووبارە هەوڵبدەرەوە'
-          : 'بيانات تسجيل الدخول أو رمز المرور غير صحيحة، يرجى التأكد وإعادة المحاولة'
-      );
+      setErrorMessage('بيانات تسجيل الدخول أو رمز المرور غير صحيحة، يرجى التأكد وإعادة المحاولة');
     }
   };
 
@@ -161,24 +131,12 @@ export const LoginView: React.FC = () => {
     const password = regPassword.trim();
 
     if (!name || !email || !password) {
-      setErrorMessage(
-        isEn
-          ? 'Please fill in all required fields (Name, Email, Password)'
-          : isKu
-          ? 'تکایە هەموو خانە پێویستەکان پڕبکەرەوە (ناو، ئیمەیڵ، وشەی نهێنی)'
-          : 'يرجى ملء جميع الحقول المطلوبة (الاسم، البريد الإلكتروني، كلمة المرور)'
-      );
+      setErrorMessage('يرجى ملء جميع الحقول المطلوبة (الاسم، البريد الإلكتروني، كلمة المرور)');
       return;
     }
 
     if (password.length < 6) {
-      setErrorMessage(
-        isEn
-          ? 'Password must be at least 6 characters long'
-          : isKu
-          ? 'وشەی نهێنی دەبێت لانیکەم ٦ پیت یان ژمارە بێت'
-          : 'يجب أن تتكون كلمة المرور من 6 أحرف أو أرقام على الأقل'
-      );
+      setErrorMessage('يجب أن تتكون كلمة المرور من 6 أحرف أو أرقام على الأقل');
       return;
     }
 
@@ -191,34 +149,19 @@ export const LoginView: React.FC = () => {
     });
 
     if (success) {
-      setSuccessMessage(
-        isEn
-          ? 'Account created successfully! Welcome to KAZAKI.IQ'
-          : isKu
-          ? 'هەژمارەکەت بە سەرکەوتوویی دروستکرا! بەخێربێیت بۆ KAZAKI.IQ'
-          : 'تم إنشاء حسابك بنجاح! مرحباً بك في متجر KAZAKI.IQ'
-      );
+      setSuccessMessage('تم إنشاء حسابك بنجاح! مرحباً بك في متجر KAZAKI.IQ');
       setTimeout(() => {
         setActiveView('home');
       }, 800);
     } else {
-      setErrorMessage(
-        isEn
-          ? 'An error occurred while creating your account, please try again'
-          : isKu
-          ? 'هەڵەیەک ڕوویدا لە کاتی دروستکردنی هەژمار، تکایە دووبارە هەوڵبدەرەوە'
-          : 'حدث خطأ أثناء إنشاء الحساب، يرجى المحاولة مرة أخرى'
-      );
+      setErrorMessage('حدث خطأ أثناء إنشاء الحساب، يرجى المحاولة مرة أخرى');
     }
   };
 
-
   return (
     <div
-      className={`min-h-[80vh] bg-gradient-to-b from-rose-50/60 via-white to-pink-50/30 py-10 px-4 sm:px-6 lg:px-8 ${
-        isEn ? 'text-left font-sans' : isKu ? 'text-right font-kurdish' : 'text-right font-cairo'
-      }`}
-      dir={isEn ? 'ltr' : 'rtl'}
+      className="min-h-[80vh] bg-gradient-to-b from-rose-50/60 via-white to-pink-50/30 py-10 px-4 sm:px-6 lg:px-8 text-right font-cairo"
+      dir="rtl"
     >
       <div className="max-w-xl mx-auto">
         {/* Navigation Breadcrumb */}
@@ -228,15 +171,15 @@ export const LoginView: React.FC = () => {
               onClick={() => setActiveView('home')}
               className="hover:text-rose-600 transition-colors cursor-pointer"
             >
-              {isEn ? 'Home' : isKu ? 'سەرەکی' : 'الرئيسية'}
+              الرئيسية
             </button>
-            <ChevronLeft className={`w-3.5 h-3.5 ${isEn ? '' : 'rotate-180'} text-stone-400`} />
+            <ChevronLeft className="w-3.5 h-3.5 rotate-180 text-stone-400" />
             <span className="text-stone-900 font-bold">
               {currentUser
-                ? (isEn ? 'Customer Profile' : isKu ? 'پڕۆفایلی هەژمار' : 'ملف الحساب الشخصي')
+                ? 'ملف الحساب الشخصي'
                 : mode === 'login'
-                ? (isEn ? 'Customer Sign In' : isKu ? 'چوونەژوورەوەی کڕیار' : 'تسجيل دخول الزبون')
-                : (isEn ? 'Create New Account' : isKu ? 'دروستکردنی هەژماری نوێ' : 'إنشاء حساب زبون جديد')}
+                ? 'تسجيل دخول الزبون'
+                : 'إنشاء حساب زبون جديد'}
             </span>
           </div>
 
@@ -244,8 +187,8 @@ export const LoginView: React.FC = () => {
             onClick={() => setActiveView('home')}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3.5 py-1.5 rounded-full transition-colors cursor-pointer shadow-2xs"
           >
-            <span>{isEn ? 'Back to Store' : isKu ? 'گەڕانەوە بۆ فرۆشگا' : 'العودة للمتجر'}</span>
-            <ArrowRight className={`w-3.5 h-3.5 ${isEn ? '' : 'rotate-180'}`} />
+            <span>العودة للمتجر</span>
+            <ArrowRight className="w-3.5 h-3.5 rotate-180" />
           </button>
         </div>
 
@@ -263,11 +206,11 @@ export const LoginView: React.FC = () => {
             <div>
               <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-2 bg-rose-100 text-rose-700">
                 {currentUser.role === 'admin'
-                  ? (isEn ? 'Role: Administrator' : isKu ? 'دەسەڵات: بەڕێوەبەر' : 'صلاحية: المدير العام')
-                  : (isEn ? 'Registered Customer' : isKu ? 'هەژماری کڕیار' : 'حساب زبون مسجل')}
+                  ? 'صلاحية: المدير العام'
+                  : 'حساب زبون مسجل'}
               </span>
               <h2 className="text-2xl font-extrabold text-stone-900">
-                {isEn ? `Welcome back, ${currentUser.name}` : isKu ? `بەخێربێیت، ${currentUser.name}` : `أهلاً بك، ${currentUser.name}`}
+                أهلاً بك، {currentUser.name}
               </h2>
               <p className="text-xs sm:text-sm text-stone-500 mt-1 font-mono">
                 {currentUser.email}
@@ -275,47 +218,45 @@ export const LoginView: React.FC = () => {
             </div>
 
             {/* Customer Details Summary Card */}
-            <div className={`p-4 rounded-2xl bg-rose-50/50 border border-rose-100 space-y-2.5 text-xs ${isEn ? 'text-left' : 'text-right'}`}>
+            <div className="p-4 rounded-2xl bg-rose-50/50 border border-rose-100 space-y-2.5 text-xs text-right">
               <h3 className="font-bold text-stone-800 text-sm border-b border-rose-100 pb-2">
-                {isEn ? 'Your Registered Details:' : isKu ? 'زانیارییە تۆمارکراوەکانی هەژمار:' : 'بيانات حسابك المسجلة:'}
+                بيانات حسابك المسجلة:
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-stone-600">
                 <div>
                   <span className="font-semibold text-stone-900">
-                    {isEn ? 'Full Name: ' : isKu ? 'ناوی تەواو: ' : 'الاسم الكامل: '}
+                    الاسم الكامل: 
                   </span>
-                  <span>{currentUser.name}</span>
+                  <span> {currentUser.name}</span>
                 </div>
                 <div>
                   <span className="font-semibold text-stone-900">
-                    {isEn ? 'Email: ' : isKu ? 'ئیمەیڵ: ' : 'البريد الإلكتروني: '}
+                    البريد الإلكتروني: 
                   </span>
-                  <span className="font-mono text-[11px]">{currentUser.email}</span>
+                  <span className="font-mono text-[11px]"> {currentUser.email}</span>
                 </div>
                 {currentUser.phone && (
                   <div>
                     <span className="font-semibold text-stone-900">
-                      {isEn ? 'Phone: ' : isKu ? 'مۆبایل: ' : 'رقم الهاتف: '}
+                      رقم الهاتف: 
                     </span>
-                    <span dir="ltr">{currentUser.phone}</span>
+                    <span dir="ltr"> {currentUser.phone}</span>
                   </div>
                 )}
                 {currentUser.city && (
                   <div>
                     <span className="font-semibold text-stone-900">
-                      {isEn ? 'Governorate: ' : isKu ? 'پارێزگا: ' : 'المحافظة / المدينة: '}
+                      المحافظة / المدينة: 
                     </span>
-                    <span>
-                      {IRAQI_CITIES_DATA.find((c) => c.ar === currentUser.city)?.[currentLanguage] || currentUser.city}
-                    </span>
+                    <span> {currentUser.city}</span>
                   </div>
                 )}
                 <div>
                   <span className="font-semibold text-stone-900">
-                    {isEn ? 'Total Orders: ' : isKu ? 'ژمارەی داواکارییەکان: ' : 'عدد الطلبات: '}
+                    عدد الطلبات: 
                   </span>
                   <span className="font-bold text-rose-600">
-                    {userOrdersCount} {isEn ? 'orders' : isKu ? 'داواکاری' : 'طلب'}
+                    {userOrdersCount} طلب
                   </span>
                 </div>
               </div>
@@ -328,7 +269,7 @@ export const LoginView: React.FC = () => {
                   className="py-3 px-4 rounded-xl bg-stone-900 hover:bg-stone-800 text-amber-400 shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <ShieldCheck className="w-4 h-4" />
-                  <span>{isEn ? 'Admin Control Panel' : isKu ? 'داشبۆردی بەڕێوەبەر' : 'لوحة تحكم الإدارة'}</span>
+                  <span>لوحة تحكم الإدارة</span>
                 </button>
               )}
 
@@ -337,18 +278,18 @@ export const LoginView: React.FC = () => {
                 className="py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-200 transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 <ShoppingBag className="w-4 h-4" />
-                <span>{isEn ? 'Browse Lego Flowers' : isKu ? 'بینینی گوڵەکانی لیگۆ' : 'تصفح تشكيلة ورد الليكو'}</span>
+                <span>تصفح تشكيلة ورد الليكو</span>
               </button>
 
               <button
                 onClick={() => {
                   logout();
-                  setSuccessMessage(isEn ? 'Signed out successfully' : isKu ? 'بە سەرکەوتوویی چوویتە دەرەوە' : 'تم تسجيل الخروج بنجاح');
+                  setSuccessMessage('تم تسجيل الخروج بنجاح');
                 }}
                 className="col-span-full py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-red-50 text-stone-600 hover:text-red-600 border border-stone-200 transition-colors flex items-center justify-center gap-2 cursor-pointer text-xs"
               >
                 <LogOut className="w-4 h-4" />
-                <span>{isEn ? 'Sign Out from Account' : isKu ? 'چوونە دەرەوە لە هەژمار' : 'تسجيل الخروج من الحساب'}</span>
+                <span>تسجيل الخروج من الحساب</span>
               </button>
             </div>
           </div>
@@ -371,7 +312,7 @@ export const LoginView: React.FC = () => {
                 }`}
               >
                 <LogIn className="w-4 h-4" />
-                <span>{isEn ? 'Sign In' : isKu ? 'چوونەژوورەوە' : 'تسجيل الدخول'}</span>
+                <span>تسجيل الدخول</span>
               </button>
 
               <button
@@ -388,7 +329,7 @@ export const LoginView: React.FC = () => {
                 }`}
               >
                 <UserPlus className="w-4 h-4 text-white" />
-                <span>{isEn ? 'Register' : isKu ? 'دروستکردنی هەژمار' : 'إنشاء حساب'}</span>
+                <span>إنشاء حساب</span>
               </button>
             </div>
 
@@ -412,7 +353,7 @@ export const LoginView: React.FC = () => {
               <form onSubmit={handleLoginSubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1.5">
-                    {isEn ? 'Email or Phone Number' : isKu ? 'ئیمەیڵ یان ژمارەی مۆبایل' : 'البريد الإلكتروني أو رقم الهاتف'}
+                    البريد الإلكتروني أو رقم الهاتف
                   </label>
                   <div className="relative">
                     <input
@@ -420,18 +361,16 @@ export const LoginView: React.FC = () => {
                       required
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      placeholder={isEn ? 'name@example.com or 07701234567' : isKu ? 'name@example.com یان 07701234567' : 'name@example.com أو 07701234567'}
-                      className={`w-full ${
-                        isEn ? 'pl-10 pr-4 text-left' : 'pr-10 pl-4 text-right'
-                      } py-3 text-xs sm:text-sm rounded-xl border border-stone-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all`}
+                      placeholder="name@example.com أو 07701234567"
+                      className="w-full pr-10 pl-4 text-right py-3 text-xs sm:text-sm rounded-xl border border-stone-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all"
                     />
-                    <Mail className={`w-4 h-4 text-stone-400 absolute ${isEn ? 'left-3.5' : 'right-3.5'} top-3.5 pointer-events-none`} />
+                    <Mail className="w-4 h-4 text-stone-400 absolute right-3.5 top-3.5 pointer-events-none" />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1.5">
-                    {isEn ? 'Password' : isKu ? 'وشەی نهێنی' : 'كلمة المرور'}
+                    كلمة المرور
                   </label>
                   <div className="relative">
                     <input
@@ -440,16 +379,14 @@ export const LoginView: React.FC = () => {
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       placeholder="••••••••"
-                      className={`w-full ${
-                        isEn ? 'pl-10 pr-10 text-left' : 'pr-10 pl-10 text-right'
-                      } py-3 text-xs sm:text-sm rounded-xl border border-stone-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all`}
+                      className="w-full pr-10 pl-10 text-right py-3 text-xs sm:text-sm rounded-xl border border-stone-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all"
                     />
-                    <Lock className={`w-4 h-4 text-stone-400 absolute ${isEn ? 'left-3.5' : 'right-3.5'} top-3.5 pointer-events-none`} />
+                    <Lock className="w-4 h-4 text-stone-400 absolute right-3.5 top-3.5 pointer-events-none" />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className={`p-1 text-stone-400 hover:text-stone-600 absolute ${isEn ? 'right-3' : 'left-3'} top-3 cursor-pointer`}
-                      aria-label={isEn ? 'Toggle password visibility' : isKu ? 'بینینی وشەی نهێنی' : 'إظهار كلمة المرور'}
+                      className="p-1 text-stone-400 hover:text-stone-600 absolute left-3 top-3 cursor-pointer"
+                      aria-label="إظهار كلمة المرور"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -464,13 +401,13 @@ export const LoginView: React.FC = () => {
                   <LogIn className="w-4 h-4" />
                   <span>
                     {isLoading
-                      ? (isEn ? 'Signing in...' : isKu ? 'چوونەژوورەوە...' : 'جاري التحقق...')
-                      : getBtnText('login', isEn ? 'Sign In' : isKu ? 'چوونەژوورەوە' : 'تسجيل الدخول')}
+                      ? 'جاري التحقق...'
+                      : getBtnText('login', 'تسجيل الدخول')}
                   </span>
                 </button>
 
                 <div className="text-center pt-4 text-xs text-stone-600">
-                  {isEn ? "Don't have an account yet? " : isKu ? 'هێشتا هەژمارت دروست نەکردووە؟ ' : 'ليس لديك حساب حتى الآن؟ '}
+                  ليس لديك حساب حتى الآن؟{' '}
                   <button
                     type="button"
                     onClick={() => {
@@ -480,7 +417,7 @@ export const LoginView: React.FC = () => {
                     }}
                     className="text-rose-600 font-bold hover:underline cursor-pointer"
                   >
-                    {isEn ? 'Create New Account' : isKu ? 'دروستکردنی هەژماری نوێ' : 'إنشاء حساب جديد'}
+                    إنشاء حساب جديد
                   </button>
                 </div>
               </form>
@@ -491,7 +428,7 @@ export const LoginView: React.FC = () => {
               <form onSubmit={handleRegisterSubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1.5">
-                    {isEn ? 'Full Name' : isKu ? 'ناوی تەواو' : 'الاسم الكامل'} <span className="text-rose-600">*</span>
+                    الاسم الكامل <span className="text-rose-600">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -499,18 +436,16 @@ export const LoginView: React.FC = () => {
                       required
                       value={regName}
                       onChange={(e) => setRegName(e.target.value)}
-                      placeholder={isEn ? 'Enter your full name' : isKu ? 'ناوی تەواوت بنووسە' : 'أدخل اسمك الكريم'}
-                      className={`w-full ${
-                        isEn ? 'pl-10 pr-4 text-left' : 'pr-10 pl-4 text-right'
-                      } py-3 text-xs sm:text-sm rounded-xl border border-stone-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all`}
+                      placeholder="أدخل اسمك الكريم"
+                      className="w-full pr-10 pl-4 text-right py-3 text-xs sm:text-sm rounded-xl border border-stone-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all"
                     />
-                    <User className={`w-4 h-4 text-stone-400 absolute ${isEn ? 'left-3.5' : 'right-3.5'} top-3.5 pointer-events-none`} />
+                    <User className="w-4 h-4 text-stone-400 absolute right-3.5 top-3.5 pointer-events-none" />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1.5">
-                    {isEn ? 'Email Address' : isKu ? 'ئیمەیڵ' : 'البريد الإلكتروني'} <span className="text-rose-600">*</span>
+                    البريد الإلكتروني <span className="text-rose-600">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -519,18 +454,16 @@ export const LoginView: React.FC = () => {
                       value={regEmail}
                       onChange={(e) => setRegEmail(e.target.value)}
                       placeholder="name@example.com"
-                      className={`w-full ${
-                        isEn ? 'pl-10 pr-4 text-left' : 'pr-10 pl-4 text-right'
-                      } py-3 text-xs sm:text-sm rounded-xl border border-stone-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all`}
+                      className="w-full pr-10 pl-4 text-right py-3 text-xs sm:text-sm rounded-xl border border-stone-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all"
                     />
-                    <Mail className={`w-4 h-4 text-stone-400 absolute ${isEn ? 'left-3.5' : 'right-3.5'} top-3.5 pointer-events-none`} />
+                    <Mail className="w-4 h-4 text-stone-400 absolute right-3.5 top-3.5 pointer-events-none" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-stone-700 mb-1.5">
-                      {isEn ? 'Phone Number' : isKu ? 'ژمارەی مۆبایل' : 'رقم الهاتف'} <span className="text-stone-400 font-normal">({isEn ? 'for delivery' : isKu ? 'بۆ گەیاندن' : 'للتوصيل'})</span>
+                      رقم الهاتف <span className="text-stone-400 font-normal">(للتوصيل)</span>
                     </label>
                     <div className="relative">
                       <input
@@ -538,41 +471,37 @@ export const LoginView: React.FC = () => {
                         value={regPhone}
                         onChange={(e) => setRegPhone(e.target.value)}
                         placeholder="07701234567"
-                        className={`w-full ${
-                          isEn ? 'pl-10 pr-4' : 'pr-10 pl-4'
-                        } py-3 text-xs sm:text-sm rounded-xl border border-stone-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all text-left`}
+                        className="w-full pr-10 pl-4 py-3 text-xs sm:text-sm rounded-xl border border-stone-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all text-left"
                         dir="ltr"
                       />
-                      <Phone className={`w-4 h-4 text-stone-400 absolute ${isEn ? 'left-3.5' : 'right-3.5'} top-3.5 pointer-events-none`} />
+                      <Phone className="w-4 h-4 text-stone-400 absolute right-3.5 top-3.5 pointer-events-none" />
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-stone-700 mb-1.5">
-                      {isEn ? 'Governorate / City' : isKu ? 'پارێزگا / شار' : 'المحافظة / المدينة'}
+                      المحافظة / المدينة
                     </label>
                     <div className="relative">
                       <select
                         value={regCity}
                         onChange={(e) => setRegCity(e.target.value)}
-                        className={`w-full ${
-                          isEn ? 'pl-10 pr-4 text-left' : 'pr-10 pl-4 text-right'
-                        } py-3 text-xs sm:text-sm rounded-xl border border-stone-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all cursor-pointer bg-white`}
+                        className="w-full pr-10 pl-4 text-right py-3 text-xs sm:text-sm rounded-xl border border-stone-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all cursor-pointer bg-white"
                       >
-                        {IRAQI_CITIES_DATA.map((city) => (
-                          <option key={city.ar} value={city.ar}>
-                            {isEn ? city.en : isKu ? city.ku : city.ar}
+                        {IRAQI_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
                           </option>
                         ))}
                       </select>
-                      <MapPin className={`w-4 h-4 text-stone-400 absolute ${isEn ? 'left-3.5' : 'right-3.5'} top-3.5 pointer-events-none`} />
+                      <MapPin className="w-4 h-4 text-stone-400 absolute right-3.5 top-3.5 pointer-events-none" />
                     </div>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1.5">
-                    {isEn ? 'Password' : isKu ? 'وشەی نهێنی' : 'كلمة المرور'} <span className="text-rose-600">*</span>
+                    كلمة المرور <span className="text-rose-600">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -580,17 +509,15 @@ export const LoginView: React.FC = () => {
                       required
                       value={regPassword}
                       onChange={(e) => setRegPassword(e.target.value)}
-                      placeholder={isEn ? 'At least 6 characters' : isKu ? 'لانیکەم ٦ پیت یان ژمارە' : 'أدخل كلمة مرور لا تقل عن 6 أحرف'}
-                      className={`w-full ${
-                        isEn ? 'pl-10 pr-10 text-left' : 'pr-10 pl-10 text-right'
-                      } py-3 text-xs sm:text-sm rounded-xl border border-stone-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all`}
+                      placeholder="أدخل كلمة مرور لا تقل عن 6 أحرف"
+                      className="w-full pr-10 pl-10 text-right py-3 text-xs sm:text-sm rounded-xl border border-stone-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all"
                     />
-                    <Lock className={`w-4 h-4 text-stone-400 absolute ${isEn ? 'left-3.5' : 'right-3.5'} top-3.5 pointer-events-none`} />
+                    <Lock className="w-4 h-4 text-stone-400 absolute right-3.5 top-3.5 pointer-events-none" />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className={`p-1 text-stone-400 hover:text-stone-600 absolute ${isEn ? 'right-3' : 'left-3'} top-3 cursor-pointer`}
-                      aria-label={isEn ? 'Toggle password visibility' : isKu ? 'بینینی وشەی نهێنی' : 'إظهار كلمة المرور'}
+                      className="p-1 text-stone-400 hover:text-stone-600 absolute left-3 top-3 cursor-pointer"
+                      aria-label="إظهار كلمة المرور"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -602,11 +529,11 @@ export const LoginView: React.FC = () => {
                   className="w-full mt-4 py-3.5 rounded-xl bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold text-sm shadow-md shadow-rose-300 hover:shadow-lg transition-all duration-300 cursor-pointer flex items-center justify-center gap-2"
                 >
                   <UserPlus className="w-4 h-4 text-white" />
-                  <span>{isEn ? 'Create Customer Account' : isKu ? 'دروستکردنی هەژماری کڕیار' : 'إنشاء حساب زبون جديد'}</span>
+                  <span>إنشاء حساب زبون جديد</span>
                 </button>
 
                 <div className="text-center pt-4 text-xs text-stone-600">
-                  {isEn ? 'Already have an account? ' : isKu ? 'هەژمارت هەیە؟ ' : 'لديك حساب بالفعل؟ '}
+                  لديك حساب بالفعل؟{' '}
                   <button
                     type="button"
                     onClick={() => {
@@ -616,7 +543,7 @@ export const LoginView: React.FC = () => {
                     }}
                     className="text-rose-600 font-bold hover:underline cursor-pointer"
                   >
-                    {isEn ? 'Sign In' : isKu ? 'چوونەژوورەوە' : 'تسجيل الدخول'}
+                    تسجيل الدخول
                   </button>
                 </div>
               </form>
@@ -627,4 +554,3 @@ export const LoginView: React.FC = () => {
     </div>
   );
 };
-

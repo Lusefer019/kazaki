@@ -11,7 +11,6 @@ import {
   CheckoutModal,
   OrdersModal,
   AuthModal,
-  LanguageModal,
   PhoneNotificationsModal,
   CustomerNotificationsModal,
   ManagerLiveAlerts,
@@ -23,7 +22,6 @@ import {
   Footer,
   ScrollLegoFlowerCanvas,
   ErrorBoundary,
-  CookieNotificationBanner,
   IOSInstallBanner,
 } from './components';
 import { ShieldAlert, Heart } from 'lucide-react';
@@ -40,7 +38,6 @@ const StoreContent: React.FC = () => {
     setSelectedCategory,
     getBtnText,
     getText,
-    currentLanguage,
     isPhoneNotifsModalOpen,
     setIsPhoneNotifsModalOpen,
     isCustomerNotifsModalOpen,
@@ -70,15 +67,12 @@ const StoreContent: React.FC = () => {
     }
   }, [activeView, currentUser, setActiveView]);
 
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
-
   const handleOrderSuccess = (order: Order) => {
     // optional notification or redirect
   };
 
   return (
-    <div className={`min-h-screen flex flex-col bg-rose-50/20 text-stone-800 relative ${isKu ? 'font-kurdish' : ''}`}>
+    <div className="min-h-screen flex flex-col bg-rose-50/20 text-stone-800 relative font-cairo" dir="rtl">
       {/* Global Anti-Spam / Rate-Limit Alert Pill */}
       {spamToast && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full bg-stone-900/95 text-white border border-rose-500/50 shadow-2xl backdrop-blur-md text-xs font-bold flex items-center gap-2.5 animate-in fade-in slide-in-from-top-4 duration-200 pointer-events-none">
@@ -123,29 +117,19 @@ const StoreContent: React.FC = () => {
             {/* Pink Boutique Story Banner */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
               <div
-                dir={isEn ? 'ltr' : 'rtl'}
-                className={`rounded-3xl bg-gradient-to-r from-rose-600/90 via-pink-600/90 to-rose-500/90 backdrop-blur-md p-8 sm:p-12 text-white relative overflow-hidden shadow-xl ${
-                  isEn ? 'text-left' : 'text-right'
-                }`}
+                dir="rtl"
+                className="rounded-3xl bg-gradient-to-r from-rose-600/90 via-pink-600/90 to-rose-500/90 backdrop-blur-md p-8 sm:p-12 text-white relative overflow-hidden shadow-xl text-right"
               >
                 <div className="relative z-10 max-w-xl space-y-4">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-xs text-xs font-semibold">
                     <Heart className="w-3.5 h-3.5 fill-white" />
-                    <span>{isEn ? 'Special Flowers That Never Wilt' : isKu ? 'گوڵی بێوێنە کە هەرگیز سیس نابێت' : 'ورد مميز لا يذبل'}</span>
+                    <span>ورد مميز لا يذبل</span>
                   </div>
                   <h3 className="text-2xl sm:text-4xl font-extrabold leading-snug">
-                    {isEn
-                      ? 'Special Flowers That Never Wilt • Designed To Stay With You Forever'
-                      : isKu
-                      ? 'گوڵی بێوێنە کە هەرگیز سیس نابێت • دیزاین کراوە تا هەمیشە لەگەڵت بمێنێتەوە'
-                      : 'ورد مميز لا يذبل • صممت لتبقى معك للأبد'}
+                    ورد مميز لا يذبل • صممت لتبقى معك للأبد
                   </h3>
                   <p className="text-rose-100 text-xs sm:text-sm leading-relaxed">
-                    {isEn
-                      ? 'Carefully selecting the most beautiful flowers with guaranteed quality and luxury packaging for all orders'
-                      : isKu
-                      ? 'هەڵبژاردنی جوانترین جۆرەکانی گوڵ بە وردی لەگەڵ گەرەنتی کوالێتی و پێچانەوەی شاهانە بۆ سەرجەم داواکارییەکان'
-                      : 'اختيار اجمل انواع الورد بعناية مع ضمان الجودة والتغليف الفاخر لجميع الطلبات'}
+                    اختيار اجمل انواع الورد بعناية مع ضمان الجودة والتغليف الفاخر لجميع الطلبات
                   </p>
                   <div className="pt-2 flex flex-wrap items-center gap-3">
                     <button
@@ -155,7 +139,7 @@ const StoreContent: React.FC = () => {
                       }}
                       className="px-7 py-3 rounded-full bg-white hover:bg-rose-50 text-rose-700 font-bold text-xs shadow-md transition-colors cursor-pointer"
                     >
-                      {getBtnText('shop', isEn ? 'Shop Now' : isKu ? 'ئێستا بکڕە' : 'تسوق الآن')}
+                      {getBtnText('shop', 'تسوق الآن')}
                     </button>
                     <button
                       onClick={() => {
@@ -164,7 +148,7 @@ const StoreContent: React.FC = () => {
                       }}
                       className="px-6 py-3 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/30 backdrop-blur-xs transition-colors cursor-pointer"
                     >
-                      {getBtnText('aboutUs', isEn ? 'Our Story' : isKu ? 'دەربارەی ئێمە' : 'من نحن وقصتنا')}
+                      {getBtnText('aboutUs', 'من نحن وقصتنا')}
                     </button>
                   </div>
                 </div>
@@ -202,9 +186,6 @@ const StoreContent: React.FC = () => {
         initialMode={authModalMode}
       />
 
-      {/* Global Language Selector Popup Modal */}
-      <LanguageModal />
-
       {/* Global Phone Notifications Modal */}
       <PhoneNotificationsModal
         isOpen={isPhoneNotifsModalOpen}
@@ -223,9 +204,6 @@ const StoreContent: React.FC = () => {
 
       {/* Floating Real-Time Customer Incoming Alerts (New Products & Order Status) */}
       <CustomerLiveAlerts />
-
-      {/* Floating Cookie & Notification Consent Banner */}
-      <CookieNotificationBanner />
 
       {/* iOS Safari Install Prompt (shows only on iPhone/iPad Safari, not standalone PWA) */}
       <IOSInstallBanner />

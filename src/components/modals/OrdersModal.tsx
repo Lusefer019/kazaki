@@ -6,9 +6,7 @@ import {
   CheckCircle,
   Clock,
   Truck,
-  ShieldAlert,
   Copy,
-  ExternalLink,
   Bell,
   ChevronDown,
   ChevronUp,
@@ -21,13 +19,10 @@ interface OrdersModalProps {
 }
 
 export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
-  const { orders, currentUser, settings, getBtnText, myOrderIds, currentLanguage, currencyLabel, t } = useStore();
+  const { orders, currentUser, getBtnText, myOrderIds, currencyLabel, t } = useStore();
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [expandedTimelineId, setExpandedTimelineId] = useState<string | null>(null);
   const [orderQuery, setOrderQuery] = useState('');
-
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
 
   if (!isOpen) return null;
 
@@ -73,37 +68,37 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
     switch (status) {
       case 'pending':
         return {
-          label: isEn ? 'Pending' : isKu ? 'چاوەڕوانکراو' : 'قيد الانتظار',
+          label: 'قيد الانتظار',
           color: 'bg-amber-100 text-amber-800 border-amber-200',
         };
       case 'processing':
         return {
-          label: isEn ? 'Processing in Warehouse' : isKu ? 'ئامادەکردن لە کۆگا' : 'جاري التجهيز بالمستودع',
+          label: 'جاري التجهيز بالمستودع',
           color: 'bg-rose-100 text-rose-800 border-rose-200',
         };
       case 'shipped':
         return {
-          label: isEn ? 'Shipped with Courier' : isKu ? 'نێردرا لەگەڵ مەندووب' : 'تم الشحن مع المندوب',
+          label: 'تم الشحن مع المندوب',
           color: 'bg-blue-100 text-blue-800 border-blue-200',
         };
       case 'delivered':
         return {
-          label: isEn ? 'Delivered Successfully' : isKu ? 'بە سەرکەوتوویی گەیەندرا' : 'تم التوصيل بنجاح',
+          label: 'تم التوصيل بنجاح',
           color: 'bg-emerald-100 text-emerald-800 border-emerald-200',
         };
       case 'cancelled':
         return {
-          label: isEn ? 'Cancelled' : isKu ? 'هەڵوەشاوەتەوە' : 'طلب ملغي',
+          label: 'طلب ملغي',
           color: 'bg-red-100 text-red-800 border-red-200',
         };
       case 'returned':
         return {
-          label: isEn ? 'Returned Shipment' : isKu ? 'گەڕاوە' : 'شحنة راجعة',
+          label: 'شحنة راجعة',
           color: 'bg-purple-100 text-purple-800 border-purple-200',
         };
       default:
         return {
-          label: isEn ? 'Processing' : isKu ? 'پڕۆسە' : 'قيد المعالجة',
+          label: 'قيد المعالجة',
           color: 'bg-stone-100 text-stone-800 border-stone-200',
         };
     }
@@ -118,11 +113,9 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex min-h-full items-center justify-center p-2.5 sm:p-4 md:p-6">
       <div
-        className={`my-auto relative bg-white rounded-2xl sm:rounded-3xl max-w-lg md:max-w-3xl w-full overflow-hidden shadow-2xl border border-rose-100 animate-in fade-in zoom-in-95 duration-200 ${
-          isEn ? 'text-left font-sans' : isKu ? 'text-right font-kurdish' : 'text-right font-cairo'
-        }`}
+        className="my-auto relative bg-white rounded-2xl sm:rounded-3xl max-w-lg md:max-w-3xl w-full overflow-hidden shadow-2xl border border-rose-100 animate-in fade-in zoom-in-95 duration-200 text-right font-cairo"
         onClick={(e) => e.stopPropagation()}
-        dir={isEn ? 'ltr' : 'rtl'}
+        dir="rtl"
       >
         {/* Header */}
         <div className="p-5 border-b border-rose-100 flex items-center justify-between bg-rose-50/40">
@@ -132,21 +125,17 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
             </div>
             <div>
               <h2 className="text-base font-bold text-stone-900">
-                {getBtnText('trackOrder', isEn ? 'Order Tracking & History' : isKu ? 'تۆمار و بەدواداچوونی داواکارییەکان' : 'سجل وتتبع طلبات المشتريات')}
+                {getBtnText('trackOrder', 'سجل وتتبع طلبات المشتريات')}
               </h2>
               <p className="text-[11px] text-stone-500">
-                {isEn
-                  ? 'Track shipments and delivery status in real-time at KAZAKI.IQ'
-                  : isKu
-                  ? 'بەدواداچوون بۆ ڕێڕەوی بارەکانت و ئاگادارییەکان لە KAZAKI.IQ'
-                  : 'تتبعي مسار شحناتكِ وإشعارات التوصيل لحظة بلحظة في KAZAKI.IQ'}
+                تتبعي مسار شحناتكِ وإشعارات التوصيل لحظة بلحظة في KAZAKI.IQ
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:bg-rose-100 text-stone-500 hover:text-stone-800 transition-colors cursor-pointer"
-            aria-label={isEn ? 'Close' : isKu ? 'داخستن' : 'إغلاق'}
+            aria-label="إغلاق"
           >
             <X className="w-5 h-5" />
           </button>
@@ -158,18 +147,14 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
           {!currentUser && (
             <div className="bg-rose-50/50 p-4 rounded-2xl border border-rose-100 space-y-2">
               <label className="block text-xs font-bold text-stone-700">
-                {isEn
-                  ? 'Track order by Order ID or Phone Number:'
-                  : isKu
-                  ? 'بەدواداچوونی داواکاری بە ژمارەی داواکاری یان مۆبایل:'
-                  : 'تتبع طلب عبر رقم الطلب أو رقم الهاتف:'}
+                تتبع طلب عبر رقم الطلب أو رقم الهاتف:
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={orderQuery}
                   onChange={(e) => setOrderQuery(e.target.value)}
-                  placeholder={isEn ? 'e.g. ORD-1234 or 07701234567' : isKu ? 'بۆ نموونە: ORD-1234 یان 07701234567' : 'مثال: ORD-1234 أو 07701234567'}
+                  placeholder="مثال: ORD-1234 أو 07701234567"
                   className="flex-1 px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 focus:border-rose-400 focus:bg-white outline-none"
                 />
                 {orderQuery && (
@@ -178,7 +163,7 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
                     onClick={() => setOrderQuery('')}
                     className="px-3 py-2 text-xs text-stone-500 hover:text-stone-800 bg-stone-100 rounded-xl cursor-pointer"
                   >
-                    {isEn ? 'Clear' : isKu ? 'سڕینەوە' : 'مسح'}
+                    مسح
                   </button>
                 )}
               </div>
@@ -192,13 +177,13 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
               </div>
               <h3 className="text-base font-bold text-stone-800">
                 {!currentUser && !orderQuery
-                  ? (isEn ? 'Please enter your order ID or phone above to track your order' : isKu ? 'تکایە ژمارەی داواکاری یان ژمارەی مۆبایلەکەت لەسەرەوە بنووسە' : 'يرجى إدخال رقم الطلب أو رقم الهاتف أعلاه لتتبع طلبك')
-                  : (isEn ? 'No matching orders found' : isKu ? 'هیچ داواکارییەکی هاوتا نەدۆزرایەوە' : 'لا توجد طلبات مطابقة')}
+                  ? 'يرجى إدخال رقم الطلب أو رقم الهاتف أعلاه لتتبع طلبك'
+                  : 'لا توجد طلبات مطابقة'}
               </h3>
               <p className="text-xs text-stone-500">
                 {!currentUser && !orderQuery
-                  ? (isEn ? 'You can track any shipment immediately using your order ID or by signing into your account.' : isKu ? 'دەتوانیت هەر بارێک بپشکنیت بە بەکارهێنانی کۆدی داواکاری یان چوونەژوورەوەی هەژمار.' : 'يمكنك تتبع أي شحنة فوراً باستخدام الرقم التعريفي للطلب أو تسجيل الدخول لحسابك.')
-                  : (isEn ? 'Make sure the order ID or phone number is entered correctly.' : isKu ? 'دڵنیابەرەوە لە دروستی نووسینی ژمارەی داواکاری یان مۆبایل.' : 'تأكد من كتابة رقم الطلب أو رقم الهاتف بشكل صحيح.')}
+                  ? 'يمكنك تتبع أي شحنة فوراً باستخدام الرقم التعريفي للطلب أو تسجيل الدخول لحسابك.'
+                  : 'تأكد من كتابة رقم الطلب أو رقم الهاتف بشكل صحيح.'}
               </p>
             </div>
           ) : (
@@ -220,9 +205,7 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
               return (
                 <div
                   key={order.id}
-                  className={`rounded-3xl border border-rose-100 bg-white p-5 shadow-2xs hover:shadow-md transition-shadow space-y-4 ${
-                    isEn ? 'text-left' : 'text-right'
-                  }`}
+                  className="rounded-3xl border border-rose-100 bg-white p-5 shadow-2xs hover:shadow-md transition-shadow space-y-4 text-right"
                 >
                   {/* Top Bar of Order */}
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rose-50 pb-3">
@@ -236,14 +219,13 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
                         </span>
                       </div>
                       <span className="text-[11px] text-stone-400 mt-0.5 block">
-                        {isEn ? 'Order Date: ' : isKu ? 'بەرواری داواکاری: ' : 'تاريخ الطلب: '}
-                        {new Date(order.createdAt).toLocaleDateString(isEn ? 'en-US' : 'ar-IQ')}
+                        تاريخ الطلب: {new Date(order.createdAt).toLocaleDateString('ar-IQ')}
                       </span>
                     </div>
 
-                    <div className={isEn ? 'text-right' : 'text-left'}>
+                    <div className="text-left">
                       <span className="text-xs text-stone-500 block">
-                        {isEn ? 'Total:' : isKu ? 'کۆی گشتی:' : 'الإجمالي:'}
+                        الإجمالي:
                       </span>
                       <span className="text-base font-extrabold text-rose-600 font-mono">
                         {order.finalAmount.toLocaleString('en-US')} {currencyLabel}
@@ -257,7 +239,7 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-bold text-stone-700 flex items-center gap-1.5">
                           <Truck className="w-3.5 h-3.5 text-rose-600" />
-                          <span>{isEn ? 'Live Shipment Tracker:' : isKu ? 'ڕێڕەوی ڕاستەوخۆی بار:' : 'مسار الشحنة المباشر:'}</span>
+                          <span>مسار الشحنة المباشر:</span>
                         </span>
                         <span className="text-[11px] font-bold text-rose-600">
                           {statusInfo.label}
@@ -266,10 +248,10 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
 
                       <div className="grid grid-cols-4 gap-1.5 text-center">
                         {[
-                          { label: isEn ? 'Ordered' : isKu ? 'داواکرا' : 'تم الطلب', icon: Clock },
-                          { label: isEn ? 'Processing' : isKu ? 'لە پڕۆسەدایە' : 'قيد المعالجة', icon: Package },
-                          { label: isEn ? 'Shipped' : isKu ? 'نێردرا' : 'تم الشحن', icon: Truck },
-                          { label: isEn ? 'Delivered' : isKu ? 'گەیەندرا' : 'تم التوصيل', icon: CheckCircle },
+                          { label: 'تم الطلب', icon: Clock },
+                          { label: 'قيد المعالجة', icon: Package },
+                          { label: 'تم الشحن', icon: Truck },
+                          { label: 'تم التوصيل', icon: CheckCircle },
                         ].map((st, idx) => {
                           const isDone = stepIndex >= idx;
                           const isCurrent = stepIndex === idx;
@@ -300,7 +282,7 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
                     </div>
                   ) : (
                     <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-bold">
-                      {isEn ? 'This order was cancelled by administration.' : isKu ? 'ئەم داواکارییە لەلایەن بەڕێوەبەرایەتییەوە هەڵوەشێندرایەوە.' : 'تم إلغاء هذا الطلب من قبل الإدارة.'}
+                      تم إلغاء هذا الطلب من قبل الإدارة.
                     </div>
                   )}
 
@@ -310,7 +292,7 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
                       <div className="flex items-center gap-2">
                         <span className="text-stone-600">
                           {order.shippingCarrier ? `${order.shippingCarrier} | ` : ''}
-                          {isEn ? 'Tracking No: ' : isKu ? 'ژمارەی تتبع: ' : 'رقم التتبع: '}
+                          رقم التتبع: 
                         </span>
                         <strong className="font-mono text-rose-700 font-bold bg-white px-2 py-0.5 rounded-md border border-rose-200" dir="ltr">
                           {order.trackingNumber}
@@ -322,9 +304,7 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
                       >
                         <Copy className="w-3.5 h-3.5" />
                         <span>
-                          {copiedId === order.trackingNumber
-                            ? (isEn ? 'Copied!' : isKu ? 'کۆپیکرا!' : 'تم النسخ!')
-                            : (isEn ? 'Copy Tracking Number' : isKu ? 'کۆپیکردنی ژمارەی تتبع' : 'نسخ رقم التتبع')}
+                          {copiedId === order.trackingNumber ? 'تم النسخ!' : 'نسخ رقم التتبع'}
                         </span>
                       </button>
                     </div>
@@ -335,7 +315,7 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
                     <div className="space-y-2">
                       <span className="text-[11px] font-bold text-stone-600 flex items-center gap-1.5">
                         <Bell className="w-3.5 h-3.5 text-rose-500" />
-                        <span>{isEn ? 'Order Status Notifications:' : isKu ? 'ئاگادارییەکانی ئەم داواکارییە:' : 'إشعارات وتحديثات حالة هذا الطلب:'}</span>
+                        <span>إشعارات وتحديثات حالة هذا الطلب:</span>
                       </span>
                       {order.notifications
                         .filter((n) => n.target !== 'admin')
@@ -350,7 +330,7 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
                                 <span>{t(notif.title)}</span>
                               </span>
                               <span className="text-[10px] text-stone-400 font-mono">
-                                {new Date(notif.timestamp).toLocaleDateString(isEn ? 'en-US' : 'ar-IQ')}
+                                {new Date(notif.timestamp).toLocaleDateString('ar-IQ')}
                               </span>
                             </div>
                             <p className="text-stone-700 leading-relaxed">
@@ -370,29 +350,29 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
                         className="text-xs font-bold text-stone-600 hover:text-rose-600 flex items-center gap-1 cursor-pointer"
                       >
                         <span>
-                          {isEn ? 'Detailed Shipment History' : isKu ? 'مێژووی وردی گۆڕانکارییەکان' : 'سجل تحديثات الشحنة بالتفصيل'} ({order.statusHistory.length})
+                          سجل تحديثات الشحنة بالتفصيل ({order.statusHistory.length})
                         </span>
                         {isTimelineExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </button>
 
                       {isTimelineExpanded && (
-                        <div className={`mt-2 space-y-2 ${isEn ? 'pl-2 border-l-2' : 'pr-2 border-r-2'} border-rose-200`}>
+                        <div className="mt-2 space-y-2 pr-2 border-r-2 border-rose-200">
                           {order.statusHistory.map((h, i) => (
                             <div key={h.id || i} className="text-xs bg-stone-50 p-2.5 rounded-xl border border-stone-100">
                               <div className="flex items-center justify-between text-[11px] font-bold text-stone-800">
                                 <span>
                                   {h.status === 'pending'
-                                    ? (isEn ? 'Order Received' : isKu ? 'وەرگرتنی داواکاری' : 'استلام الطلب')
+                                    ? 'استلام الطلب'
                                     : h.status === 'processing'
-                                    ? (isEn ? 'Processing' : isKu ? 'قید پرۆسێسکردن' : 'قيد المعالجة')
+                                    ? 'قيد المعالجة'
                                     : h.status === 'shipped'
-                                    ? (isEn ? 'Shipped' : isKu ? 'نێردراوە' : 'تم الشحن')
+                                    ? 'تم الشحن'
                                     : h.status === 'delivered'
-                                    ? (isEn ? 'Delivered' : isKu ? 'گەیەندراوە' : 'تم التوصيل')
-                                    : (isEn ? 'Cancelled' : isKu ? 'هەڵوەشاوەتەوە' : 'ملغي')}
+                                    ? 'تم التوصيل'
+                                    : 'ملغي'}
                                 </span>
                                 <span className="text-[10px] text-stone-400 font-mono">
-                                  {new Date(h.timestamp).toLocaleDateString(isEn ? 'en-US' : 'ar-IQ')} - {new Date(h.timestamp).toLocaleTimeString(isEn ? 'en-US' : 'ar-IQ', { hour: '2-digit', minute: '2-digit' })}
+                                  {new Date(h.timestamp).toLocaleDateString('ar-IQ')} - {new Date(h.timestamp).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                               </div>
                               {h.note && <p className="text-stone-600 text-[11px] mt-1">{t(h.note)}</p>}
@@ -406,50 +386,39 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
                   {/* Items in order */}
                   <div className="space-y-2 pt-1">
                     <h4 className="text-xs font-bold text-stone-700">
-                      {isEn ? 'Ordered Products:' : isKu ? 'بەرهەمە داواکراوەکان:' : 'المنتجات المطلوبة:'}
+                      المنتجات المطلوبة:
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {order.items.map((item, idx) => {
-                        const itemTitle =
-                          isEn && item.product.titleEn
-                            ? item.product.titleEn
-                            : isKu && item.product.titleKu
-                            ? item.product.titleKu
-                            : item.product.title;
-
-                        return (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-2.5 p-2 rounded-xl bg-stone-50/60 border border-stone-100 text-xs"
-                          >
-                            <img
-                              src={item.product.image}
-                              alt={itemTitle}
-                              className="w-10 h-10 rounded-lg object-cover bg-white"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-stone-900 truncate">
-                                {itemTitle}
-                              </p>
-                              <p className="text-[11px] text-stone-500">
-                                {item.quantity} × {item.product.price.toLocaleString('en-US')} {currencyLabel}
-                              </p>
-                            </div>
+                      {order.items.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2.5 p-2 rounded-xl bg-stone-50/60 border border-stone-100 text-xs"
+                        >
+                          <img
+                            src={item.product.image}
+                            alt={item.product.title}
+                            className="w-10 h-10 rounded-lg object-cover bg-white"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-stone-900 truncate">
+                              {item.product.title}
+                            </p>
+                            <p className="text-[11px] text-stone-500">
+                              {item.quantity} × {item.product.price.toLocaleString('en-US')} {currencyLabel}
+                            </p>
                           </div>
-                        );
-                      })}
+                        </div>
+                      ))}
                     </div>
                   </div>
 
                   {/* Delivery destination */}
                   <div className="text-[11px] text-stone-500 pt-2 border-t border-rose-50 flex items-center justify-between">
                     <span>
-                      {isEn ? 'Delivery Address: ' : isKu ? 'ناونیشانی گەیاندن: ' : 'عنوان التسليم: '}
-                      {t(order.city)} - {t(order.address)}
+                      عنوان التسليم: {t(order.city)} - {t(order.address)}
                     </span>
                     <span>
-                      {isEn ? 'Recipient: ' : isKu ? 'وەرگر: ' : 'المستلم: '}
-                      {order.customerName} ({order.customerPhone})
+                      المستلم: {order.customerName} ({order.customerPhone})
                     </span>
                   </div>
                 </div>

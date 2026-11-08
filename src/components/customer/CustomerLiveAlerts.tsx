@@ -5,9 +5,6 @@ import {
   Package,
   X,
   Eye,
-  ArrowRight,
-  ExternalLink,
-  Clock,
   BellRing,
 } from 'lucide-react';
 
@@ -19,12 +16,8 @@ export const CustomerLiveAlerts: React.FC = () => {
     products,
     setSelectedProduct,
     setIsCustomerNotifsModalOpen,
-    currentLanguage,
     t,
   } = useStore();
-
-  const isEn = currentLanguage === 'en';
-  const isKu = currentLanguage === 'ku';
 
   // Auto-dismiss alert after 9 seconds
   useEffect(() => {
@@ -52,8 +45,8 @@ export const CustomerLiveAlerts: React.FC = () => {
 
   return (
     <div
-      dir={isEn ? 'ltr' : 'rtl'}
-      className="fixed bottom-6 left-6 z-50 max-w-sm w-full space-y-3 pointer-events-auto animate-in slide-in-from-bottom-5 fade-in duration-300"
+      dir="rtl"
+      className="fixed bottom-6 right-6 z-50 max-w-sm w-full space-y-3 pointer-events-auto animate-in slide-in-from-bottom-5 fade-in duration-300"
     >
       <div className="bg-white/95 text-stone-900 rounded-3xl p-5 shadow-2xl border-2 border-rose-400/90 backdrop-blur-xl relative overflow-hidden ring-4 ring-rose-500/15">
         {/* Soft decorative background glow */}
@@ -72,12 +65,10 @@ export const CustomerLiveAlerts: React.FC = () => {
             <div>
               <h4 className="font-extrabold text-xs sm:text-sm text-stone-900 flex items-center gap-1.5">
                 <span>
-                  {isNewProduct
-                    ? (isEn ? 'New Product Arrival!' : isKu ? 'بەرهەمی تازە گەیشتوو!' : 'وصل حديثاً للمتجر!')
-                    : (isEn ? 'Order Update' : isKu ? 'نوێکردنەوەی داواکاری' : 'تحديث على طلبك')}
+                  {isNewProduct ? 'وصل حديثاً للمتجر!' : 'تحديث على طلبك'}
                 </span>
                 <span className="text-[10px] bg-rose-600 text-white px-2 py-0.5 rounded-full font-bold">
-                  {isEn ? 'Live' : isKu ? 'خێرا' : 'فوري'}
+                  فوري
                 </span>
               </h4>
               <span className="text-[11px] text-stone-400 font-mono">
@@ -90,7 +81,7 @@ export const CustomerLiveAlerts: React.FC = () => {
             type="button"
             onClick={clearCustomerLiveAlert}
             className="p-1 rounded-full text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
-            aria-label={isEn ? 'Close' : isKu ? 'داخستن' : 'إغلاق'}
+            aria-label="إغلاق"
           >
             <X className="w-4 h-4" />
           </button>
@@ -140,7 +131,7 @@ export const CustomerLiveAlerts: React.FC = () => {
               className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white font-bold text-xs shadow-md shadow-rose-500/25 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Eye className="w-3.5 h-3.5" />
-              <span>{isEn ? 'View Product Details' : isKu ? 'بینینی وردەکاری بەرهەم' : 'معاينة المنتج والطلب الآن'}</span>
+              <span>معاينة المنتج والطلب الآن</span>
             </button>
           ) : (
             <button
@@ -152,7 +143,7 @@ export const CustomerLiveAlerts: React.FC = () => {
               className="w-full py-2 px-3 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Package className="w-3.5 h-3.5" />
-              <span>{isEn ? 'View Order Notification' : isKu ? 'بینینی ئاگاداری داواکاری' : 'متابعة تفاصيل الإشعار'}</span>
+              <span>متابعة تفاصيل الإشعار</span>
             </button>
           )}
         </div>
