@@ -308,6 +308,94 @@ export const sanitizeCategories = (cats: Category[]): Category[] => {
     });
 };
 
+/**
+ * Safely removes older version keys and redundant cache items from localStorage
+ * to ensure that quota errors never occur.
+ */
+export const pruneLegacyStorageKeys = () => {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    const legacyPatterns = [
+      /^kazaki_products_(?!leko_v9)/,
+      /^kazaki_categories_(?!leko_v9)/,
+      /^kazaki_user_(?!leko_v9)/,
+      /^kazaki_orders_(?!leko_v9)/,
+      /^kazaki_settings_(?!leko_v9)/,
+      /^kazaki_notifications_(?!leko_v9)/,
+      /^kazaki_messages_(?!leko_v9)/,
+      /^kazaki_promos_(?!leko_v9)/,
+      /^kazaki_cart_(?!leko_v9)/,
+      /^kazaki_live_ping$/,
+    ];
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      if (legacyPatterns.some((pattern) => pattern.test(key))) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch {}
+};
+
+/**
+ * Safely saves products into localStorage without exceeding browser quotas.
+ * If quota is exceeded, legacy keys and heavy base64 strings are stripped automatically.
+ */
+export const safePersistProducts = (prods: Product[]) => {
+  if (typeof localStorage === 'undefined' || !Array.isArray(prods)) return;
+  try {
+    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(prods));
+  } catch {
+    // Quota reached or private mode: Clean up legacy keys and try saving a lightweight cache
+    pruneLegacyStorageKeys();
+    try {
+      localStorage.removeItem('kazaki_notifications_master_v1');
+      localStorage.removeItem('kazaki_support_messages_master_v1');
+      localStorage.removeItem('kazaki_live_ping');
+
+      const lightweight = prods.map((p) => ({
+        id: p.id,
+        title: p.title,
+        titleEn: p.titleEn,
+        titleKu: p.titleKu,
+        price: p.price,
+        originalPrice: p.originalPrice,
+        categoryId: p.categoryId,
+        image: p.image && p.image.length > 50000 && p.image.startsWith('data:') ? '' : p.image,
+        inStock: p.inStock,
+        stockCount: p.stockCount,
+        rating: p.rating,
+        reviewsCount: p.reviewsCount,
+        isFeatured: p.isFeatured,
+        isNew: p.isNew,
+        volumeOrSize: p.volumeOrSize,
+        tags: Array.isArray(p.tags) ? p.tags.slice(0, 5) : [],
+        gallery: Array.isArray(p.gallery)
+          ? p.gallery.filter((g) => typeof g === 'string' && !g.startsWith('data:')).slice(0, 2)
+          : [],
+      }));
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(lightweight));
+    } catch {
+      // In-memory state and Supabase remain fully intact, silently succeed.
+    }
+  }
+};
+
+/**
+ * Safely saves categories into localStorage.
+ */
+export const safePersistCategories = (cats: Category[]) => {
+  if (typeof localStorage === 'undefined' || !Array.isArray(cats)) return;
+  try {
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(cats));
+  } catch {
+    pruneLegacyStorageKeys();
+    try {
+      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(cats));
+    } catch {}
+  }
+};
+
 export const safeFetchJson = async <T = any>(url: string, options?: RequestInit): Promise<T | null> => {
   try {
     const res = await fetch(url, options);
@@ -419,9 +507,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           const savedIds = new Set(sanitized.map((c) => c.id));
           const missing = initialCategories.filter((ic) => !savedIds.has(ic.id));
           effectiveList = [...sanitized, ...missing];
-          try {
-            localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(effectiveList));
-          } catch {}
+          safePersistCategories(effectiveList);
         }
 
         return effectiveList.map((cat) => {
@@ -608,7 +694,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           (item) => item.product && !item.product.id?.startsWith('prod-')
         );
         if (filtered.length !== parsed.length) {
-          localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(filtered));
+          try {
+            localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(filtered));
+          } catch {}
         }
         return filtered;
       }
@@ -1017,13 +1105,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     resetSiteTextsToDefault();
   };
 
-  // Sync to localStorage
+  // Sync to localStorage safely
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+    safePersistProducts(products);
   }, [products]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    safePersistCategories(categories);
   }, [categories]);
 
   useEffect(() => {
@@ -1088,8 +1176,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch {}
   }, [promoCodes]);
 
-  // Register Service Worker for offline asset caching
+  // Register Service Worker for offline asset caching & prune legacy keys
   useEffect(() => {
+    pruneLegacyStorageKeys();
     registerServiceWorker().catch(() => {});
   }, []);
 
@@ -1100,9 +1189,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (dbCats && dbCats.length > 0) {
           const sanitized = sanitizeCategories(dbCats);
           setCategories(sanitized);
-          try {
-            localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(sanitized));
-          } catch {}
+          safePersistCategories(sanitized);
         }
       })
       .catch((err) => console.warn('Supabase categories sync warning:', err));
@@ -1111,9 +1198,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       .then((dbProds) => {
         if (dbProds !== null) {
           setProducts(dbProds);
-          try {
-            localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(dbProds));
-          } catch {}
+          safePersistProducts(dbProds);
         }
       })
       .catch((err) => console.warn('Supabase products sync warning:', err));
@@ -2621,7 +2706,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         : {}),
     };
     setSettings(updatedSettings);
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updatedSettings));
+    try {
+      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updatedSettings));
+    } catch {}
   };
 
   // Totals calculation

@@ -50,7 +50,7 @@
           }
         </style>
         <div id="kazaki-boot-timeout-btn" style="display: none; margin-top: 24px;">
-          <button onclick="sessionStorage.clear(); window.location.reload();" style="padding: 12px 24px; border-radius: 14px; background: #e11d48; color: #fff; border: none; font-weight: bold; font-size: 13px; cursor: pointer;">
+          <button onclick="try{sessionStorage.clear();}catch(e){} window.location.reload();" style="padding: 12px 24px; border-radius: 14px; background: #e11d48; color: #fff; border: none; font-weight: bold; font-size: 13px; cursor: pointer;">
             تحديث المتجر الآن
           </button>
         </div>

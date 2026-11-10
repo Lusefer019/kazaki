@@ -3,9 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 
-// تحميل متغيرات البيئة من .env
+// تحميل متغيرات البيئة من .env مع قيم احتياطية
 const envPath = path.resolve(process.cwd(), '.env');
-const envContent = fs.readFileSync(envPath, 'utf8');
+const envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
 const env: Record<string, string> = {};
 for (const line of envContent.split('\n')) {
   const trimmed = line.trim();
@@ -16,13 +16,8 @@ for (const line of envContent.split('\n')) {
   }
 }
 
-const supabaseUrl = env.VITE_SUPABASE_URL || env.SUPABASE_URL;
-const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY || env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Supabase URL or Key is missing.');
-  process.exit(1);
-}
+const supabaseUrl = env.VITE_SUPABASE_URL || env.SUPABASE_URL || 'https://aadwlfwdqubxtmhzbkpn.supabase.co';
+const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY || env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY || 'sb_publishable_MridwJWlvDvHU5ADteSLCw_zrXt09PJ';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 

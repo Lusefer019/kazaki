@@ -114,7 +114,9 @@ export const saveSupabaseConfig = (config: SupabaseConfig): void => {
     url: cleanSupabaseUrl(config.url),
     anonKey: config.anonKey.trim(),
   };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+  } catch {}
 };
 
 let cachedClient: SupabaseClient | null = null;
