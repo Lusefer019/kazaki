@@ -5,13 +5,11 @@ import {
   Mail,
   Clock,
   Send,
-  CheckCircle2,
   Instagram,
   Heart,
   Truck,
   CreditCard,
   MessageCircle,
-  ShieldAlert,
   Headphones,
   Edit2,
   ExternalLink,
@@ -136,65 +134,6 @@ export const ContactView: React.FC = () => {
     'أريد التأكد من توفر مقاس أو لون معين لمنتج',
     'متابعة تفاصيل وحالة طلب أرسلته سابقاً',
   ];
-
-  const [form, setForm] = useState({
-    name: currentUser?.name || '',
-    phone: currentUser?.phone || '',
-    email: currentUser?.email || '',
-    subject: '',
-    message: '',
-  });
-
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-  const [spamMsg, setSpamMsg] = useState<string | null>(null);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.name || !form.email || !form.message || isSending) return;
-
-    // Anti-spam debounce
-    if (!checkClickAllowed('contact_form_submit', 2000, false)) {
-      setSpamMsg('تم استلام طلبكِ وجاري إرسال الرسالة! يرجى عدم تكرار الضغط.');
-      setTimeout(() => setSpamMsg(null), 4000);
-      return;
-    }
-
-    // Rate limit: max 2 messages per minute
-    const rateCheck = checkRateLimit('contact_submission', 2, 60000, 30000);
-    if (!rateCheck.allowed) {
-      setSpamMsg(rateCheck.message || 'تم حظر المحاولات المتكررة مؤقتاً لحماية النظام. يرجى الانتظار.');
-      setTimeout(() => setSpamMsg(null), 5000);
-      return;
-    }
-
-    setIsSending(true);
-    setSpamMsg(null);
-
-    sendSupportMessage({
-      customerName: form.name,
-      customerPhone: form.phone,
-      customerEmail: form.email,
-      subject: form.subject || 'استفسار عام',
-      message: form.message,
-    });
-
-    setTimeout(() => {
-      setIsSending(false);
-      setIsSubmitted(true);
-      setForm({
-        name: currentUser?.name || '',
-        phone: currentUser?.phone || '',
-        email: currentUser?.email || '',
-        subject: '',
-        message: '',
-      });
-
-      setTimeout(() => {
-        setIsSubmitted(false);
-      }, 6000);
-    }, 600);
-  };
 
   const isEnabled = settings.contactInfo?.enabled !== false;
   const rawChannels = settings.contactInfo?.channels && settings.contactInfo.channels.length > 0
@@ -415,12 +354,7 @@ export const ContactView: React.FC = () => {
                         <span>إنهاء</span>
                       </button>
                     </div>
-                  ) : (
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-400/20 border border-amber-300/30 text-amber-200 text-xs font-bold">
-                      <Clock className="w-4 h-4 text-amber-300 shrink-0" />
-                      <span>المدة: 24 ساعة من أول رسالة</span>
-                    </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
 
@@ -734,125 +668,6 @@ export const ContactView: React.FC = () => {
           </div>
         </div>
 
-        {/* Contact Form & Customer Service Message */}
-        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-rose-100 shadow-xl relative overflow-hidden">
-          <div className="max-w-2xl mx-auto space-y-6">
-            <div className="text-center space-y-2">
-              <h2 className="text-xl sm:text-2xl font-black text-stone-900">
-                أرسلي رسالة أو استفسار لفريقنا
-              </h2>
-              <p className="text-xs text-stone-500 leading-relaxed">
-                {settings.contactInfo?.customerServiceNote || 'فريق الدعم الفني متواجد للإجابة على استفساراتكم ومتابعة طلباتكم بكل اهتمام.'}
-              </p>
-            </div>
-
-            {spamMsg && (
-              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 text-xs font-bold flex items-center gap-2.5 animate-in fade-in">
-                <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>{spamMsg}</span>
-              </div>
-            )}
-
-            {isSubmitted && (
-              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-3 animate-in fade-in">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                <span>
-                  تم إرسال رسالتكِ بنجاح! سيقوم فريق خدمة عملاء KAZAKI.IQ بالرد عليكِ في أقرب وقت.
-                </span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    الاسم الكريم <span className="text-rose-600">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="سارة علي"
-                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    رقم الهاتف / واتساب
-                  </label>
-                  <input
-                    type="tel"
-                    dir="ltr"
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    placeholder="+964 770 123 4567"
-                    className="w-full text-xs text-right border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    البريد الإلكتروني <span className="text-rose-600">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    placeholder="sara@example.com"
-                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    موضوع الرسالة
-                  </label>
-                  <input
-                    type="text"
-                    value={form.subject}
-                    onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                    placeholder="استفسار عن توفر منتج أو موعد الشحن"
-                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  نص الرسالة أو الاستفسار <span className="text-rose-600">*</span>
-                </label>
-                <textarea
-                  rows={4}
-                  required
-                  value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  placeholder="اكتبي تفاصيل استفساركِ هنا، ويسعدنا تقديم المساعدة فوراً..."
-                  className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
-                />
-              </div>
-
-              <div className="pt-2 flex justify-end">
-                <button
-                  type="submit"
-                  disabled={isSending}
-                  className="px-8 py-3 rounded-full bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white font-bold text-xs shadow-md shadow-rose-300 hover:shadow-lg transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50"
-                >
-                  <Send className={`w-4 h-4 ${isSending ? 'animate-pulse' : ''} rotate-180`} />
-                  <span>
-                    {isSending
-                      ? 'جاري الإرسال بأمان...'
-                      : getBtnText('sendMessage', 'إرسال الرسالة إلى خدمة العملاء')}
-                  </span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
       </div>
     </div>
   );

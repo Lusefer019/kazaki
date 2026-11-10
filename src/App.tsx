@@ -24,7 +24,7 @@ import {
   ErrorBoundary,
   IOSInstallBanner,
 } from './components';
-import { ShieldAlert, Heart } from 'lucide-react';
+import { ShieldAlert } from 'lucide-react';
 import { Order } from './types';
 import { setGlobalSpamNotifier } from './utils/antiSpam';
 
@@ -113,51 +113,6 @@ const StoreContent: React.FC = () => {
           <div>
             {/* Hero Section */}
             <HeroSection />
-
-            {/* Pink Boutique Story Banner */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-              <div
-                dir="rtl"
-                className="rounded-3xl bg-gradient-to-r from-rose-600/90 via-pink-600/90 to-rose-500/90 backdrop-blur-md p-8 sm:p-12 text-white relative overflow-hidden shadow-xl text-right"
-              >
-                <div className="relative z-10 max-w-xl space-y-4">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-xs text-xs font-semibold">
-                    <Heart className="w-3.5 h-3.5 fill-white" />
-                    <span>ورد مميز لا يذبل</span>
-                  </div>
-                  <h3 className="text-2xl sm:text-4xl font-extrabold leading-snug">
-                    ورد مميز لا يذبل • صممت لتبقى معك للأبد
-                  </h3>
-                  <p className="text-rose-100 text-xs sm:text-sm leading-relaxed">
-                    اختيار اجمل انواع الورد بعناية مع ضمان الجودة والتغليف الفاخر لجميع الطلبات
-                  </p>
-                  <div className="pt-2 flex flex-wrap items-center gap-3">
-                    <button
-                      onClick={() => {
-                        setActiveView('products');
-                        setSelectedCategory('all');
-                      }}
-                      className="px-7 py-3 rounded-full bg-white hover:bg-rose-50 text-rose-700 font-bold text-xs shadow-md transition-colors cursor-pointer"
-                    >
-                      {getBtnText('shop', 'تسوق الآن')}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setActiveView('about');
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
-                      className="px-6 py-3 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/30 backdrop-blur-xs transition-colors cursor-pointer"
-                    >
-                      {getBtnText('aboutUs', 'من نحن وقصتنا')}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Decorative background shapes */}
-                <div className="absolute top-0 left-0 w-80 h-80 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-                <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-pink-300/20 rounded-full blur-xl pointer-events-none" />
-              </div>
-            </section>
           </div>
         )}
       </main>

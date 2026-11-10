@@ -616,9 +616,9 @@ export const initialStoreSettings: StoreSettings = {
   tiktok: 'https://tiktok.com/@kazaki.iq',
   currency: 'د.ع',
   announcement: {
-    enabled: true,
-    text: 'توصيل سريع لكافة محافظات العراق | كود الخصم: KAZAKI20 يمنح خصماً 20% على جميع ورد الليكو',
-    linkText: 'تسوق ورد الليكو الآن',
+    enabled: false,
+    text: '',
+    linkText: '',
   },
   heroBanner: {
     title: 'ورد مميز لا يذبل • صممت لتبقى معك للأبد',

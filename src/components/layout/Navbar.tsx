@@ -55,26 +55,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-rose-100 shadow-xs">
-      {/* Top Announcement Bar */}
-      {settings.announcement.enabled && (
-        <div className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400 text-white text-xs py-2 px-4 text-center font-medium">
-          <div className="max-w-7xl mx-auto flex items-center justify-center gap-2">
-            <span>{getText('announcement', settings.announcement.text)}</span>
-            {settings.announcement.linkText && (
-              <button
-                onClick={() => {
-                  setActiveView('products');
-                  setSelectedCategory('all');
-                }}
-                className="underline hover:text-rose-100 font-semibold cursor-pointer ml-1"
-              >
-                {getText('announcementLink', settings.announcement.linkText)}
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Main Navigation Bar */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
@@ -157,18 +137,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
               }`}
             >
               {getBtnText('contactUs', 'تواصل معنا')}
-            </button>
-            <button
-              onClick={() => {
-                setActiveView('about');
-              }}
-              className={`text-sm font-semibold transition-colors pb-1 border-b-2 cursor-pointer ${
-                activeView === 'about'
-                  ? 'text-rose-600 border-rose-500'
-                  : 'text-stone-600 border-transparent hover:text-rose-600'
-              }`}
-            >
-              {getBtnText('aboutUs', 'من نحن')}
             </button>
             <button
               onClick={() => {
@@ -497,15 +465,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenOrders }) => {
             className="block w-full text-right text-sm font-semibold text-stone-800 py-1.5"
           >
             {getBtnText('contactUs', 'تواصل معنا')}
-          </button>
-          <button
-            onClick={() => {
-              setActiveView('about');
-              setIsMobileMenuOpen(false);
-            }}
-            className="block w-full text-right text-sm font-semibold text-stone-800 py-1.5"
-          >
-            {getBtnText('aboutUs', 'من نحن')}
           </button>
           <button
             onClick={() => {

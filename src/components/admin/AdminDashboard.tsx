@@ -154,7 +154,7 @@ export const AdminDashboard: React.FC = () => {
   }
 
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'reports' | 'products' | 'categories' | 'orders' | 'buttons' | 'branding' | 'contact' | 'about'
+    'overview' | 'reports' | 'products' | 'categories' | 'orders' | 'buttons' | 'branding' | 'contact'
   >('overview');
 
   // Store notification settings state
@@ -372,32 +372,6 @@ export const AdminDashboard: React.FC = () => {
     contactSubtitle: settings.contactInfo?.subtitle || 'نحن هنا لخدمتكِ ومساعدتكِ في كل خطوة',
     workingHours: settings.contactInfo?.workingHours || 'يومياً من 10:00 صباحاً حتى 10:00 مساءً',
     customerServiceNote: settings.contactInfo?.customerServiceNote || 'فريق الدعم الفني متواجد للإجابة على استفساراتكم عبر واتساب والهاتف فوراً.',
-  });
-
-
-  // About Us settings local state
-  const [aboutForm, setAboutForm] = useState({
-    badge: settings.aboutUs?.badge || defaultAboutUs.badge,
-    badgeEn: settings.aboutUs?.badgeEn || defaultAboutUs.badgeEn || '',
-    badgeKu: settings.aboutUs?.badgeKu || defaultAboutUs.badgeKu || '',
-    title: settings.aboutUs?.title || defaultAboutUs.title,
-    titleEn: settings.aboutUs?.titleEn || defaultAboutUs.titleEn || '',
-    titleKu: settings.aboutUs?.titleKu || defaultAboutUs.titleKu || '',
-    subtitle: settings.aboutUs?.subtitle || defaultAboutUs.subtitle,
-    subtitleEn: settings.aboutUs?.subtitleEn || defaultAboutUs.subtitleEn || '',
-    subtitleKu: settings.aboutUs?.subtitleKu || defaultAboutUs.subtitleKu || '',
-    story: settings.aboutUs?.story || defaultAboutUs.story,
-    storyEn: settings.aboutUs?.storyEn || defaultAboutUs.storyEn || '',
-    storyKu: settings.aboutUs?.storyKu || defaultAboutUs.storyKu || '',
-    mission: settings.aboutUs?.mission || defaultAboutUs.mission,
-    missionEn: settings.aboutUs?.missionEn || defaultAboutUs.missionEn || '',
-    missionKu: settings.aboutUs?.missionKu || defaultAboutUs.missionKu || '',
-    imageUrl: settings.aboutUs?.imageUrl || defaultAboutUs.imageUrl,
-    secondaryImageUrl: settings.aboutUs?.secondaryImageUrl || defaultAboutUs.secondaryImageUrl || '',
-    gallery: settings.aboutUs?.gallery || defaultAboutUs.gallery || [],
-    experienceYears: settings.aboutUs?.experienceYears || defaultAboutUs.experienceYears || '+3 سنوات من الإبداع',
-    satisfiedCustomers: settings.aboutUs?.satisfiedCustomers || defaultAboutUs.satisfiedCustomers || '+10,000 زبون راضٍ',
-    everlastingGuarantee: settings.aboutUs?.everlastingGuarantee || defaultAboutUs.everlastingGuarantee || '100% ورد لا يذبل',
   });
 
   // Iraqi Governorates Shipping rates state
@@ -983,51 +957,6 @@ export const AdminDashboard: React.FC = () => {
   };
 
 
-  // Save About Us
-  const handleSaveAboutUs = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateSettings({
-      aboutUs: {
-        ...(settings.aboutUs || defaultAboutUs),
-        ...aboutForm,
-      },
-    });
-    showNotification('تم حفظ وتحديث صفحة وقسم «من نحن» بنجاح! التغييرات مفعلة فوراً للجميع');
-  };
-
-  const handleResetAboutUs = () => {
-    if (confirm('هل ترغب في استعادة النصوص والبيانات الافتراضية لقسم «من نحن»؟')) {
-      const resetData = {
-        badge: defaultAboutUs.badge,
-        badgeEn: defaultAboutUs.badgeEn || '',
-        badgeKu: defaultAboutUs.badgeKu || '',
-        title: defaultAboutUs.title,
-        titleEn: defaultAboutUs.titleEn || '',
-        titleKu: defaultAboutUs.titleKu || '',
-        subtitle: defaultAboutUs.subtitle,
-        subtitleEn: defaultAboutUs.subtitleEn || '',
-        subtitleKu: defaultAboutUs.subtitleKu || '',
-        story: defaultAboutUs.story,
-        storyEn: defaultAboutUs.storyEn || '',
-        storyKu: defaultAboutUs.storyKu || '',
-        mission: defaultAboutUs.mission,
-        missionEn: defaultAboutUs.missionEn || '',
-        missionKu: defaultAboutUs.missionKu || '',
-        imageUrl: defaultAboutUs.imageUrl,
-        secondaryImageUrl: defaultAboutUs.secondaryImageUrl || '',
-        gallery: defaultAboutUs.gallery || [],
-        experienceYears: defaultAboutUs.experienceYears || '+3 سنوات من الإبداع',
-        satisfiedCustomers: defaultAboutUs.satisfiedCustomers || '+10,000 زبون راضٍ',
-        everlastingGuarantee: defaultAboutUs.everlastingGuarantee || '100% ورد لا يذبل',
-      };
-      setAboutForm(resetData);
-      updateSettings({
-        aboutUs: defaultAboutUs,
-      });
-      showNotification('تمت استعادة البيانات الافتراضية لقسم «من نحن»');
-    }
-  };
-
   // Add Promo Code
   const handleAddPromo = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1324,22 +1253,6 @@ export const AdminDashboard: React.FC = () => {
       description: 'الشارة الصغيرة في أعلى الواجهة الترحيبية',
       badge: 'بانر الواجهة',
       icon: Tag,
-      group: 'banners',
-    },
-    {
-      key: 'announcement',
-      title: 'شريط الإعلانات العلوي',
-      description: 'نص الشريط الإعلاني في أعلى الموقع عن كود الخصم والتوصيل',
-      badge: 'أعلى الموقع',
-      icon: Bell,
-      group: 'banners',
-    },
-    {
-      key: 'announcementLink',
-      title: 'زر شريط الإعلانات',
-      description: 'نص زر التوجيه السريع في الشريط الإعلاني',
-      badge: 'الشريط الإعلاني',
-      icon: ExternalLink,
       group: 'banners',
     },
     {
@@ -1858,18 +1771,6 @@ export const AdminDashboard: React.FC = () => {
             <Headphones className="w-4 h-4 text-emerald-600" />
             <span>خدمة العملاء (تعديل وحذف)</span>
           </button>
-
-          <button
-            onClick={() => setActiveTab('about')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
-              activeTab === 'about'
-                ? 'bg-gradient-to-r from-rose-600 to-pink-500 text-white shadow-md shadow-rose-200 font-extrabold'
-                : 'text-stone-600 hover:bg-rose-50 hover:text-rose-700 font-semibold'
-            }`}
-          >
-            <Heart className="w-4 h-4 text-rose-500" />
-            <span>«من نحن» وقصة المتجر</span>
-          </button>
         </div>
 
         {/* TAB 1: OVERVIEW */}
@@ -2181,52 +2082,45 @@ export const AdminDashboard: React.FC = () => {
                               <div className="flex flex-col gap-1.5">
                                 {hasDiscount ? (
                                   <div className="flex items-center gap-1.5">
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500 text-white text-[11px] font-black shadow-2xs">
-                                      <Percent className="w-3 h-3" />
-                                      <span>خصم {currentDiscountPercent}%</span>
-                                    </span>
                                     <button
                                       type="button"
                                       onClick={() => handleRemoveDiscount(prod)}
-                                      className="px-2 py-1 rounded-lg border border-stone-200 hover:border-red-300 bg-white hover:bg-red-50 text-stone-500 hover:text-red-600 text-[10px] font-bold transition-all cursor-pointer"
-                                      title="إلغاء الخصم واسترجاع السعر الأصلي"
+                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-xs transition-all cursor-pointer group"
+                                      title="انقر لإغلاق وإلغاء الخصم واسترجاع السعر الأصلي"
                                     >
-                                      إلغاء
+                                      <Percent className="w-3.5 h-3.5 text-white" />
+                                      <span>خصم {currentDiscountPercent}% مفعّل</span>
+                                      <span className="bg-rose-800 text-rose-100 text-[10px] px-1.5 py-0.5 rounded-md group-hover:bg-red-900 transition-colors">
+                                        إغلاق الخصم ✕
+                                      </span>
                                     </button>
                                   </div>
                                 ) : (
                                   <div className="flex items-center gap-1">
                                     <button
                                       type="button"
-                                      onClick={() => handleApplyQuickDiscount(prod, 10)}
-                                      className="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[10px] font-bold transition-all cursor-pointer hover:scale-105 active:scale-95"
-                                      title="تفعيل خصم 10% فوراً بضغطة زر"
+                                      onClick={() => handleOpenDiscountModal(prod)}
+                                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-rose-50 text-stone-700 hover:text-rose-700 border border-stone-200 hover:border-rose-300 text-[11px] font-bold transition-all cursor-pointer"
+                                      title="تفعيل الخصم على هذا المنتج"
                                     >
-                                      10%
+                                      <Percent className="w-3.5 h-3.5 text-rose-500" />
+                                      <span>تفعيل الخصم</span>
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => handleApplyQuickDiscount(prod, 15)}
-                                      className="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[10px] font-bold transition-all cursor-pointer hover:scale-105 active:scale-95"
-                                      title="تفعيل خصم 15% فوراً بضغطة زر"
+                                      className="px-2 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[10px] font-black transition-all cursor-pointer hover:scale-105 active:scale-95"
+                                      title="تفعيل خصم 15% فوري"
                                     >
                                       15%
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => handleApplyQuickDiscount(prod, 20)}
-                                      className="px-2 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 text-[10px] font-black transition-all cursor-pointer hover:scale-105 active:scale-95"
-                                      title="تفعيل خصم 20% فوراً بضغطة زر"
+                                      className="px-2 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 text-[10px] font-black transition-all cursor-pointer hover:scale-105 active:scale-95"
+                                      title="تفعيل خصم 20% فوري"
                                     >
                                       20%
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleOpenDiscountModal(prod)}
-                                      className="px-2 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-[10px] font-bold transition-all cursor-pointer"
-                                      title="تخصيص نسبة الخصم أو السعر بعد الخصم"
-                                    >
-                                      تخصيص
                                     </button>
                                   </div>
                                 )}
@@ -2974,31 +2868,6 @@ export const AdminDashboard: React.FC = () => {
         {/* TAB 5: CATEGORIES */}
         {activeTab === 'categories' && (
           <div className="space-y-4 animate-in fade-in">
-            {/* Standalone Segregation Notice for "من نحن" */}
-            <div className="bg-gradient-to-r from-pink-50 via-rose-50 to-pink-50 p-4 rounded-2xl border border-pink-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-pink-100 text-pink-700 shrink-0 mt-0.5">
-                  <Languages className="w-4 h-4 text-pink-600" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-extrabold text-pink-900">
-                    تم إزالة وفصل «من نحن» تماماً عن أقسام المنتجات ووضعها كصفحة وقسم مستقل وحدها
-                  </h4>
-                  <p className="text-[11px] text-pink-800 leading-relaxed mt-0.5">
-                    وفقاً للتنظيم الجديد، لا تُعتبر «من نحن» تصنيفاً للمنتجات. تم عزلها بالكامل في تبويب مستقل خاص بها لإدارة القصة والرسالة والمزايا، لتقتصر الأقسام هنا على بوكسات وورود ليغو فقط.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveTab('about')}
-                className="px-4 py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold shrink-0 transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer mr-auto sm:mr-0"
-              >
-                <span>إدارة صفحة «من نحن» المستقلة</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
             <div className="bg-white p-4 rounded-2xl border border-rose-100 flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-sm text-stone-900">أقسام وتصنيفات المتجر</h3>
@@ -3133,30 +3002,6 @@ export const AdminDashboard: React.FC = () => {
                     helperText="يظهر هذا اللوغو في الهيدر، الفوتر، شاشة الترحيب، وكافة صفحات المتجر"
                   />
                 </div>
-              </div>
-
-              {/* Announcement Bar */}
-              <div className="p-4 rounded-2xl bg-rose-50/50 border border-rose-100 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-stone-800">شريط الإعلانات العلوي</span>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={brandingForm.announcementEnabled}
-                      onChange={(e) => setBrandingForm({ ...brandingForm, announcementEnabled: e.target.checked })}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-stone-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
-                  </label>
-                </div>
-
-                <input
-                  type="text"
-                  value={brandingForm.announcementText}
-                  onChange={(e) => setBrandingForm({ ...brandingForm, announcementText: e.target.value })}
-                  placeholder="نص الإعلان العلوي..."
-                  className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-white outline-hidden focus:border-rose-400"
-                />
               </div>
 
               {/* Hero Banner Controls */}
@@ -4000,434 +3845,9 @@ export const AdminDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 8: ABOUT US & STORE STORY CONTROL (من نحن وقصة المتجر) */}
-        {activeTab === 'about' && (
-          <div className="bg-white rounded-2xl border border-rose-100 p-6 shadow-2xs space-y-6 animate-in fade-in">
-            {/* Header */}
-            <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-rose-100">
-              <div>
-                <h3 className="font-extrabold text-base text-stone-900 flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-rose-600" />
-                  <span>إدارة وتعديل قسم وصفحة «من نحن» (About Us) وقصة المتجر</span>
-                </h3>
-                <p className="text-xs text-stone-500 mt-1">
-                  تعديل قصة KAZAKI.IQ، الرسالة، العناوين باللغات الثلاث (عربي/إنجليزي/كردي)، الصور، والإحصائيات التي تظهر للزوار في صفحة «من نحن» والبنرات.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setActiveView('about')}
-                  className="px-4 py-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>مشاهدة صفحة «من نحن» كزبون</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleResetAboutUs}
-                  className="px-3.5 py-2 rounded-full border border-stone-200 hover:bg-stone-50 text-stone-600 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                  title="استعادة النصوص الافتراضية"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>استعادة الافتراضي</span>
-                </button>
-              </div>
-            </div>
-
-            <form onSubmit={handleSaveAboutUs} className="space-y-6">
-              {/* SECTION 1: BADGE & MAIN TITLES */}
-              <div className="p-5 rounded-2xl bg-rose-50/30 border border-rose-100 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-xs text-rose-900 uppercase tracking-wider flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-rose-500" />
-                    <span>الشارة الترحيبية والعنوان الرئيسي لـ «من نحن»</span>
-                  </h4>
-                  <span className="text-[11px] font-medium text-rose-600 bg-rose-100/70 px-2 py-0.5 rounded-full">
-                    يدعم اللغات الثلاث (العربية / English / الكردية)
-                  </span>
-                </div>
-
-                {/* Badge Inputs */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      الشارة الترحيبية (Badge بالعربية)
-                    </label>
-                    <input
-                      type="text"
-                      value={aboutForm.badge}
-                      onChange={(e) => setAboutForm({ ...aboutForm, badge: e.target.value })}
-                      placeholder="مثال: قصتنا وهوية متجرنا"
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-rose-200 outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      الشارة بالإنجليزية (Badge EN)
-                    </label>
-                    <input
-                      type="text"
-                      dir="ltr"
-                      value={aboutForm.badgeEn}
-                      onChange={(e) => setAboutForm({ ...aboutForm, badgeEn: e.target.value })}
-                      placeholder="e.g. Our Story & Boutique Identity"
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-rose-200 outline-none font-sans"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      الشارة بالكردية (Badge KU)
-                    </label>
-                    <input
-                      type="text"
-                      value={aboutForm.badgeKu}
-                      onChange={(e) => setAboutForm({ ...aboutForm, badgeKu: e.target.value })}
-                      placeholder="نموونە: چیرۆک و ناسنامەی ئێمە"
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-rose-200 outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Main Title Inputs */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      العنوان الرئيسي (بالعربية) <span className="text-rose-600">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={aboutForm.title}
-                      onChange={(e) => setAboutForm({ ...aboutForm, title: e.target.value })}
-                      placeholder="من نحن | KAZAKI.IQ لعالم ورد الليكو الفاخر"
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-rose-200 outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Subtitle Inputs */}
-                <div className="pt-2">
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      العنوان الفرعي والشعار (بالعربية)
-                    </label>
-                    <input
-                      type="text"
-                      value={aboutForm.subtitle}
-                      onChange={(e) => setAboutForm({ ...aboutForm, subtitle: e.target.value })}
-                      placeholder="أول وأرقى متجر متخصص في بوكسات وورود ليغو الفاخرة..."
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-rose-200 outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 2: STORE STORY (قصة المتجر بالتفصيل) */}
-              <div className="p-5 rounded-2xl bg-white border border-rose-100 shadow-2xs space-y-4">
-                <h4 className="font-bold text-xs text-stone-900 uppercase tracking-wider flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-amber-500" />
-                  <span>قصة المتجر ورؤيته (Story Text)</span>
-                </h4>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      نص قصة المتجر (بالعربية) <span className="text-rose-600">*</span>
-                    </label>
-                    <textarea
-                      rows={4}
-                      required
-                      value={aboutForm.story}
-                      onChange={(e) => setAboutForm({ ...aboutForm, story: e.target.value })}
-                      placeholder="اكتب هنا قصة تأسيس المتجر، الشغف، وفلسفة ورد الليكو الذي لا يذبل..."
-                      className="w-full text-xs border border-rose-200 rounded-xl p-3.5 bg-rose-50/10 focus:bg-white focus:ring-2 focus:ring-rose-200 outline-none leading-relaxed"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 3: MISSION & PROMISE (الرسالة والوعد) */}
-              <div className="p-5 rounded-2xl bg-white border border-rose-100 shadow-2xs space-y-4">
-                <h4 className="font-bold text-xs text-stone-900 uppercase tracking-wider flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600" />
-                  <span>رسالة المتجر والوعد للعميل (Mission & Promise)</span>
-                </h4>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      نص رسالة المتجر (بالعربية)
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={aboutForm.mission}
-                      onChange={(e) => setAboutForm({ ...aboutForm, mission: e.target.value })}
-                      placeholder="رسالتنا هي تحويل كل مناسبة إهداء إلى لحظة لا تُنسى..."
-                      className="w-full text-xs border border-rose-200 rounded-xl p-3.5 bg-rose-50/10 focus:bg-white focus:ring-2 focus:ring-rose-200 outline-none leading-relaxed"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 4: IMAGERY & MEDIA (رفع الصور من الاستوديو أو رابط) */}
-              <div className="p-5 rounded-2xl bg-white border border-rose-100 shadow-2xs space-y-5">
-                <div className="flex items-center justify-between pb-3 border-b border-rose-100">
-                  <h4 className="font-bold text-xs text-stone-900 uppercase tracking-wider flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4 text-rose-600" />
-                    <span>صور قسم «من نحن» والوسائط من الاستوديو</span>
-                  </h4>
-                  <span className="text-[11px] font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200">
-                    دعم مباشر لرفع الصور من استوديو الهاتف والجهاز
-                  </span>
-                </div>
-
-                {/* 1. Main About Us Image (صورة من نحن الرئيسية من الاستوديو) */}
-                <div className="p-4 rounded-xl bg-rose-50/20 border border-rose-100 space-y-3">
-                  <StudioMediaUploader
-                    label="صورة «من نحن» الرئيسية (اختر من استوديو جهازك أو ضع رابطاً)"
-                    value={aboutForm.imageUrl || ''}
-                    onChange={(val) => setAboutForm({ ...aboutForm, imageUrl: val })}
-                    mediaType="image"
-                    helperText="الصورة الأبرز التي تظهر في الصفحة الرئيسية وصفحة من نحن للتعريف بالمتجر والورد الفاخر"
-                  />
-
-                  {/* Quick Suggestions for Lego Flower Images */}
-                  <div className="pt-2">
-                    <span className="text-[11px] font-bold text-stone-500 block mb-2">
-                      أو اختر من النماذج الجاهزة لورد الليكو (انقر للتطبيق الفوري):
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setAboutForm({
-                            ...aboutForm,
-                            imageUrl:
-                              'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=1000&q=80',
-                          })
-                        }
-                        className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold border border-rose-200 transition-colors cursor-pointer"
-                      >
-                        ورود ليغو وردية
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setAboutForm({
-                            ...aboutForm,
-                            imageUrl:
-                              'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1000&q=80',
-                          })
-                        }
-                        className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold border border-rose-200 transition-colors cursor-pointer"
-                      >
-                        بوكس ورد ليغو فاخر
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setAboutForm({
-                            ...aboutForm,
-                            imageUrl:
-                              'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=1000&q=80',
-                          })
-                        }
-                        className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold border border-rose-200 transition-colors cursor-pointer"
-                      >
-                        بوكس الهدايا الفاخر
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setAboutForm({
-                            ...aboutForm,
-                            imageUrl:
-                              'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=1000&q=80',
-                          })
-                        }
-                        className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold border border-rose-200 transition-colors cursor-pointer"
-                      >
-                        نباتات بونساي وأوركيد
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. Secondary Image from Studio */}
-                <div className="p-4 rounded-xl bg-rose-50/20 border border-rose-100">
-                  <StudioMediaUploader
-                    label="صورة ثانوية إضافية لصفحة من نحن (من الاستوديو أو رابط - اختياري)"
-                    value={aboutForm.secondaryImageUrl || ''}
-                    onChange={(val) => setAboutForm({ ...aboutForm, secondaryImageUrl: val })}
-                    mediaType="image"
-                    helperText="صورة إضافية تبرز زاوية أخرى، تفاصيل التغليف، أو الورشة في صفحة من نحن"
-                  />
-                </div>
-
-                {/* 3. Studio Gallery Photos for About Us (معرض صور متعدد من الاستوديو) */}
-                <div className="p-4 rounded-xl bg-rose-50/20 border border-rose-100 space-y-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                      <label className="block text-xs font-bold text-stone-800">
-                        معرض صور المتجر والورشة (Studio Gallery لـ «من نحن»)
-                      </label>
-                      <p className="text-[11px] text-stone-500">
-                        يمكنك إضافة عدة صور مباشرة من استوديو هاتفك لتظهر كمعرض صور فوتوغرافي داخل صفحة «من نحن»
-                      </p>
-                    </div>
-                    <span className="text-[11px] font-bold text-rose-700 bg-white px-3 py-1 rounded-full border border-rose-200 shadow-2xs">
-                      {aboutForm.gallery?.length || 0} صور بالمعرض
-                    </span>
-                  </div>
-
-                  {/* Thumbnail gallery grid */}
-                  {aboutForm.gallery && aboutForm.gallery.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 pt-2">
-                      {aboutForm.gallery.map((imgUrl, idx) => (
-                        <div key={idx} className="relative rounded-2xl overflow-hidden aspect-square border border-rose-200 group bg-stone-100 shadow-2xs">
-                          <img src={imgUrl} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const updated = (aboutForm.gallery || []).filter((_, i) => i !== idx);
-                              setAboutForm({ ...aboutForm, gallery: updated });
-                            }}
-                            className="absolute top-1.5 left-1.5 p-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white transition-opacity shadow-sm cursor-pointer"
-                            title="حذف الصورة"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="absolute bottom-1 right-1.5 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded font-mono">
-                            #{idx + 1}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Add New Image to Gallery from Studio */}
-                  <div className="pt-2">
-                    <StudioMediaUploader
-                      label="إضافة صورة جديدة إلى معرض الاستوديو"
-                      value=""
-                      onChange={(newImg) => {
-                        if (newImg) {
-                          setAboutForm({
-                            ...aboutForm,
-                            gallery: [...(aboutForm.gallery || []), newImg],
-                          });
-                          showNotification('تمت إضافة الصورة إلى معرض استوديو «من نحن» بنجاح!');
-                        }
-                      }}
-                      mediaType="image"
-                      helperText="اختر صورة من استوديو هاتفك وسيتم حفظها وإدراجها فوراً في معرض صور من نحن"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 5: TRUST METRICS & GUARANTEES */}
-              <div className="p-5 rounded-2xl bg-white border border-rose-100 shadow-2xs space-y-4">
-                <h4 className="font-bold text-xs text-stone-900 uppercase tracking-wider flex items-center gap-2">
-                  <Award className="w-4 h-4 text-rose-600" />
-                  <span>إحصائيات وأرقام الثقة (Trust Numbers & Metrics)</span>
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      سنوات الخبرة والإبداع
-                    </label>
-                    <input
-                      type="text"
-                      value={aboutForm.experienceYears}
-                      onChange={(e) => setAboutForm({ ...aboutForm, experienceYears: e.target.value })}
-                      placeholder="مثال: +3 سنوات من الإبداع"
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/10 focus:bg-white focus:ring-2 focus:ring-rose-200 outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      عدد الزبائن الراضين
-                    </label>
-                    <input
-                      type="text"
-                      value={aboutForm.satisfiedCustomers}
-                      onChange={(e) => setAboutForm({ ...aboutForm, satisfiedCustomers: e.target.value })}
-                      placeholder="مثال: +10,000 زبون راضٍ"
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/10 focus:bg-white focus:ring-2 focus:ring-rose-200 outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
-                      نسبة الضمان والورد الدائم
-                    </label>
-                    <input
-                      type="text"
-                      value={aboutForm.everlastingGuarantee}
-                      onChange={(e) => setAboutForm({ ...aboutForm, everlastingGuarantee: e.target.value })}
-                      placeholder="مثال: 100% ورد لا يذبل"
-                      className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/10 focus:bg-white focus:ring-2 focus:ring-rose-200 outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 6: LIVE PREVIEW BOX */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-rose-50/50 via-pink-50/30 to-rose-100/40 border border-rose-200 space-y-3">
-                <span className="text-[11px] font-bold text-rose-800 uppercase tracking-widest flex items-center gap-1.5">
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>معاينة فورية لكيفية ظهور صفحة «من نحن» للزبائن الآن</span>
-                </span>
-
-                <div className="bg-white rounded-2xl p-4 sm:p-5 border border-rose-100 shadow-sm space-y-3">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-bold">
-                    <Heart className="w-3 h-3 fill-rose-500 text-rose-500" />
-                    <span>{aboutForm.badge || 'قصتنا وهوية متجرنا'}</span>
-                  </div>
-                  <h3 className="font-black text-lg text-stone-900 leading-snug">
-                    {aboutForm.title || 'من نحن | KAZAKI.IQ'}
-                  </h3>
-                  <p className="text-xs text-stone-600 line-clamp-2">
-                    {aboutForm.subtitle}
-                  </p>
-                  <p className="text-xs text-stone-700 line-clamp-3 bg-rose-50/30 p-3 rounded-xl border border-rose-100/60 leading-relaxed">
-                    {aboutForm.story}
-                  </p>
-                </div>
-              </div>
-
-              {/* SUBMIT BUTTON */}
-              <div className="pt-4 border-t border-rose-100 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => setActiveView('about')}
-                  className="text-xs text-rose-600 font-bold hover:underline cursor-pointer"
-                >
-                  معاينة كاملة على الموقع ←
-                </button>
-
-                <button
-                  type="submit"
-                  className="px-8 py-3.5 rounded-full bg-gradient-to-r from-rose-600 via-pink-600 to-rose-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold text-xs shadow-md shadow-rose-300 hover:shadow-lg transition-all cursor-pointer flex items-center gap-2 transform hover:-translate-y-0.5"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>حفظ وتطبيق تعديل «من نحن» فوراً</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
       </div>
 
-      {/* PRODUCT ADD / EDIT MODAL */}
+            {/* PRODUCT ADD / EDIT MODAL */}
       {isProductModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div
@@ -4463,10 +3883,10 @@ export const AdminDashboard: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    السعر الحالي ({settings.currency}) <span className="text-rose-600">*</span>
+                    السعر الأساسي الحالي ({settings.currency}) <span className="text-rose-600">*</span>
                   </label>
                   <input
                     type="number"
@@ -4474,23 +3894,77 @@ export const AdminDashboard: React.FC = () => {
                     min={1}
                     value={productForm.price}
                     onChange={(e) => setProductForm({ ...productForm, price: Number(e.target.value) })}
-                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
+                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 font-bold"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    السعر قبل الخصم (اختياري)
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={productForm.originalPrice}
-                    onChange={(e) =>
-                      setProductForm({ ...productForm, originalPrice: Number(e.target.value) })
-                    }
-                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
-                  />
+                {/* زر وخيار تفعيل/إغلاق الخصم */}
+                <div className="p-3.5 rounded-2xl border border-rose-200/80 bg-rose-50/40 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-rose-100 text-rose-700">
+                        <Percent className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-stone-900 block">
+                          تفعيل الخصم على هذا المنتج
+                        </span>
+                        <span className="text-[10px] text-stone-500">
+                          {Boolean(productForm.originalPrice && productForm.originalPrice > productForm.price)
+                            ? `الخصم مفعّل حالياً (${Math.round((((productForm.originalPrice - productForm.price) / productForm.originalPrice) * 100))}% توفير)`
+                            : 'الخصم متوقف حالياً. يمكنك تفعيله وإغلاقه في أي وقت'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(productForm.originalPrice && productForm.originalPrice > productForm.price)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            const suggestedOrig = Math.round((productForm.price * 1.25) / 250) * 250;
+                            setProductForm({ ...productForm, originalPrice: suggestedOrig });
+                          } else {
+                            setProductForm({ ...productForm, originalPrice: 0 });
+                          }
+                        }}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-stone-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
+                    </label>
+                  </div>
+
+                  {Boolean(productForm.originalPrice && productForm.originalPrice > productForm.price) && (
+                    <div className="grid grid-cols-2 gap-3 pt-2 border-t border-rose-200/60 animate-in fade-in">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                          السعر قبل الخصم ({settings.currency})
+                        </label>
+                        <input
+                          type="number"
+                          min={productForm.price + 1}
+                          value={productForm.originalPrice}
+                          onChange={(e) =>
+                            setProductForm({ ...productForm, originalPrice: Number(e.target.value) })
+                          }
+                          className="w-full text-xs border border-rose-200 rounded-xl px-3 py-2 bg-white outline-hidden focus:border-rose-400 font-bold"
+                          placeholder="السعر قبل الخصم"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                          نسبة الخصم المحسوبة
+                        </label>
+                        <div className="flex items-center gap-1.5 h-[36px] px-3 rounded-xl bg-white border border-rose-200 text-rose-700 font-bold text-xs">
+                          <Tag className="w-3.5 h-3.5" />
+                          <span>
+                            {Math.round((((productForm.originalPrice! - productForm.price) / productForm.originalPrice!) * 100))}% خصم للزبون
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
