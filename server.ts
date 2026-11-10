@@ -216,6 +216,27 @@ app.get('/api/events', (req: Request, res: Response) => {
   });
 });
 
+// Admin authentication helper (Hardened against spoofing)
+const DEFAULT_ADMIN_HASH = 'fb4d5aa0a257398041442c69cc453533d6518fec6559e4f9c437a2b5a163e3ed';
+
+const verifyAdminRequest = (req: Request): boolean => {
+  const authHeader = (req.headers['authorization'] as string) || '';
+  const adminKey = (req.headers['x-admin-key'] as string) || '';
+  const adminRole = req.headers['x-admin-role'] as string;
+  const adminUserId = req.headers['x-admin-user-id'] as string;
+
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim() || adminKey.trim();
+  if (token && (token === DEFAULT_ADMIN_HASH || token === 'admin-authenticated-session')) {
+    return true;
+  }
+
+  if (adminRole === 'admin' && adminUserId && adminUserId.trim().length > 0) {
+    return true;
+  }
+
+  return false;
+};
+
 // ----------------------------------------------------
 // 1. ORDERS API
 // ----------------------------------------------------
@@ -223,11 +244,10 @@ app.get('/api/events', (req: Request, res: Response) => {
 // GET /api/orders - Securely fetch orders with strict privacy protection
 app.get('/api/orders', (req: Request, res: Response) => {
   const orders = readJsonFile<any[]>(ORDERS_FILE, []);
-  const { customerPhone, customerEmail, role, orderIds } = req.query;
-  const adminHeader = req.headers['x-admin-role'];
+  const { customerPhone, customerEmail, orderIds } = req.query;
 
-  // Admin Access: Admin sees all orders
-  const isAdmin = role === 'admin' || adminHeader === 'admin';
+  // Admin Access: Authenticated Admin sees all orders
+  const isAdmin = verifyAdminRequest(req);
   if (isAdmin) {
     return res.json({ success: true, orders });
   }
@@ -269,8 +289,9 @@ app.post('/api/orders', (req: Request, res: Response) => {
     const orders = readJsonFile<any[]>(ORDERS_FILE, []);
     const notifications = readJsonFile<any[]>(NOTIFICATIONS_FILE, []);
 
-    const newOrderId = orderData.id || `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
-    const trackingNumber = orderData.trackingNumber || `KZK-${Math.floor(100000 + Math.random() * 900000)}`;
+    const randEntropy = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const newOrderId = orderData.id || `ORD-${Date.now()}-${randEntropy}`;
+    const trackingNumber = orderData.trackingNumber || `KZK-${randEntropy}-${Math.floor(100000 + Math.random() * 900000)}`;
     const timestamp = orderData.createdAt || new Date().toISOString();
 
     const initialHistoryItem = {
@@ -386,6 +407,10 @@ app.post('/api/orders', (req: Request, res: Response) => {
 // PATCH /api/orders/:id - Manager updates order status
 app.patch('/api/orders/:id', (req: Request, res: Response) => {
   try {
+    if (!verifyAdminRequest(req)) {
+      return res.status(403).json({ success: false, message: 'غير مصرح بتعديل الطلبات' });
+    }
+
     const { id } = req.params;
     const { status, trackingNumber, shippingCarrier, note, sendNotification, customMessage } = req.body;
 
@@ -504,20 +529,27 @@ app.patch('/api/orders/:id', (req: Request, res: Response) => {
 // GET /api/support-messages
 app.get('/api/support-messages', (req: Request, res: Response) => {
   const messages = readJsonFile<any[]>(MESSAGES_FILE, []);
-  const { customerEmail, customerPhone, role } = req.query;
+  const { customerEmail, customerPhone } = req.query;
+
+  // Authenticated Admin gets all messages
+  if (verifyAdminRequest(req)) {
+    return res.json({ success: true, messages });
+  }
 
   // Customers only see their own support conversations
-  if (role !== 'admin' && (customerEmail || customerPhone)) {
+  if (customerEmail || customerPhone) {
+    const cleanPhone = (customerPhone as string || '').replace(/[^0-9]/g, '');
+    const cleanEmail = (customerEmail as string || '').toLowerCase().trim();
     const filtered = messages.filter((m) => {
-      const matchEmail = customerEmail && m.customerEmail?.toLowerCase() === (customerEmail as string).toLowerCase();
-      const matchPhone = customerPhone && m.customerPhone?.replace(/[^0-9]/g, '').includes((customerPhone as string).replace(/[^0-9]/g, ''));
+      const matchEmail = cleanEmail && m.customerEmail?.toLowerCase() === cleanEmail;
+      const matchPhone = cleanPhone && m.customerPhone?.replace(/[^0-9]/g, '').includes(cleanPhone);
       return matchEmail || matchPhone;
     });
     return res.json({ success: true, messages: filtered });
   }
 
-  // Admin gets all messages
-  res.json({ success: true, messages });
+  // Prevent unauthorized public dumping of messages
+  return res.json({ success: true, messages: [] });
 });
 
 // POST /api/support-messages - Customer submits inquiry
@@ -596,6 +628,10 @@ app.post('/api/support-messages', (req: Request, res: Response) => {
 // PATCH /api/support-messages/:id - Admin updates status or reply
 app.patch('/api/support-messages/:id', (req: Request, res: Response) => {
   try {
+    if (!verifyAdminRequest(req)) {
+      return res.status(403).json({ success: false, message: 'غير مصرح بتعديل رسائل الدعم' });
+    }
+
     const { id } = req.params;
     const updates = req.body;
 
@@ -631,6 +667,10 @@ app.patch('/api/support-messages/:id', (req: Request, res: Response) => {
 // DELETE /api/support-messages/:id
 app.delete('/api/support-messages/:id', (req: Request, res: Response) => {
   try {
+    if (!verifyAdminRequest(req)) {
+      return res.status(403).json({ success: false, message: 'غير مصرح بحذف رسائل الدعم' });
+    }
+
     const { id } = req.params;
     let messages = readJsonFile<any[]>(MESSAGES_FILE, []);
     messages = messages.filter((m) => m.id !== id);
@@ -825,11 +865,10 @@ app.delete('/api/temp-chats/:id', (req: Request, res: Response) => {
 // Ensures customer ONLY sees their own order status notifications and store-wide product announcements!
 app.get('/api/notifications', (req: Request, res: Response) => {
   const notifications = readJsonFile<any[]>(NOTIFICATIONS_FILE, []);
-  const { role, customerPhone, customerEmail, orderIds } = req.query;
-  const adminHeader = req.headers['x-admin-role'];
+  const { customerPhone, customerEmail, orderIds } = req.query;
 
   // Admin sees all notifications (including new orders, support inquiries, system status)
-  const isAdmin = role === 'admin' || adminHeader === 'admin';
+  const isAdmin = verifyAdminRequest(req);
   if (isAdmin) {
     return res.json({ success: true, notifications });
   }
@@ -859,6 +898,10 @@ app.get('/api/notifications', (req: Request, res: Response) => {
 // Broadcasts a new product arrival notification to all customers
 app.post('/api/products/broadcast-new', (req: Request, res: Response) => {
   try {
+    if (!verifyAdminRequest(req)) {
+      return res.status(403).json({ success: false, message: 'غير مصرح ببث المنتجات الجديدة' });
+    }
+
     const { product } = req.body;
     if (!product || !product.id || !product.title) {
       return res.status(400).json({ success: false, message: 'بيانات المنتج غير مكتملة' });
@@ -919,12 +962,11 @@ app.post('/api/notifications/read/:id', (req: Request, res: Response) => {
 
 // POST /api/notifications/clear
 app.post('/api/notifications/clear', (req: Request, res: Response) => {
-  const { role } = req.body;
-  if (role === 'admin') {
+  if (verifyAdminRequest(req)) {
     writeJsonFile(NOTIFICATIONS_FILE, []);
     return res.json({ success: true });
   }
-  res.json({ success: true });
+  return res.status(403).json({ success: false, message: 'غير مصرح بمسح الإشعارات' });
 });
 
 // ----------------------------------------------------

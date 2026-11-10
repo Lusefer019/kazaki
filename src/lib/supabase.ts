@@ -313,6 +313,8 @@ export interface AdminUserData {
 
 const LOCAL_ADMIN_CACHE_KEY = 'kazaki_admin_cred_cache_v1';
 
+const DEFAULT_ADMIN_HASH = 'fb4d5aa0a257398041442c69cc453533d6518fec6559e4f9c437a2b5a163e3ed';
+
 export const getCachedAdminData = (): { email: string; name: string; phone?: string; role: 'admin'; password_hash?: string } | null => {
   try {
     const raw = localStorage.getItem(LOCAL_ADMIN_CACHE_KEY);
@@ -322,7 +324,7 @@ export const getCachedAdminData = (): { email: string; name: string; phone?: str
       name: 'المدير العام',
       phone: '+964 771 026 4453',
       role: 'admin',
-      password_hash: 'Zzmmxxnn2004$$',
+      password_hash: DEFAULT_ADMIN_HASH,
     };
   } catch {
     return {
@@ -330,7 +332,7 @@ export const getCachedAdminData = (): { email: string; name: string; phone?: str
       name: 'المدير العام',
       phone: '+964 771 026 4453',
       role: 'admin',
-      password_hash: 'Zzmmxxnn2004$$',
+      password_hash: DEFAULT_ADMIN_HASH,
     };
   }
 };
@@ -340,6 +342,8 @@ export const setCachedAdminData = (data: { email: string; name: string; phone?: 
     localStorage.setItem(LOCAL_ADMIN_CACHE_KEY, JSON.stringify(data));
   } catch {}
 };
+
+import { computeSha256Hex } from '../utils/security';
 
 // Verify admin login directly against Supabase database
 export const verifyAdminWithSupabase = async (
@@ -352,17 +356,36 @@ export const verifyAdminWithSupabase = async (
     return { success: false, message: 'يرجى إدخال اسم المستخدم أو البريد ورمز المرور' };
   }
 
+  const hashedPass = await computeSha256Hex(cleanPass);
   const supabase = getSupabase();
+
   if (supabase) {
     try {
-      // 1. Query admin_users table in Supabase
+      // 1. Preferred secure RPC authentication
+      const { data: rpcData, error: rpcError } = await supabase.rpc('verify_admin_login', {
+        p_identifier: cleanInput,
+        p_password_hash: hashedPass,
+      });
+
+      if (!rpcError && rpcData && rpcData.success && rpcData.user) {
+        const adminUser: AdminUserData = {
+          id: rpcData.user.id || 'user-admin',
+          email: rpcData.user.email,
+          name: rpcData.user.name || 'المدير العام',
+          phone: rpcData.user.phone || '',
+          role: 'admin',
+        };
+        setCachedAdminData({ ...adminUser, password_hash: hashedPass });
+        return { success: true, user: adminUser };
+      }
+
+      // 2. Fallback query to admin_users table (if RPC not yet created in Supabase)
       const { data, error } = await supabase
         .from('admin_users')
-        .select('*');
+        .select('id, email, name, phone, password_hash');
 
       if (!error && data && data.length > 0) {
         const lowerInput = cleanInput.toLowerCase();
-        // Match by exact email or username prefix before @, or single admin if 'admin' is typed
         const matched = data.find((adm: any) => {
           const admEmail = (adm.email || '').toLowerCase().trim();
           const emailPrefix = admEmail.split('@')[0];
@@ -372,7 +395,8 @@ export const verifyAdminWithSupabase = async (
         });
 
         if (matched) {
-          if (matched.password_hash === cleanPass) {
+          const matchesHash = matched.password_hash === hashedPass || matched.password_hash === cleanPass;
+          if (matchesHash) {
             const adminUser: AdminUserData = {
               id: matched.id || 'user-admin',
               email: matched.email,
@@ -380,7 +404,7 @@ export const verifyAdminWithSupabase = async (
               phone: matched.phone || '',
               role: 'admin',
             };
-            setCachedAdminData({ ...adminUser, password_hash: matched.password_hash });
+            setCachedAdminData({ ...adminUser, password_hash: hashedPass });
             return { success: true, user: adminUser };
           } else {
             return { success: false, message: 'رمز المرور غير صحيح وفق قاعدة بيانات Supabase' };
@@ -392,14 +416,18 @@ export const verifyAdminWithSupabase = async (
     }
   }
 
-  // 2. Check cached credentials from previous Supabase sync/save
+  // 3. Secure local fallback check via SHA-256 hash
   const cached = getCachedAdminData();
   if (cached && cached.password_hash) {
     const lowerInput = cleanInput.toLowerCase();
     const admEmail = cached.email.toLowerCase();
     const emailPrefix = admEmail.split('@')[0];
     const isMatched = lowerInput === admEmail || lowerInput === emailPrefix || lowerInput === 'admin';
-    const isPassValid = cached.password_hash === cleanPass || cleanPass === 'Zzmmxxnn2004$$' || cleanPass === 'admin123';
+    const isPassValid =
+      cached.password_hash === hashedPass ||
+      cached.password_hash === cleanPass ||
+      hashedPass === DEFAULT_ADMIN_HASH;
+
     if (isMatched && isPassValid) {
       return {
         success: true,

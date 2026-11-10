@@ -66,6 +66,17 @@ export const isUserAdmin = (user: User | null | undefined): boolean => {
   return user.role === 'admin' && Boolean(user.id);
 };
 
+export const computeSha256Hex = async (text: string): Promise<string> => {
+  if (typeof crypto !== 'undefined' && crypto.subtle) {
+    const enc = new TextEncoder();
+    const buf = await crypto.subtle.digest('SHA-256', enc.encode(text));
+    return Array.from(new Uint8Array(buf))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+  return '';
+};
+
 /**
  * Comprehensive Product Payload Validator & Sanitizer.
  */
