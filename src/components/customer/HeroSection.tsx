@@ -59,45 +59,45 @@ export const HeroSection: React.FC = () => {
               </button>
             </div>
 
-            {/* Micro Feature Proofs */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-6 sm:pt-8 border-t border-rose-100/80">
-              <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white/60 sm:bg-transparent border sm:border-0 border-rose-100/60">
-                <div className="p-2 rounded-xl bg-rose-100/80 text-rose-700 shrink-0">
-                  <Truck className="w-4 h-4" />
+            {/* Micro Feature Proofs - One row on all mobile, tablets, and desktop devices */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-6 sm:pt-8 border-t border-rose-100/80">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-right gap-1.5 sm:gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-white/75 backdrop-blur-xs border border-rose-100/80 shadow-2xs hover:shadow-xs transition-all h-full justify-center">
+                <div className="p-1.5 sm:p-2 rounded-xl bg-rose-100/80 text-rose-700 shrink-0">
+                  <Truck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-stone-800">
+                <div className="min-w-0">
+                  <h4 className="text-[10px] sm:text-xs font-bold text-stone-800 leading-snug truncate">
                     {getText('guaranteeFastShipping', 'شحن لجميع العراق')}
                   </h4>
-                  <p className="text-[11px] text-stone-500">
+                  <p className="text-[9px] sm:text-[11px] text-stone-500 leading-snug mt-0.5 truncate">
                     خلال 24-48 ساعة
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white/60 sm:bg-transparent border sm:border-0 border-rose-100/60">
-                <div className="p-2 rounded-xl bg-rose-100/80 text-rose-700 shrink-0">
-                  <Shield className="w-4 h-4" />
+              <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-right gap-1.5 sm:gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-white/75 backdrop-blur-xs border border-rose-100/80 shadow-2xs hover:shadow-xs transition-all h-full justify-center">
+                <div className="p-1.5 sm:p-2 rounded-xl bg-rose-100/80 text-rose-700 shrink-0">
+                  <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-stone-800">
+                <div className="min-w-0">
+                  <h4 className="text-[10px] sm:text-xs font-bold text-stone-800 leading-snug truncate">
                     {getText('guaranteeOriginal', 'منتجات أصلية 100%')}
                   </h4>
-                  <p className="text-[11px] text-stone-500">
+                  <p className="text-[9px] sm:text-[11px] text-stone-500 leading-snug mt-0.5 truncate">
                     ضمان ذهبي للمنتجات
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white/60 sm:bg-transparent border sm:border-0 border-rose-100/60">
-                <div className="p-2 rounded-xl bg-rose-100/80 text-rose-700 shrink-0">
-                  <RefreshCw className="w-4 h-4" />
+              <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-right gap-1.5 sm:gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-white/75 backdrop-blur-xs border border-rose-100/80 shadow-2xs hover:shadow-xs transition-all h-full justify-center">
+                <div className="p-1.5 sm:p-2 rounded-xl bg-rose-100/80 text-rose-700 shrink-0">
+                  <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-stone-800">
+                <div className="min-w-0">
+                  <h4 className="text-[10px] sm:text-xs font-bold text-stone-800 leading-snug truncate">
                     {getText('guaranteeEasyReturn', 'إرجاع سهل ومرن')}
                   </h4>
-                  <p className="text-[11px] text-stone-500">
+                  <p className="text-[9px] sm:text-[11px] text-stone-500 leading-snug mt-0.5 truncate">
                     خلال 14 يوماً بسهولة
                   </p>
                 </div>

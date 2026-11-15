@@ -90,12 +90,34 @@ CREATE POLICY "Public can insert orders"
     TO public
     WITH CHECK (true);
 
--- منع الزوار من استرجاع كافة طلبات المتجر؛ القراءة والإدارة محصورة بـ service_role
+-- السماح بحذف الطلبات بواسطة الإدارة
+DROP POLICY IF EXISTS "Allow delete orders" ON orders;
+CREATE POLICY "Allow delete orders"
+    ON orders
+    FOR DELETE
+    TO public
+    USING (true);
+
+-- القراءة والإدارة الشاملة للطلبات محصورة بـ service_role
 CREATE POLICY "Service role can read orders"
     ON orders
     TO service_role
     USING (true)
     WITH CHECK (true);
+
+-- دالة حذف طلبية من قاعدة البيانات بصلاحية تنفيذ آمنة (RPC: delete_order_by_id)
+CREATE OR REPLACE FUNCTION delete_order_by_id(p_order_id text)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    DELETE FROM orders WHERE id = p_order_id;
+    RETURN FOUND;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION delete_order_by_id(text) TO anon, authenticated, service_role;
 
 -- 6. سياسات جدول رسائل الدعم (support_messages):
 -- الزوار يمكنهم إرسال رسائل جديدة فقط

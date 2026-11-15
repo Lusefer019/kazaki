@@ -86,12 +86,6 @@ export const Footer: React.FC = () => {
                     </span>
                   </a>
                 )}
-                {settings.email && (
-                  <p className="flex items-center gap-2 text-stone-600">
-                    <Mail className="w-4 h-4 text-rose-600 shrink-0" />
-                    <span>{settings.email}</span>
-                  </p>
-                )}
                 <button
                   onClick={() => {
                     setActiveView('contact');

@@ -19,7 +19,7 @@ interface OrdersModalProps {
 }
 
 export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
-  const { orders, currentUser, getBtnText, myOrderIds, currencyLabel, t } = useStore();
+  const { orders, currentUser, getBtnText, myOrderIds, currencyLabel, t, updateOrderStatus } = useStore();
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [expandedTimelineId, setExpandedTimelineId] = useState<string | null>(null);
   const [orderQuery, setOrderQuery] = useState('');
@@ -279,6 +279,24 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
                           );
                         })}
                       </div>
+                      {order.status === 'pending' && (
+                        <div className="pt-3 flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (window.confirm('هل أنت متأكد من رغبتك في إلغاء هذا الطلب؟')) {
+                                updateOrderStatus(order.id, 'cancelled', {
+                                  note: 'تم إلغاء الطلب بناءً على رغبة العميل',
+                                  sendNotification: true,
+                                });
+                              }
+                            }}
+                            className="px-3.5 py-1.5 rounded-full border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold transition-colors cursor-pointer"
+                          >
+                            إلغاء الطلب
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-bold">

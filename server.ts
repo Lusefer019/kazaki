@@ -522,6 +522,38 @@ app.patch('/api/orders/:id', (req: Request, res: Response) => {
   }
 });
 
+// DELETE /api/orders/:id - Manager permanently deletes an order
+app.delete('/api/orders/:id', (req: Request, res: Response) => {
+  try {
+    if (!verifyAdminRequest(req)) {
+      return res.status(403).json({ success: false, message: 'غير مصرح بحذف الطلبات' });
+    }
+
+    const { id } = req.params;
+    let orders = readJsonFile<any[]>(ORDERS_FILE, []);
+    const initialLen = orders.length;
+    orders = orders.filter((o) => o.id !== id);
+    writeJsonFile(ORDERS_FILE, orders);
+
+    // Also remove notifications linked to this order
+    let notifications = readJsonFile<any[]>(NOTIFICATIONS_FILE, []);
+    notifications = notifications.filter((n) => n.orderId !== id);
+    writeJsonFile(NOTIFICATIONS_FILE, notifications);
+
+    // Broadcast deletion across SSE clients
+    broadcastSseEvent('order_deleted', { orderId: id });
+
+    res.json({
+      success: true,
+      message: 'تم حذف الطلب بنجاح من قاعدة البيانات',
+      deleted: initialLen !== orders.length,
+    });
+  } catch (err: any) {
+    console.error('Error deleting order:', err);
+    res.status(500).json({ success: false, message: 'فشل حذف الطلب' });
+  }
+});
+
 // ----------------------------------------------------
 // 2. SUPPORT MESSAGES & CHATS API
 // ----------------------------------------------------

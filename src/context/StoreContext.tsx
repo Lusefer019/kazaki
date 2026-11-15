@@ -48,6 +48,7 @@ import {
   fetchOrdersFromSupabase,
   syncOrderToSupabase,
   syncOrderStatusToSupabase,
+  syncOrderDeletionToSupabase,
   fetchSupportMessagesFromSupabase,
   syncSupportMessageToSupabase,
   updateSupportMessageInSupabase,
@@ -206,6 +207,7 @@ interface StoreContextType {
       customMessage?: string;
     }
   ) => void;
+  deleteOrder: (orderId: string) => Promise<boolean>;
   sendOrderNotification: (
     orderId: string,
     options: {
@@ -587,7 +589,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           logoUrl: parsed.logoUrl || '/logo.jpg',
           phone: parsed.phone || initialStoreSettings.phone,
           whatsapp: parsed.whatsapp || initialStoreSettings.whatsapp,
-          email: (!parsed.email || parsed.email === 'info@kazaki.iq') ? initialStoreSettings.email : parsed.email,
+          email: (!parsed.email || parsed.email === 'info@kazaki.iq') ? '' : parsed.email,
           address: parsed.address || initialStoreSettings.address,
           instagram: parsed.instagram || initialStoreSettings.instagram,
           tiktok: parsed.tiktok || initialStoreSettings.tiktok,
@@ -603,9 +605,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             ...initialStoreSettings.contactInfo,
             ...(parsed.contactInfo || {}),
             enabled: typeof parsed.contactInfo?.enabled === 'boolean' ? parsed.contactInfo.enabled : true,
-            channels: (parsed.contactInfo?.channels && Array.isArray(parsed.contactInfo.channels) && parsed.contactInfo.channels.length > 0)
+            channels: ((parsed.contactInfo?.channels && Array.isArray(parsed.contactInfo.channels) && parsed.contactInfo.channels.length > 0)
               ? parsed.contactInfo.channels
-              : defaultCustomerServiceChannels,
+              : defaultCustomerServiceChannels).filter(
+                (c: any) => c.id !== 'cs-email' && c.type !== 'email' && c.value !== 'info@kazaki.iq' && !c.name?.includes('الشكاوى')
+              ),
           },
           introConfig: {
             ...initialStoreSettings.introConfig,
@@ -3092,6 +3096,74 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const deleteOrder = async (orderId: string): Promise<boolean> => {
+    // 1. Remove from state
+    setOrders((prev) => prev.filter((o) => o.id !== orderId));
+    setMyOrderIds((prev) => {
+      const updated = prev.filter((id) => id !== orderId);
+      try {
+        localStorage.setItem('kazaki_my_order_ids_v1', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    // 2. Remove from LocalStorage caches
+    try {
+      const savedOrders = localStorage.getItem(STORAGE_KEYS.ORDERS);
+      if (savedOrders) {
+        const parsed = JSON.parse(savedOrders);
+        if (Array.isArray(parsed)) {
+          localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(parsed.filter((o: any) => o.id !== orderId)));
+        }
+      }
+      const adminOrders = localStorage.getItem('kazaki_admin_orders_v1');
+      if (adminOrders) {
+        const parsed = JSON.parse(adminOrders);
+        if (Array.isArray(parsed)) {
+          localStorage.setItem('kazaki_admin_orders_v1', JSON.stringify(parsed.filter((o: any) => o.id !== orderId)));
+        }
+      }
+      const masterOrders = localStorage.getItem('kazaki_master_orders_v1');
+      if (masterOrders) {
+        const parsed = JSON.parse(masterOrders);
+        if (Array.isArray(parsed)) {
+          localStorage.setItem('kazaki_master_orders_v1', JSON.stringify(parsed.filter((o: any) => o.id !== orderId)));
+        }
+      }
+    } catch {}
+
+    // 3. Remove permanently from Supabase Database
+    try {
+      await syncOrderDeletionToSupabase(orderId);
+      broadcastSupabaseLiveEvent('DELETE_ORDER', { orderId });
+    } catch (err) {
+      console.warn('Supabase delete order warning:', err);
+    }
+
+    // 4. Remove from backend server (if live)
+    if (isBackendReachableRef.current) {
+      try {
+        await fetch(`/api/orders/${orderId}`, {
+          method: 'DELETE',
+          headers: getAdminRequestHeaders(currentUser),
+        });
+      } catch (err) {
+        console.warn('Backend delete order warning:', err);
+      }
+    }
+
+    // 5. Broadcast across tabs
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        const bc = new BroadcastChannel('kazaki_store_live_bus');
+        bc.postMessage({ type: 'DELETE_ORDER', orderId });
+        bc.close();
+      }
+    } catch {}
+
+    return true;
+  };
+
   const sendOrderNotification = (
     orderId: string,
     options: {
@@ -4136,6 +4208,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         removePromoCode,
         createOrder,
         updateOrderStatus,
+        deleteOrder,
         sendOrderNotification,
         markNotificationAsRead,
         clearNotifications,

@@ -114,6 +114,7 @@ export const AdminDashboard: React.FC = () => {
     deleteCategory,
     updateSettings,
     updateOrderStatus,
+    deleteOrder,
     sendOrderNotification,
     addPromoCode,
     togglePromoCode,
@@ -355,7 +356,7 @@ export const AdminDashboard: React.FC = () => {
     logoUrl: settings.logoUrl || '',
     phone: settings.phone || '07838969959',
     whatsapp: settings.whatsapp || '07838969959',
-    email: settings.email || 'info@kazaki.iq',
+    email: settings.email === 'info@kazaki.iq' ? '' : (settings.email || ''),
     address: settings.address || 'بغداد - المنصور - شارع 14 رمضان',
     instagram: settings.instagram || 'https://instagram.com/kazaki.iq',
     tiktok: settings.tiktok || 'https://tiktok.com/@kazaki.iq',
@@ -1591,53 +1592,6 @@ export const AdminDashboard: React.FC = () => {
                 {adminNotifications.filter((n) => !n.read).length}
               </span>
             </button>
-
-            {/* Test Alarm Chime */}
-            <button
-              type="button"
-              onClick={testManagerAlarmChime}
-              className="py-1.5 px-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="فحص صوت رنين التنبيه الموسيقي للطلبات الجديدة"
-            >
-              <Volume2 className="w-3.5 h-3.5 text-rose-600" />
-              <span>جرس الطلبات</span>
-            </button>
-
-            {/* Test Support Chime */}
-            <button
-              type="button"
-              onClick={testSupportMessageChime}
-              className="py-1.5 px-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="فحص صوت رنين محادثات خدمة العملاء"
-            >
-              <Volume2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>جرس الدعم</span>
-            </button>
-
-            {/* Phone Web Push Notification (Runs even when phone is locked / outside Chrome) */}
-            <button
-              type="button"
-              onClick={async () => {
-                if (!phoneNotificationsEnabled) {
-                  await togglePhoneNotifications();
-                } else {
-                  sendPhoneTestNotification();
-                }
-              }}
-              className={`py-1.5 px-3 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border ${
-                phoneNotificationsEnabled
-                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
-                  : 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-300 animate-pulse'
-              }`}
-              title="تفعيل وفحص إشعار هاتف الأدمن المباشر حتى لو كان الهاتف مقفلاً أو خارج متصفح كروم"
-            >
-              <Smartphone className={`w-3.5 h-3.5 ${phoneNotificationsEnabled ? 'text-emerald-600' : 'text-rose-600'}`} />
-              <span>
-                {phoneNotificationsEnabled
-                  ? 'فحص إشعار الهاتف (خارج كروم / شاشة مقفلة)'
-                  : 'تفعيل إشعارات هاتف الأدمن (خارج كروم)'}
-              </span>
-            </button>
           </div>
         </div>
 
@@ -2570,7 +2524,7 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Action Buttons: Status Update Modal, Timeline, Direct WhatsApp */}
+                      {/* Action Buttons: Status Update Modal, Cancel Order, Delete Order, Timeline, Direct WhatsApp */}
                       <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-rose-100">
                         <div className="flex flex-wrap items-center gap-2">
                           {/* PRIMARY: Open Status Update & Notification Modal */}
@@ -2581,6 +2535,48 @@ export const AdminDashboard: React.FC = () => {
                           >
                             <Send className="w-3.5 h-3.5" />
                             <span>تحديث الحالة وإرسال إشعار للعميل</span>
+                          </button>
+
+                          {/* CANCEL ORDER BUTTON (زر إلغاء الطلبية) */}
+                          {ord.status !== 'cancelled' ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (window.confirm(`هل أنتِ متأكدة من رغبتكِ في إلغاء الطلبية رقم #${ord.id} للزبونة "${ord.customerName}"؟`)) {
+                                  updateOrderStatus(ord.id, 'cancelled', {
+                                    note: 'تم إلغاء الطلب من قبل الإدارة',
+                                    sendNotification: true,
+                                  });
+                                  showNotification(`تم إلغاء الطلبية #${ord.id} بنجاح!`);
+                                }
+                              }}
+                              className="px-3.5 py-2.5 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-colors"
+                              title="إلغاء الطلبية وتحديث حالتها إلى ملغية"
+                            >
+                              <XCircle className="w-3.5 h-3.5 text-amber-600" />
+                              <span>إلغاء الطلبية</span>
+                            </button>
+                          ) : (
+                            <span className="px-3 py-2 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold inline-flex items-center gap-1.5">
+                              <XCircle className="w-3.5 h-3.5 text-rose-500" />
+                              الطلبية ملغية
+                            </span>
+                          )}
+
+                          {/* DELETE ORDER FROM DATABASE (زر حذف الطلبية نهائياً من قاعدة البيانات) */}
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (window.confirm(`تحذير نهائي:\nهل أنتِ متأكدة من حذف الطلبية رقم #${ord.id} نهائياً من قاعدة البيانات والمتجر؟\n\nتنبيه: سيتم مسح بيانات الطلبية بالكامل ولن يمكن استرجاعها.`)) {
+                                await deleteOrder(ord.id);
+                                showNotification(`تم حذف الطلبية #${ord.id} نهائياً من قاعدة البيانات.`);
+                              }
+                            }}
+                            className="px-3.5 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                            title="حذف هذه الطلبية بشكل نهائي من قاعدة البيانات ومتجر Kazaki"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-white" />
+                            <span>حذف من قاعدة البيانات</span>
                           </button>
 
                           {/* SECONDARY: View Full Timeline History */}
@@ -3670,10 +3666,9 @@ export const AdminDashboard: React.FC = () => {
                   </label>
                   <input
                     type="email"
-                    required
                     value={brandingForm.email}
                     onChange={(e) => setBrandingForm({ ...brandingForm, email: e.target.value })}
-                    placeholder="info@kazaki.iq"
+                    placeholder="البريد الإلكتروني الرسمي (اختياري)"
                     className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400"
                   />
                 </div>

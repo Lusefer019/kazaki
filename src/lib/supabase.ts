@@ -946,6 +946,33 @@ export const syncOrderStatusToSupabase = async (
 };
 
 /**
+ * Deletes a single order permanently from Supabase database.
+ */
+export const syncOrderDeletionToSupabase = async (orderId: string): Promise<boolean> => {
+  const supabase = getSupabase();
+  if (!supabase) return false;
+
+  try {
+    // 1. Try secure RPC function first
+    const { error: rpcError } = await supabase.rpc('delete_order_by_id', { p_order_id: orderId });
+    if (!rpcError) {
+      return true;
+    }
+
+    // 2. Direct table deletion fallback
+    const { error } = await supabase.from('orders').delete().eq('id', orderId);
+    if (error) {
+      console.warn('Deleting order from Supabase error:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Exception deleting order from Supabase:', err);
+    return false;
+  }
+};
+
+/**
  * Fetches all support messages directly from Supabase.
  */
 export const fetchSupportMessagesFromSupabase = async (): Promise<SupportMessage[] | null> => {
