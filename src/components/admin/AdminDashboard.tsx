@@ -228,7 +228,7 @@ export const AdminDashboard: React.FC = () => {
     shippingCarrier: '',
     note: '',
     sendNotification: true,
-    channel: 'whatsapp',
+    channel: 'system',
     customMessage: '',
   });
 
@@ -1364,7 +1364,7 @@ export const AdminDashboard: React.FC = () => {
       shippingCarrier: '',
       note: '',
       sendNotification: true,
-      channel: 'whatsapp',
+      channel: 'system',
       customMessage: defaultMessages[nextStatus] || '',
     });
     setIsStatusModalOpen(true);
@@ -4376,35 +4376,8 @@ export const AdminDashboard: React.FC = () => {
                 {statusUpdateForm.sendNotification && (
                   <div className="space-y-3 pt-2 border-t border-rose-200/60">
                     <div>
-                      <span className="block text-[11px] font-semibold text-stone-700 mb-1.5">
-                        قناة الإشعار المفضلة:
-                      </span>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { id: 'whatsapp', label: 'واتساب', sub: 'رابط مباشر' },
-                          { id: 'system', label: 'حساب العميل', sub: 'إشعار النظام' },
-                          { id: 'email', label: 'بريد إلكتروني', sub: 'رسالة إلكترونية' },
-                        ].map((ch) => (
-                          <button
-                            key={ch.id}
-                            type="button"
-                            onClick={() => setStatusUpdateForm({ ...statusUpdateForm, channel: ch.id as any })}
-                            className={`p-2 rounded-xl border text-center text-xs font-bold transition-all cursor-pointer ${
-                              statusUpdateForm.channel === ch.id
-                                ? 'bg-white border-rose-500 text-rose-800 shadow-2xs'
-                                : 'bg-rose-50/40 border-stone-200 text-stone-600 hover:bg-white'
-                            }`}
-                          >
-                            <span>{ch.label}</span>
-                            <span className="text-[9px] block text-stone-400 font-normal">{ch.sub}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
                       <label className="block text-[11px] font-semibold text-stone-700 mb-1">
-                        نص الإشعار المرسل للعميل (يمكنكِ تعديله بحرية):
+                        نص الإشعار المرسل للعميل (يصل لحساب العميل في المتجر):
                       </label>
                       <textarea
                         rows={3}
