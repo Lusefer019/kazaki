@@ -4455,7 +4455,28 @@ export const AdminDashboard: React.FC = () => {
                   إلغاء
                 </button>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (
+                        selectedOrderForStatus &&
+                        window.confirm(
+                          `تحذير نهائي:\nهل أنتِ متأكدة من حذف الطلبية رقم #${selectedOrderForStatus.id} نهائياً من قاعدة البيانات والمتجر؟\n\nلن يمكن استرجاع بيانات هذه الطلبية بعد الحذف.`
+                        )
+                      ) {
+                        await deleteOrder(selectedOrderForStatus.id);
+                        showNotification(`تم حذف الطلبية #${selectedOrderForStatus.id} نهائياً من قاعدة البيانات.`);
+                        setIsStatusModalOpen(false);
+                      }
+                    }}
+                    className="px-4 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                    title="حذف هذه الطلبية بشكل نهائي من قاعدة البيانات ومتجر Kazaki"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-white" />
+                    <span>حذف الطلبية نهائياً</span>
+                  </button>
+
                   <button
                     type="submit"
                     className="px-6 py-2.5 rounded-full bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white font-bold text-xs shadow-md shadow-rose-200 hover:shadow-lg transition-all cursor-pointer flex items-center gap-1.5"
@@ -4600,12 +4621,57 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Footer Close */}
-            <div className="p-4 border-t border-rose-100 bg-stone-50 flex justify-end">
+            {/* Footer Actions */}
+            <div className="p-4 border-t border-rose-100 bg-stone-50 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                {selectedOrderForTimeline.status !== 'cancelled' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          `هل أنتِ متأكدة من رغبتكِ في إلغاء الطلبية رقم #${selectedOrderForTimeline.id}؟`
+                        )
+                      ) {
+                        updateOrderStatus(selectedOrderForTimeline.id, 'cancelled', {
+                          note: 'تم إلغاء الطلب من قبل الإدارة',
+                          sendNotification: true,
+                        });
+                        showNotification(`تم إلغاء الطلبية #${selectedOrderForTimeline.id} بنجاح!`);
+                        setIsTimelineModalOpen(false);
+                      }
+                    }}
+                    className="px-3.5 py-2 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <XCircle className="w-3.5 h-3.5 text-amber-600" />
+                    <span>إلغاء الطلبية</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (
+                      window.confirm(
+                        `تحذير نهائي:\nهل أنتِ متأكدة من حذف الطلبية رقم #${selectedOrderForTimeline.id} نهائياً من قاعدة البيانات والمتجر؟\n\nلن يمكن استرجاع بيانات هذه الطلبية بعد الحذف.`
+                      )
+                    ) {
+                      await deleteOrder(selectedOrderForTimeline.id);
+                      showNotification(`تم حذف الطلبية #${selectedOrderForTimeline.id} نهائياً من قاعدة البيانات.`);
+                      setIsTimelineModalOpen(false);
+                    }
+                  }}
+                  className="px-3.5 py-2 rounded-full bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-white" />
+                  <span>حذف نهائي</span>
+                </button>
+              </div>
+
               <button
                 type="button"
                 onClick={() => setIsTimelineModalOpen(false)}
-                className="px-6 py-2 rounded-full bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold"
+                className="px-6 py-2 rounded-full bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold cursor-pointer"
               >
                 إغلاق
               </button>
