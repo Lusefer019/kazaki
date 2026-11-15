@@ -436,7 +436,7 @@ app.patch('/api/orders/:id', (req: Request, res: Response) => {
     const statusDefaultMessages: Record<string, string> = {
       pending: `مرحباً ${existingOrder.customerName}، طلبك رقم #${id} قيد المراجعة حالياً.`,
       processing: `مرحباً ${existingOrder.customerName}، بدأنا الآن تجهيز وتغليف طلبك رقم #${id} بكل فخامة وعناية في متجر KAZAKI.IQ.`,
-      shipped: `مرحباً ${existingOrder.customerName}، تم تسليم طلبك رقم #${id} إلى شركة الشحن (${shippingCarrier || 'خدمة التوصيل السريع'}) برقم تتبع: ${trackingNumber || existingOrder.trackingNumber}. الشحنة في طريقها إليك!`,
+      shipped: `مرحباً ${existingOrder.customerName}، تم تسليم طلبك رقم #${id} للشحن والتوصيل برقم تتبع: ${trackingNumber || existingOrder.trackingNumber}. الشحنة في طريقها إليك!`,
       delivered: `تهانينا ${existingOrder.customerName}! تم توصيل طلبك رقم #${id} بنجاح. نتمنى أن ينال ورد الليكو إعجابك ورضاكِ.`,
       cancelled: `مرحباً ${existingOrder.customerName}، نود إعلامك بأنه تم إلغاء الطلب رقم #${id}. لأي استفسار يرجى التواصل مع خدمة العملاء.`,
     };

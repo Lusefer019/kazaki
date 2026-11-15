@@ -309,7 +309,6 @@ export const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => 
                     <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-2xl bg-rose-50/40 border border-rose-100 text-xs">
                       <div className="flex items-center gap-2">
                         <span className="text-stone-600">
-                          {order.shippingCarrier ? `${order.shippingCarrier} | ` : ''}
                           رقم التتبع: 
                         </span>
                         <strong className="font-mono text-rose-700 font-bold bg-white px-2 py-0.5 rounded-md border border-rose-200" dir="ltr">

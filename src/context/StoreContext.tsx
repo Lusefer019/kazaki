@@ -2977,7 +2977,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const defaultNotes: Record<OrderStatus, string> = {
           pending: 'تم استلام الطلب وتأكيده بنجاح',
           processing: 'بدأ تجهيز وتغليف المنتجات في المستودع ونقلها للشحن',
-          shipped: `تم تسليم الشحنة لشركة النقل (${effectiveCarrier || 'شركة النقل المعتمدة'}) برقم تتبع: ${effectiveTracking || 'قيد الإصدار'}`,
+          shipped: `تم تسليم الشحنة للشحن والتوصيل برقم تتبع: ${effectiveTracking || 'قيد الإصدار'}`,
           delivered: 'تم تسليم الطلب للعميل بنجاح واستلام الدفعة',
           cancelled: 'تم إلغاء الطلب من قبل الإدارة',
           returned: 'تم تسجيل إرجاع الشحنة إلى المستودع',
@@ -3008,7 +3008,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           const defaultMessages: Record<OrderStatus, string> = {
             pending: `مرحباً ${order.customerName}، تم استلام الطلب رقم ${order.id} في متجر KAZAKI.IQ وهو بانتظار التجهيز.`,
             processing: `مرحباً ${order.customerName}، بدأ الآن تجهيز وتغليف الطلب رقم ${order.id} بكل عناية واهتمام في متجر KAZAKI.IQ.`,
-            shipped: `مرحباً ${order.customerName}، تم تسليم الطلب رقم ${order.id} لشركة ${effectiveCarrier || 'الشحن'} برقم تتبع ${effectiveTracking || ''}. الشحنة في الطريق للتوصيل!`,
+            shipped: `مرحباً ${order.customerName}، تم تسليم الطلب رقم ${order.id} للشحن والتوصيل برقم تتبع ${effectiveTracking || ''}. الشحنة في الطريق للتوصيل!`,
             delivered: `شكراً للتسوق من KAZAKI.IQ! تم توصيل الطلب رقم ${order.id} بنجاح. نأمل أن تنال منتجاتنا إعجابكم ورضاكم.`,
             cancelled: `مرحباً ${order.customerName}، نود إعلامكم بأنه تم تحديث حالة الطلب رقم ${order.id} إلى ملغي. لأي استفسار يرجى مراسلة خدمة العملاء.`,
             returned: `مرحباً ${order.customerName}، نود إعلامكم بأنه تم تسجيل إرجاع الطلب رقم ${order.id} إلى المستودع.`,

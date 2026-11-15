@@ -217,7 +217,7 @@ export const AdminDashboard: React.FC = () => {
   const [statusUpdateForm, setStatusUpdateForm] = useState<{
     status: OrderStatus;
     trackingNumber: string;
-    shippingCarrier: string;
+    shippingCarrier?: string;
     note: string;
     sendNotification: boolean;
     channel: 'whatsapp' | 'email' | 'system';
@@ -225,7 +225,7 @@ export const AdminDashboard: React.FC = () => {
   }>({
     status: 'processing',
     trackingNumber: '',
-    shippingCarrier: 'أرجوان إكسبريس (بغداد والمحافظات)',
+    shippingCarrier: '',
     note: '',
     sendNotification: true,
     channel: 'whatsapp',
@@ -1346,14 +1346,13 @@ export const AdminDashboard: React.FC = () => {
         ? 'delivered'
         : ord.status;
 
-    const defaultCarrier = ord.shippingCarrier || 'أرجوان إكسبريس (بغداد والمحافظات)';
     const defaultTracking =
       ord.trackingNumber || `KZK-${Math.floor(100000 + Math.random() * 900000)}`;
 
     const defaultMessages: Record<OrderStatus, string> = {
       pending: `عزيزتي ${ord.customerName}، تم استلام طلبكِ رقم ${ord.id} في متجر KAZAKI.IQ وهو بانتظار التجهيز.`,
       processing: `عزيزتي ${ord.customerName}، بدأنا الآن بتجهيز وتغليف طلبكِ رقم ${ord.id} بكل عناية واهتمام في متجر KAZAKI.IQ.`,
-      shipped: `مرحباً ${ord.customerName}، تم تسليم طلبكِ رقم ${ord.id} لشركة ${defaultCarrier} برقم تتبع ${defaultTracking}. شحنتكِ في الطريق إليكِ!`,
+      shipped: `مرحباً ${ord.customerName}، تم تسليم طلبكِ رقم ${ord.id} للشحن والتوصيل برقم تتبع ${defaultTracking}. شحنتكِ في الطريق إليكِ!`,
       delivered: `شكراً لتسوقكِ من KAZAKI.IQ! تم توصيل طلبكِ رقم ${ord.id} بنجاح. نأمل أن تنال منتجاتنا إعجابكِ ورضاكِ.`,
       cancelled: `عزيزتي ${ord.customerName}، نود إعلامكِ بأنه تم تحديث حالة طلبكِ رقم ${ord.id} إلى ملغي. لأي استفسار يرجى مراسلة خدمة العملاء.`,
       returned: `عزيزتي ${ord.customerName}، نود إعلامكِ بأنه تم تسجيل إرجاع الشحنة الخاصة بطلبكِ رقم ${ord.id} إلى المستودع.`,
@@ -1362,7 +1361,7 @@ export const AdminDashboard: React.FC = () => {
     setStatusUpdateForm({
       status: nextStatus,
       trackingNumber: defaultTracking,
-      shippingCarrier: defaultCarrier,
+      shippingCarrier: '',
       note: '',
       sendNotification: true,
       channel: 'whatsapp',
@@ -1377,7 +1376,6 @@ export const AdminDashboard: React.FC = () => {
 
     updateOrderStatus(selectedOrderForStatus.id, statusUpdateForm.status, {
       trackingNumber: statusUpdateForm.trackingNumber,
-      shippingCarrier: statusUpdateForm.shippingCarrier,
       note: statusUpdateForm.note,
       sendNotification: statusUpdateForm.sendNotification,
       notificationChannel: statusUpdateForm.channel,
@@ -2454,18 +2452,11 @@ export const AdminDashboard: React.FC = () => {
                         )}
                       </div>
 
-                      {/* Carrier & Tracking Number Strip */}
+                      {/* Tracking Number Strip */}
                       <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-stone-50 border border-stone-200 text-xs">
                         <div className="flex flex-wrap items-center gap-3">
                           <div className="flex items-center gap-1.5 text-stone-700">
                             <Truck className="w-4 h-4 text-rose-600" />
-                            <span className="font-semibold">شركة الشحن:</span>
-                            <span className="font-bold text-stone-900 bg-white px-2 py-0.5 rounded-md border border-stone-200">
-                              {ord.shippingCarrier || 'أرجوان إكسبريس (بغداد)'}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 text-stone-700">
                             <span className="font-semibold">رقم التتبع:</span>
                             <span className="font-mono font-bold text-rose-700 bg-white px-2.5 py-0.5 rounded-md border border-rose-200" dir="ltr">
                               {ord.trackingNumber || 'قيد الإصدار'}
@@ -4291,7 +4282,7 @@ export const AdminDashboard: React.FC = () => {
                         const messages: Record<OrderStatus, string> = {
                           pending: `عزيزتي ${ord.customerName}، تم استلام طلبكِ رقم ${ord.id} في متجر KAZAKI.IQ وهو بانتظار التجهيز.`,
                           processing: `عزيزتي ${ord.customerName}، بدأنا الآن بتجهيز وتغليف طلبكِ رقم ${ord.id} بكل عناية واهتمام في متجر KAZAKI.IQ.`,
-                          shipped: `مرحباً ${ord.customerName}، تم تسليم طلبكِ رقم ${ord.id} لشركة ${carrier} برقم تتبع ${tracking}. شحنتكِ في الطريق إليكِ!`,
+                          shipped: `مرحباً ${ord.customerName}، تم تسليم طلبكِ رقم ${ord.id} للشحن والتوصيل برقم تتبع ${tracking}. شحنتكِ في الطريق إليكِ!`,
                           delivered: `شكراً لتسوقكِ من KAZAKI.IQ! تم توصيل طلبكِ رقم ${ord.id} بنجاح. نأمل أن تنال منتجاتنا إعجابكِ ورضاكِ.`,
                           cancelled: `عزيزتي ${ord.customerName}، نود إعلامكِ بأنه تم تحديث حالة طلبكِ رقم ${ord.id} إلى ملغي. لأي استفسار يرجى مراسلة خدمة العملاء.`,
                           returned: `عزيزتي ${ord.customerName}، نود إعلامكِ بأنه تم تسجيل إرجاع الشحنة الخاصة بطلبكِ رقم ${ord.id} إلى المستودع.`,
@@ -4316,12 +4307,12 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Carrier & Tracking Number Fields */}
+              {/* Tracking Number Fields */}
               <div className="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-3">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
                     <Truck className="w-4 h-4 text-rose-600" />
-                    <span>بيانات الشحن وشركة النقل</span>
+                    <span>بيانات الشحن ورقم التتبع</span>
                   </h4>
                   <button
                     type="button"
@@ -4339,37 +4330,18 @@ export const AdminDashboard: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-stone-600 mb-1">
-                      شركة الشحن / الناقل:
-                    </label>
-                    <select
-                      value={statusUpdateForm.shippingCarrier}
-                      onChange={(e) => setStatusUpdateForm({ ...statusUpdateForm, shippingCarrier: e.target.value })}
-                      className="w-full text-xs border border-stone-300 rounded-xl px-3 py-2 bg-white outline-hidden focus:border-rose-400"
-                    >
-                      <option value="أرجوان إكسبريس (بغداد والمحافظات)">أرجوان إكسبريس (بغداد والمحافظات)</option>
-                      <option value="شركة الفهد إكسبريس (البصرة والجنوب)">شركة الفهد إكسبريس (البصرة والجنوب)</option>
-                      <option value="شركة الرافدين للنقل السريع (الشمال والفرات)">شركة الرافدين للنقل السريع (الشمال والفرات)</option>
-                      <option value="أرامكس العراق (Aramex Iraq)">أرامكس العراق (Aramex Iraq)</option>
-                      <option value="مندوب KAZAKI.IQ الخاص">مندوب KAZAKI.IQ الخاص</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-semibold text-stone-600 mb-1">
-                      رقم بوليصة الشحن (Tracking #):
-                    </label>
-                    <input
-                      type="text"
-                      dir="ltr"
-                      value={statusUpdateForm.trackingNumber}
-                      onChange={(e) => setStatusUpdateForm({ ...statusUpdateForm, trackingNumber: e.target.value })}
-                      placeholder="KZK-123456"
-                      className="w-full text-xs text-right border border-stone-300 rounded-xl px-3 py-2 bg-white outline-hidden focus:border-rose-400 font-mono"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-stone-600 mb-1">
+                    رقم بوليصة الشحن (Tracking #):
+                  </label>
+                  <input
+                    type="text"
+                    dir="ltr"
+                    value={statusUpdateForm.trackingNumber}
+                    onChange={(e) => setStatusUpdateForm({ ...statusUpdateForm, trackingNumber: e.target.value })}
+                    placeholder="KZK-123456"
+                    className="w-full text-xs text-right border border-stone-300 rounded-xl px-3 py-2 bg-white outline-hidden focus:border-rose-400 font-mono"
+                  />
                 </div>
               </div>
 
@@ -4569,9 +4541,6 @@ export const AdminDashboard: React.FC = () => {
                             <span>بواسطة: {item.updatedBy || 'المدير'}</span>
                             {item.trackingNumber && (
                               <span className="font-mono">تتبع: {item.trackingNumber}</span>
-                            )}
-                            {item.shippingCarrier && (
-                              <span>الناقل: {item.shippingCarrier}</span>
                             )}
                           </div>
                         </div>
