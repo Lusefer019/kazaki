@@ -4,6 +4,14 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import webpush from 'web-push';
+import {
+  initTelegramBot,
+  notifyNewOrderTelegram,
+  getTelegramBotStatus,
+  saveBotConfig,
+  testTelegramBotConnection,
+  sendTelegramCustomReport,
+} from './telegramBot.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -390,6 +398,11 @@ app.post('/api/orders', (req: Request, res: Response) => {
       ).catch((e) => console.warn('[WebPush] Error pushing order to customer:', e));
     }
 
+    // Instant Telegram Bot notification with interactive control buttons
+    notifyNewOrderTelegram(newOrder).catch((err) => {
+      console.warn('[TelegramBot] Failed to dispatch new order alert:', err);
+    });
+
     console.log(`[Order Placed] Order #${newOrderId} from ${orderData.customerName} saved and broadcast to admin.`);
 
     res.status(201).json({
@@ -404,6 +417,115 @@ app.post('/api/orders', (req: Request, res: Response) => {
   }
 });
 
+// Internal helper to update order status and trigger notifications
+export function executeOrderStatusUpdate(
+  id: string,
+  status: string,
+  options: {
+    trackingNumber?: string;
+    shippingCarrier?: string;
+    note?: string;
+    sendNotification?: boolean;
+    customMessage?: string;
+    updatedBy?: string;
+  } = {}
+) {
+  const orders = readJsonFile<any[]>(ORDERS_FILE, []);
+  const notifications = readJsonFile<any[]>(NOTIFICATIONS_FILE, []);
+
+  const orderIndex = orders.findIndex((o) => o.id === id);
+  if (orderIndex === -1) {
+    throw new Error('الطلب غير موجود');
+  }
+
+  const existingOrder = orders[orderIndex];
+  const timestamp = new Date().toISOString();
+
+  const statusTitles: Record<string, string> = {
+    pending: 'الطلب قيد الانتظار والمراجعة',
+    processing: 'بدأ تجهيز وتغليف طلبك',
+    shipped: 'انطلق طلبك مع شركة الشحن والتوصيل',
+    delivered: 'تم تسليم الطلب بنجاح! شكراً لثقتكم',
+    cancelled: 'تم إلغاء الطلب',
+  };
+
+  const statusDefaultMessages: Record<string, string> = {
+    pending: `مرحباً ${existingOrder.customerName}، طلبك رقم #${id} قيد المراجعة حالياً.`,
+    processing: `مرحباً ${existingOrder.customerName}، بدأنا الآن تجهيز وتغليف طلبك رقم #${id} بكل فخامة وعناية في متجر KAZAKI.IQ.`,
+    shipped: `مرحباً ${existingOrder.customerName}، تم تسليم طلبك رقم #${id} للشحن والتوصيل برقم تتبع: ${options.trackingNumber || existingOrder.trackingNumber}. الشحنة في طريقها إليك!`,
+    delivered: `تهانينا ${existingOrder.customerName}! تم توصيل طلبك رقم #${id} بنجاح. نتمنى أن ينال ورد الليكو إعجابك ورضاكِ.`,
+    cancelled: `مرحباً ${existingOrder.customerName}، نود إعلامك بأنه تم إلغاء الطلب رقم #${id}. لأي استفسار يرجى التواصل مع خدمة العملاء.`,
+  };
+
+  const effectiveTracking = options.trackingNumber || existingOrder.trackingNumber;
+  const effectiveCarrier = options.shippingCarrier || existingOrder.shippingCarrier;
+
+  const historyEntry = {
+    id: `hist-${Date.now()}`,
+    status: status || existingOrder.status,
+    timestamp,
+    note: options.note || statusDefaultMessages[status] || 'تم تحديث حالة الطلب',
+    trackingNumber: effectiveTracking,
+    shippingCarrier: effectiveCarrier,
+    updatedBy: options.updatedBy || 'المدير العام (لوحة التحكم)',
+    notificationSent: Boolean(options.sendNotification !== false),
+  };
+
+  let customerNotification: any = null;
+  if (options.sendNotification !== false) {
+    customerNotification = {
+      id: `notif-cust-${Date.now()}`,
+      orderId: id,
+      customerName: existingOrder.customerName,
+      customerEmail: existingOrder.customerEmail,
+      customerPhone: existingOrder.customerPhone,
+      status: status || existingOrder.status,
+      title: statusTitles[status] || `تحديث على حالة الطلب #${id}`,
+      message: options.customMessage || statusDefaultMessages[status] || 'تم تحديث حالة طلبك.',
+      timestamp,
+      channel: 'system',
+      read: false,
+      trackingNumber: effectiveTracking,
+      target: 'customer',
+    };
+    notifications.unshift(customerNotification);
+    writeJsonFile(NOTIFICATIONS_FILE, notifications);
+  }
+
+  const updatedOrder = {
+    ...existingOrder,
+    status: status || existingOrder.status,
+    trackingNumber: effectiveTracking,
+    shippingCarrier: effectiveCarrier,
+    statusHistory: [historyEntry, ...(existingOrder.statusHistory || [])],
+    notifications: customerNotification
+      ? [customerNotification, ...(existingOrder.notifications || [])]
+      : existingOrder.notifications || [],
+  };
+
+  orders[orderIndex] = updatedOrder;
+  writeJsonFile(ORDERS_FILE, orders);
+
+  // Live notify customer & admin about the order status update!
+  broadcastSseEvent('order_status', { order: updatedOrder, notification: customerNotification });
+
+  if (customerNotification) {
+    sendWebPushNotification(
+      { phone: existingOrder.customerPhone, email: existingOrder.customerEmail },
+      {
+        title: customerNotification.title || `تحديث على حالة طلبك #${id}`,
+        body: customerNotification.message || `تم تحديث حالة طلبك رقم #${id}`,
+        icon: '/logo.jpg',
+        badge: '/logo.jpg',
+        tag: `order-status-${id}`,
+        url: `/?view=orders&orderId=${id}`,
+      }
+    ).catch((e) => console.warn('[WebPush] Error pushing order status to customer:', e));
+  }
+
+  return { updatedOrder, customerNotification };
+}
+
 // PATCH /api/orders/:id - Manager updates order status
 app.patch('/api/orders/:id', (req: Request, res: Response) => {
   try {
@@ -414,101 +536,14 @@ app.patch('/api/orders/:id', (req: Request, res: Response) => {
     const { id } = req.params;
     const { status, trackingNumber, shippingCarrier, note, sendNotification, customMessage } = req.body;
 
-    const orders = readJsonFile<any[]>(ORDERS_FILE, []);
-    const notifications = readJsonFile<any[]>(NOTIFICATIONS_FILE, []);
-
-    const orderIndex = orders.findIndex((o) => o.id === id);
-    if (orderIndex === -1) {
-      return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
-    }
-
-    const existingOrder = orders[orderIndex];
-    const timestamp = new Date().toISOString();
-
-    const statusTitles: Record<string, string> = {
-      pending: 'الطلب قيد الانتظار والمراجعة',
-      processing: 'بدأ تجهيز وتغليف طلبك',
-      shipped: 'انطلق طلبك مع شركة الشحن والتوصيل',
-      delivered: 'تم تسليم الطلب بنجاح! شكراً لثقتكم',
-      cancelled: 'تم إلغاء الطلب',
-    };
-
-    const statusDefaultMessages: Record<string, string> = {
-      pending: `مرحباً ${existingOrder.customerName}، طلبك رقم #${id} قيد المراجعة حالياً.`,
-      processing: `مرحباً ${existingOrder.customerName}، بدأنا الآن تجهيز وتغليف طلبك رقم #${id} بكل فخامة وعناية في متجر KAZAKI.IQ.`,
-      shipped: `مرحباً ${existingOrder.customerName}، تم تسليم طلبك رقم #${id} للشحن والتوصيل برقم تتبع: ${trackingNumber || existingOrder.trackingNumber}. الشحنة في طريقها إليك!`,
-      delivered: `تهانينا ${existingOrder.customerName}! تم توصيل طلبك رقم #${id} بنجاح. نتمنى أن ينال ورد الليكو إعجابك ورضاكِ.`,
-      cancelled: `مرحباً ${existingOrder.customerName}، نود إعلامك بأنه تم إلغاء الطلب رقم #${id}. لأي استفسار يرجى التواصل مع خدمة العملاء.`,
-    };
-
-    const effectiveTracking = trackingNumber || existingOrder.trackingNumber;
-    const effectiveCarrier = shippingCarrier || existingOrder.shippingCarrier;
-
-    const historyEntry = {
-      id: `hist-${Date.now()}`,
-      status: status || existingOrder.status,
-      timestamp,
-      note: note || statusDefaultMessages[status] || 'تم تحديث حالة الطلب',
-      trackingNumber: effectiveTracking,
-      shippingCarrier: effectiveCarrier,
+    const { updatedOrder, customerNotification } = executeOrderStatusUpdate(id, status, {
+      trackingNumber,
+      shippingCarrier,
+      note,
+      sendNotification,
+      customMessage,
       updatedBy: 'المدير العام (لوحة التحكم)',
-      notificationSent: Boolean(sendNotification !== false),
-    };
-
-    let customerNotification: any = null;
-    if (sendNotification !== false) {
-      customerNotification = {
-        id: `notif-cust-${Date.now()}`,
-        orderId: id,
-        customerName: existingOrder.customerName,
-        customerEmail: existingOrder.customerEmail,
-        customerPhone: existingOrder.customerPhone,
-        status: status || existingOrder.status,
-        title: statusTitles[status] || `تحديث على حالة الطلب #${id}`,
-        message: customMessage || statusDefaultMessages[status] || 'تم تحديث حالة طلبك.',
-        timestamp,
-        channel: 'system',
-        read: false,
-        trackingNumber: effectiveTracking,
-        target: 'customer',
-      };
-      notifications.unshift(customerNotification);
-      writeJsonFile(NOTIFICATIONS_FILE, notifications);
-    }
-
-    const updatedOrder = {
-      ...existingOrder,
-      status: status || existingOrder.status,
-      trackingNumber: effectiveTracking,
-      shippingCarrier: effectiveCarrier,
-      statusHistory: [historyEntry, ...(existingOrder.statusHistory || [])],
-      notifications: customerNotification
-        ? [customerNotification, ...(existingOrder.notifications || [])]
-        : existingOrder.notifications || [],
-    };
-
-    orders[orderIndex] = updatedOrder;
-    writeJsonFile(ORDERS_FILE, orders);
-
-    // Live notify customer about the order status update!
-    if (customerNotification) {
-      broadcastSseEvent('order_status', { order: updatedOrder, notification: customerNotification }, 'customer', {
-        phone: existingOrder.customerPhone,
-        email: existingOrder.customerEmail,
-      });
-
-      sendWebPushNotification(
-        { phone: existingOrder.customerPhone, email: existingOrder.customerEmail },
-        {
-          title: customerNotification.title || `تحديث على حالة طلبك #${id}`,
-          body: customerNotification.message || `تم تحديث حالة طلبك رقم #${id}`,
-          icon: '/logo.jpg',
-          badge: '/logo.jpg',
-          tag: `order-status-${id}`,
-          url: `/?view=orders&orderId=${id}`,
-        }
-      ).catch((e) => console.warn('[WebPush] Error pushing order status to customer:', e));
-    }
+    });
 
     res.json({
       success: true,
@@ -518,7 +553,10 @@ app.patch('/api/orders/:id', (req: Request, res: Response) => {
     });
   } catch (err: any) {
     console.error('Error updating order:', err);
-    res.status(500).json({ success: false, message: 'حدث خطأ أثناء تحديث الطلب' });
+    res.status(err.message === 'الطلب غير موجود' ? 404 : 500).json({
+      success: false,
+      message: err.message || 'حدث خطأ أثناء تحديث الطلب',
+    });
   }
 });
 
@@ -1120,6 +1158,72 @@ app.get('/api/health', (req: Request, res: Response) => {
     unreadMessages: messages.filter((m) => m.status === 'new').length,
     timestamp: new Date().toISOString(),
   });
+});
+
+// ----------------------------------------------------
+// 6. TELEGRAM BOT & REPORTING API
+// ----------------------------------------------------
+// GET /api/telegram-bot/status
+app.get('/api/telegram-bot/status', (_req: Request, res: Response) => {
+  try {
+    const status = getTelegramBotStatus();
+    res.json({ success: true, ...status });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// POST /api/telegram-bot/config - Update bot settings
+app.post('/api/telegram-bot/config', (req: Request, res: Response) => {
+  try {
+    if (!verifyAdminRequest(req)) {
+      return res.status(403).json({ success: false, message: 'غير مصرح بتعديل إعدادات البوت' });
+    }
+    const newConfig = saveBotConfig(req.body);
+    res.json({ success: true, message: 'تم حفظ إعدادات البوت بنجاح', config: newConfig });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// POST /api/telegram-bot/test - Send test message
+app.post('/api/telegram-bot/test', async (req: Request, res: Response) => {
+  try {
+    if (!verifyAdminRequest(req)) {
+      return res.status(403).json({ success: false, message: 'غير مصرح بإجراء اختبار الاتصال' });
+    }
+    const { botToken, chatId } = req.body || {};
+    const result = await testTelegramBotConnection(botToken, chatId);
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// POST /api/telegram-bot/report - Send report to Telegram
+app.post('/api/telegram-bot/report', async (req: Request, res: Response) => {
+  try {
+    if (!verifyAdminRequest(req)) {
+      return res.status(403).json({ success: false, message: 'غير مصرح بإرسال التقارير' });
+    }
+    const { type, chatId } = req.body || {};
+    const result = await sendTelegramCustomReport(type || 'today', chatId);
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Initialize Telegram Bot system
+initTelegramBot({
+  getOrders: () => readJsonFile<any[]>(ORDERS_FILE, []),
+  updateOrderStatus: (id: string, status: string, note?: string) => {
+    return executeOrderStatusUpdate(id, status, {
+      note,
+      updatedBy: 'بوت تيليجرام (الإدارة)',
+      sendNotification: true,
+    });
+  },
 });
 
 // ----------------------------------------------------

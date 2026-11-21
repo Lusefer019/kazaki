@@ -73,6 +73,7 @@ import {
   Percent,
   PieChart,
   BarChart3,
+  Bot,
 } from 'lucide-react';
 import { Product, Category, OrderStatus, PromoCode, Order, ButtonTranslations, SupportedLanguage, CityShippingRate, StoreNotificationSettings, CustomerServiceChannel, CustomerServiceConfig, CustomerServiceType, SupportMessage, TempChatSession, TempChatMessage } from '../../types';
 import { initialButtonTranslations, initialSiteTexts, defaultAboutUs, defaultIraqiShippingRates } from '../../data/initialData';
@@ -85,6 +86,7 @@ import {
 import { translateArabicToEnAndKu, instantTranslateArabic } from '../../utils/autoTranslator';
 import { StudioMediaUploader } from '../common/StudioMediaUploader';
 import { ReportsView } from './ReportsView';
+import { TelegramBotView } from './TelegramBotView';
 
 export const AdminDashboard: React.FC = () => {
   const {
@@ -155,7 +157,7 @@ export const AdminDashboard: React.FC = () => {
   }
 
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'reports' | 'products' | 'categories' | 'orders' | 'buttons' | 'branding' | 'contact'
+    'overview' | 'reports' | 'telegram-bot' | 'products' | 'categories' | 'orders' | 'buttons' | 'branding' | 'contact'
   >('overview');
 
   // Store notification settings state
@@ -1665,6 +1667,18 @@ export const AdminDashboard: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('telegram-bot')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+              activeTab === 'telegram-bot'
+                ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-md shadow-sky-500/20 font-extrabold'
+                : 'text-stone-600 hover:bg-sky-50 hover:text-sky-700 font-semibold'
+            }`}
+          >
+            <Bot className="w-4 h-4 text-sky-500" />
+            <span>بوت تيليجرام والتقارير 🤖</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('products')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
               activeTab === 'products'
@@ -1882,6 +1896,9 @@ export const AdminDashboard: React.FC = () => {
 
         {/* TAB: OPERATIONS & SHIPMENT REPORTS */}
         {activeTab === 'reports' && <ReportsView />}
+
+        {/* TAB: TELEGRAM BOT & SMART REPORTS */}
+        {activeTab === 'telegram-bot' && <TelegramBotView />}
 
         {/* TAB 2: PRODUCTS MANAGEMENT */}
         {activeTab === 'products' && (
