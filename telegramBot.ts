@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename);
 export interface TelegramBotConfig {
   botToken: string;
   chatId: string;
+  apiBase?: string;
   enabled: boolean;
   notifyNewOrders: boolean;
   allowStatusUpdateFromBot: boolean;
@@ -18,6 +19,7 @@ export interface TelegramBotConfig {
 const DEFAULT_CONFIG: TelegramBotConfig = {
   botToken: process.env.TELEGRAM_BOT_TOKEN || '',
   chatId: process.env.TELEGRAM_CHAT_ID || '',
+  apiBase: process.env.TELEGRAM_API_BASE || '',
   enabled: false,
   notifyNewOrders: true,
   allowStatusUpdateFromBot: true,
@@ -58,12 +60,14 @@ export function loadBotConfig(): TelegramBotConfig {
         ...data,
         botToken: data.botToken || process.env.TELEGRAM_BOT_TOKEN || '',
         chatId: data.chatId || process.env.TELEGRAM_CHAT_ID || '',
+        apiBase: data.apiBase || process.env.TELEGRAM_API_BASE || '',
       };
     } else {
       currentConfig = {
         ...DEFAULT_CONFIG,
         botToken: process.env.TELEGRAM_BOT_TOKEN || '',
         chatId: process.env.TELEGRAM_CHAT_ID || '',
+        apiBase: process.env.TELEGRAM_API_BASE || '',
         enabled: Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID),
       };
       saveBotConfig(currentConfig);
@@ -99,7 +103,7 @@ async function callTelegramApi(token: string, method: string, payload?: any, sig
   if (!cleanToken) {
     throw new Error('Telegram Bot Token is missing');
   }
-  const apiBase = (process.env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/+$/, '');
+  const apiBase = (currentConfig.apiBase || process.env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/+$/, '');
   const url = `${apiBase}/bot${cleanToken}/${method}`;
   const effectiveSignal = signal || AbortSignal.timeout(12000);
 
@@ -233,7 +237,7 @@ export async function sendTelegramDocument(
     throw new Error('Missing Telegram token or chat ID');
   }
 
-  const apiBase = (process.env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/+$/, '');
+  const apiBase = (currentConfig.apiBase || process.env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/+$/, '');
   const url = `${apiBase}/bot${t.trim()}/sendDocument`;
   const formData = new FormData();
   formData.append('chat_id', chatId.trim());
@@ -784,7 +788,8 @@ async function startPollingLoop(): Promise<void> {
 
     try {
       const token = currentConfig.botToken.trim();
-      const url = `https://api.telegram.org/bot${token}/getUpdates?offset=${lastUpdateId + 1}&timeout=20`;
+      const apiBase = (currentConfig.apiBase || process.env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/+$/, '');
+      const url = `${apiBase}/bot${token}/getUpdates?offset=${lastUpdateId + 1}&timeout=20`;
 
       const res = await fetch(url, {
         signal: pollingAbortController?.signal,
@@ -951,7 +956,11 @@ export async function testTelegramBotConnection(
   try {
     const info = await getBotInfo(token);
     if (!info) {
-      return { success: false, message: 'لم يتم العثور على البوت، تأكد من صحة الـ Token' };
+      return {
+        success: false,
+        message:
+          'تعذر الوصول إلى سيرفر تيليجرام الرسمي من شبكة الإنترنت الحالية (بسبب حجب شركات الاتصال في العراق لـ api.telegram.org). يرجى تشغيل VPN على جهازك (مثل Cloudflare WARP 1.1.1.1) أو إضافة رابط بروكسي وسيط.',
+      };
     }
 
     const testText = `

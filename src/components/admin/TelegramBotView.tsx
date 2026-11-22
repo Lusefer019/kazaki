@@ -21,11 +21,13 @@ import {
   Layers,
   MapPin,
   CheckCheck,
+  Globe,
 } from 'lucide-react';
 
 interface BotConfigState {
   botToken: string;
   chatId: string;
+  apiBase?: string;
   enabled: boolean;
   notifyNewOrders: boolean;
   allowStatusUpdateFromBot: boolean;
@@ -389,7 +391,27 @@ export const TelegramBotView: React.FC = () => {
                   className="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-xs font-mono text-stone-800 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
                 />
                 <p className="text-[11px] text-stone-400 mt-1">
-                  معرف حسابك في تيليجرام الذي ستصل إليه الإشعارات (يمكنك الحصول عليه من بوت userinfobot@).
+                  معرف حسابك في تيليجرام الذي ستصل إليه الإشعارات (تم ضبطه على 8398534448).
+                </p>
+              </div>
+
+              {/* Optional Proxy Field for Blocked ISPs */}
+              <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/90 space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
+                  <Globe className="w-4 h-4 text-amber-700" />
+                  <span>تخطي حجب شركات الاتصال في العراق (اختياري)</span>
+                </div>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={botConfig.apiBase || ''}
+                  onChange={(e) => setBotConfig({ ...botConfig, apiBase: e.target.value })}
+                  placeholder="https://api.telegram.org (افتراضي) أو رابط Cloudflare Worker"
+                  className="w-full px-3.5 py-2 rounded-xl border border-amber-300 bg-white text-xs font-mono text-stone-800 focus:outline-none focus:border-amber-500"
+                />
+                <p className="text-[11px] text-amber-900 leading-relaxed">
+                  <b>تنبيه هام للمطورين في العراق:</b> شركات الاتصال في العراق (إيرثلنك، زين، آسياسيل) تحجب الاتصال المباشر بـ <code>api.telegram.org</code> على أجهزة الكمبيوتر بدون VPN.
+                  لتجربة البوت على حاسبتك، <b>شغّل أي VPN على جهازك (مثل تطبيق Cloudflare 1.1.1.1 WARP المجاني)</b>. وعند رفع المتجر على استضافة سحابية خارجية سيعمل البوت تلقائياً 24/7 دون الحاجة لأي VPN.
                 </p>
               </div>
 
