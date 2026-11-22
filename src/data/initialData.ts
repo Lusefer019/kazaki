@@ -643,7 +643,7 @@ export const initialStoreSettings: StoreSettings = {
     enableBrowserPush: true,
     enableTelegram: true,
     telegramBotToken: '9019784006:AAGJ_pea1vjzx3N_Yd9EKHpE12olABxMkA8',
-    telegramChatId: '',
+    telegramChatId: '8398534448',
     enableWhatsAppAlert: true,
     adminWhatsApp: '9647838969959',
     enableEmailAlert: true,

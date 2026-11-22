@@ -635,6 +635,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             ...initialStoreSettings.notificationSettings,
             ...(parsed.notificationSettings || {}),
             telegramBotToken: parsed.notificationSettings?.telegramBotToken || initialStoreSettings.notificationSettings?.telegramBotToken || '9019784006:AAGJ_pea1vjzx3N_Yd9EKHpE12olABxMkA8',
+            telegramChatId: parsed.notificationSettings?.telegramChatId || initialStoreSettings.notificationSettings?.telegramChatId || '8398534448',
           },
         };
       }

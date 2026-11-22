@@ -38,9 +38,9 @@ export const TelegramBotView: React.FC = () => {
 
   // Local state for bot settings
   const [botConfig, setBotConfig] = useState<BotConfigState>({
-    botToken: settings.notificationSettings?.telegramBotToken || '',
-    chatId: settings.notificationSettings?.telegramChatId || '',
-    enabled: settings.notificationSettings?.enableTelegram || false,
+    botToken: settings.notificationSettings?.telegramBotToken || '9019784006:AAGJ_pea1vjzx3N_Yd9EKHpE12olABxMkA8',
+    chatId: settings.notificationSettings?.telegramChatId || '8398534448',
+    enabled: true,
     notifyNewOrders: true,
     allowStatusUpdateFromBot: true,
     dailyReportEnabled: true,
