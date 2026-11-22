@@ -631,6 +631,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           shippingRates: defaultIraqiShippingRates,
           defaultShippingFee: typeof parsed.defaultShippingFee === 'number' ? parsed.defaultShippingFee : 6000,
           freeShippingThreshold: typeof parsed.freeShippingThreshold === 'number' ? parsed.freeShippingThreshold : 0,
+          notificationSettings: {
+            ...initialStoreSettings.notificationSettings,
+            ...(parsed.notificationSettings || {}),
+            telegramBotToken: parsed.notificationSettings?.telegramBotToken || initialStoreSettings.notificationSettings?.telegramBotToken || '9019784006:AAGJ_pea1vjzx3N_Yd9EKHpE12olABxMkA8',
+          },
         };
       }
       return initialStoreSettings;

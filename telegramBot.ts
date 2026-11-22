@@ -99,12 +99,15 @@ async function callTelegramApi(token: string, method: string, payload?: any, sig
   if (!cleanToken) {
     throw new Error('Telegram Bot Token is missing');
   }
-  const url = `https://api.telegram.org/bot${cleanToken}/${method}`;
+  const apiBase = (process.env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/+$/, '');
+  const url = `${apiBase}/bot${cleanToken}/${method}`;
+  const effectiveSignal = signal || AbortSignal.timeout(12000);
+
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: payload ? JSON.stringify(payload) : undefined,
-    signal,
+    signal: effectiveSignal,
   });
 
   const data = await response.json().catch(() => ({ ok: false, description: 'Invalid JSON response from Telegram' }));
@@ -230,7 +233,8 @@ export async function sendTelegramDocument(
     throw new Error('Missing Telegram token or chat ID');
   }
 
-  const url = `https://api.telegram.org/bot${t.trim()}/sendDocument`;
+  const apiBase = (process.env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/+$/, '');
+  const url = `${apiBase}/bot${t.trim()}/sendDocument`;
   const formData = new FormData();
   formData.append('chat_id', chatId.trim());
 
@@ -246,6 +250,7 @@ export async function sendTelegramDocument(
   const response = await fetch(url, {
     method: 'POST',
     body: formData,
+    signal: AbortSignal.timeout(20000),
   });
 
   const resJson = await response.json();

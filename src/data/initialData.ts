@@ -641,8 +641,8 @@ export const initialStoreSettings: StoreSettings = {
   notificationSettings: {
     enableSound: true,
     enableBrowserPush: true,
-    enableTelegram: false,
-    telegramBotToken: '',
+    enableTelegram: true,
+    telegramBotToken: '9019784006:AAGJ_pea1vjzx3N_Yd9EKHpE12olABxMkA8',
     telegramChatId: '',
     enableWhatsAppAlert: true,
     adminWhatsApp: '9647838969959',
