@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { defaultAboutUs } from '../../data/initialData';
 import { optimizeImageFile } from '../../utils/mediaUpload';
+import { uploadDataUrlToStorage } from '../../lib/supabase';
 
 export const AboutHomeSection: React.FC = () => {
   const {
@@ -40,10 +41,11 @@ export const AboutHomeSection: React.FC = () => {
     setIsUploading(true);
     try {
       const optimized = await optimizeImageFile(file, 400);
+      const storedUrl = await uploadDataUrlToStorage(optimized, 'about');
       updateSettings({
         aboutUs: {
           ...about,
-          imageUrl: optimized,
+          imageUrl: storedUrl || optimized,
         },
       });
       setToastMessage('تم تحديث صورة «من نحن» من استوديو جهازك بنجاح!');

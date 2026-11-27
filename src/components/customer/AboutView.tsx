@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { defaultAboutUs } from '../../data/initialData';
 import { optimizeImageFile } from '../../utils/mediaUpload';
+import { uploadDataUrlToStorage } from '../../lib/supabase';
 
 export const AboutView: React.FC = () => {
   const {
@@ -64,10 +65,11 @@ export const AboutView: React.FC = () => {
     setIsUploading(true);
     try {
       const optimized = await optimizeImageFile(file, 400);
+      const storedUrl = await uploadDataUrlToStorage(optimized, 'about');
       updateSettings({
         aboutUs: {
           ...about,
-          imageUrl: optimized,
+          imageUrl: storedUrl || optimized,
         },
       });
       setToastMessage('تم تحديث صورة «من نحن» من استوديو جهازك بنجاح!');
@@ -87,11 +89,12 @@ export const AboutView: React.FC = () => {
     setIsUploading(true);
     try {
       const optimized = await optimizeImageFile(file, 400);
+      const storedUrl = await uploadDataUrlToStorage(optimized, 'about');
       const currentGallery = about.gallery || defaultAboutUs.gallery || [];
       updateSettings({
         aboutUs: {
           ...about,
-          gallery: [...currentGallery, optimized],
+          gallery: [...currentGallery, storedUrl || optimized],
         },
       });
       setToastMessage('تمت إضافة الصورة إلى معرض صور «من نحن» من الاستوديو بنجاح!');

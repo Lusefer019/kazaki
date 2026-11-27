@@ -651,7 +651,13 @@ export const syncCategoryUpsertToSupabase = async (category: Category): Promise<
   if (!supabase) return;
 
   try {
-    await supabase.from('categories').upsert(
+    let imageUrl = category.image || '';
+    if (isHeavyDataUrl(imageUrl)) {
+      const uploaded = await uploadDataUrlToStorage(imageUrl, 'categories');
+      if (uploaded) imageUrl = uploaded;
+    }
+
+    const { error } = await supabase.from('categories').upsert(
       {
         id: category.id,
         name: category.name,
@@ -660,11 +666,14 @@ export const syncCategoryUpsertToSupabase = async (category: Category): Promise<
         description: category.description || '',
         description_en: category.descriptionEn || '',
         description_ku: category.descriptionKu || '',
-        image: category.image || '',
+        image: imageUrl,
         icon: category.icon || 'Heart',
       },
       { onConflict: 'id' }
     );
+    if (error) {
+      console.error('Supabase category upsert FAILED:', error.message);
+    }
   } catch (err) {
     console.warn('Syncing category upsert to Supabase warning:', err);
   }
