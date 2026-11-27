@@ -12,6 +12,7 @@ import {
   RotateCw,
 } from 'lucide-react';
 import { optimizeImageFile, readVideoFile, formatFileSize } from '../../utils/mediaUpload';
+import { uploadDataUrlToStorage } from '../../lib/supabase';
 
 interface StudioMediaUploaderProps {
   label: string;
@@ -67,13 +68,22 @@ export const StudioMediaUploader: React.FC<StudioMediaUploaderProps> = ({
       }
 
       let resultUrl = '';
+      let measuredLength = 0;
       if (isVideo) {
         resultUrl = await readVideoFile(file);
+        measuredLength = resultUrl.length;
       } else {
         resultUrl = await optimizeImageFile(file, 300);
+        measuredLength = resultUrl.length;
+        // Persist the picture in Supabase Storage and keep only its short permanent URL.
+        // (Inline base64 gets dropped by browser quota / DB timeouts after a reload.)
+        const storedUrl = await uploadDataUrlToStorage(resultUrl, 'uploads');
+        if (storedUrl) {
+          resultUrl = storedUrl;
+        }
       }
 
-      const calculatedSize = Math.round(resultUrl.length * 0.75);
+      const calculatedSize = Math.round(measuredLength * 0.75);
       setUploadStats({
         name: file.name,
         size: `${formatFileSize(calculatedSize)} (دقة فائقة HD)`,

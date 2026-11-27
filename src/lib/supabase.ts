@@ -687,12 +687,14 @@ export const syncCategoryDeletionToSupabase = async (categoryId: string): Promis
 /**
  * Upserts a single product directly to Supabase when modified by the manager.
  */
-export const syncProductUpsertToSupabase = async (product: Product): Promise<void> => {
+export const syncProductUpsertToSupabase = async (inputProduct: Product): Promise<void> => {
   const supabase = getSupabase();
   if (!supabase) return;
 
   try {
-    await supabase.from('products').upsert(
+    // Safety net: any inline base64 image that slipped through is moved to Storage first
+    const product = await moveProductImagesToStorage(inputProduct);
+    const { error } = await supabase.from('products').upsert(
       {
         id: product.id,
         title: product.title,
@@ -713,6 +715,9 @@ export const syncProductUpsertToSupabase = async (product: Product): Promise<voi
       },
       { onConflict: 'id' }
     );
+    if (error) {
+      console.error('Supabase product upsert FAILED (image/data not saved to database):', error.message);
+    }
   } catch (err) {
     console.warn('Syncing product upsert to Supabase warning:', err);
   }
@@ -779,15 +784,60 @@ export const fetchProductsFromSupabase = async (): Promise<Product[] | null> => 
   if (!supabase) return null;
 
   try {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Products may carry heavy base64 images. A single `select *` on many rows exceeds
+    // Supabase's statement timeout (57014) and used to make the whole sync fail, which
+    // dropped every image from the storefront. Fetch in small pages and degrade per-row.
+    const PAGE = 4;
+    const rows: any[] = [];
+    let from = 0;
+    let incomplete = false;
 
-    if (error) {
-      console.warn('Error fetching products from Supabase:', error.message);
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      let { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(from, from + PAGE - 1);
+
+      if (error) {
+        // Retry the same window one row at a time so a single heavy row cannot block the rest
+        const recovered: any[] = [];
+        let lastErr = error;
+        for (let i = from; i < from + PAGE; i++) {
+          const single = await supabase
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .range(i, i);
+          if (single.error) {
+            lastErr = single.error;
+            continue;
+          }
+          if (!single.data || single.data.length === 0) break;
+          recovered.push(...single.data);
+        }
+        if (recovered.length === 0) {
+          incomplete = true;
+          console.warn('Error fetching products page from Supabase:', lastErr.message);
+          break;
+        }
+        data = recovered;
+      }
+
+      if (!data || data.length === 0) break;
+      rows.push(...data);
+      if (data.length < PAGE) break;
+      from += PAGE;
+      if (from > 5000) break;
+    }
+
+    // Never replace the storefront with a partial list: keep the cached products instead
+    if (incomplete) {
       return null;
     }
+
+    const data = rows;
 
     if (data && Array.isArray(data)) {
       return data.map((p: any) => ({
@@ -1078,3 +1128,87 @@ export const updateSupportMessageInSupabase = async (
 export { getSupabaseServer } from './supabaseServer';
 
 
+
+/**
+ * Uploads a data URL (image) to Supabase Storage and returns its permanent public URL.
+ * Storing a short URL instead of a multi-hundred-KB base64 string keeps the products table
+ * light, avoids statement timeouts and keeps the browser cache far below its quota.
+ * Returns null when Storage is unavailable so the caller can fall back to the data URL.
+ */
+export const STORE_IMAGES_BUCKET = 'product-images';
+
+export const isHeavyDataUrl = (value: unknown): value is string =>
+  typeof value === 'string' && value.startsWith('data:') && value.length > 2000;
+
+export const uploadDataUrlToStorage = async (
+  dataUrl: string,
+  folder = 'products'
+): Promise<string | null> => {
+  const supabase = getSupabase();
+  if (!supabase || !dataUrl || !dataUrl.startsWith('data:')) return null;
+
+  try {
+    const match = /^data:([^;,]+)(;base64)?,([\s\S]*)$/.exec(dataUrl);
+    if (!match) return null;
+    const mime = match[1] || 'image/jpeg';
+    const payload = match[3];
+    const binary = match[2] ? atob(payload) : decodeURIComponent(payload);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+    const ext =
+      (mime.split('/')[1] || 'jpg').replace('jpeg', 'jpg').replace(/[^a-z0-9]/gi, '') || 'jpg';
+    const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+    const { error } = await supabase.storage
+      .from(STORE_IMAGES_BUCKET)
+      .upload(path, bytes, { contentType: mime, cacheControl: '31536000', upsert: false });
+    if (error) {
+      console.warn('Storage upload failed, keeping inline image:', error.message);
+      return null;
+    }
+
+    const { data } = supabase.storage.from(STORE_IMAGES_BUCKET).getPublicUrl(path);
+    return data?.publicUrl || null;
+  } catch (err) {
+    console.warn('Storage upload exception, keeping inline image:', err);
+    return null;
+  }
+};
+
+/**
+ * Moves every heavy inline image of a product (cover + gallery) into Storage.
+ * Falls back per-image to the original data URL if an upload fails.
+ */
+export const moveProductImagesToStorage = async (product: Product): Promise<Product> => {
+  const next: Product = { ...product };
+  const uploaded = new Map<string, string>();
+
+  if (isHeavyDataUrl(next.image)) {
+    const url = await uploadDataUrlToStorage(next.image);
+    if (url) {
+      uploaded.set(product.image, url);
+      next.image = url;
+    }
+  }
+
+  if (Array.isArray(next.gallery) && next.gallery.some(isHeavyDataUrl)) {
+    const out: string[] = [];
+    for (const g of next.gallery) {
+      if (!isHeavyDataUrl(g)) {
+        out.push(g);
+        continue;
+      }
+      // gallery frequently repeats the cover image: reuse the already uploaded URL
+      if (uploaded.has(g)) {
+        out.push(uploaded.get(g)!);
+        continue;
+      }
+      const url = await uploadDataUrlToStorage(g);
+      uploaded.set(g, url || g);
+      out.push(url || g);
+    }
+    next.gallery = out;
+  }
+  return next;
+};
