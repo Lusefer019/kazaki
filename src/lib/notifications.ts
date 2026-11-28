@@ -295,17 +295,35 @@ export const notifyStoreOwnerOfNewOrder = async (
     } catch {}
   }
 
-  // 3. Send Telegram Alert if configured
-  if (
-    notifConfig?.enableTelegram &&
-    notifConfig.telegramBotToken &&
-    notifConfig.telegramChatId
-  ) {
-    sendTelegramOrderAlert(
-      notifConfig.telegramBotToken,
-      notifConfig.telegramChatId,
-      order,
-      settings.storeName
-    ).catch((err) => console.warn('Telegram notification background error:', err));
-  }
+  // 3. Dispatch Telegram Alert: prefer Cloudflare Worker / server API first so customer browsers
+  // bypass Iraqi ISP blocks and keep Worker-configured credentials working transparently.
+  const canUseDirectTelegram = Boolean(
+    notifConfig?.enableTelegram && notifConfig.telegramBotToken && notifConfig.telegramChatId
+  );
+
+  (async () => {
+    try {
+      const apiRes = await fetch('/api/telegram-bot/notify-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order }),
+      });
+      const ct = apiRes.headers.get('content-type') || '';
+      if (apiRes.ok && ct.includes('application/json')) {
+        const data = await apiRes.json();
+        if (data?.success) return;
+      }
+    } catch {
+      // No /api/telegram-bot/notify-order backend (e.g., static deploy): fall back below
+    }
+
+    if (canUseDirectTelegram) {
+      await sendTelegramOrderAlert(
+        notifConfig!.telegramBotToken!,
+        notifConfig!.telegramChatId!,
+        order,
+        settings.storeName
+      );
+    }
+  })().catch((err) => console.warn('Telegram notification background error:', err));
 };

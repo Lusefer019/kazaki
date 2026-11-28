@@ -1214,6 +1214,20 @@ app.post('/api/telegram-bot/report', async (req: Request, res: Response) => {
   }
 });
 
+// POST /api/telegram-bot/notify-order - Unified order notification endpoint
+app.post('/api/telegram-bot/notify-order', async (req: Request, res: Response) => {
+  try {
+    const order = req.body?.order;
+    if (!order || !order.id) {
+      return res.status(400).json({ success: false, message: 'بيانات الطلب غير صالحة' });
+    }
+    const result = await notifyNewOrderTelegram(order);
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Initialize Telegram Bot system
 initTelegramBot({
   getOrders: () => readJsonFile<any[]>(ORDERS_FILE, []),

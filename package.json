@@ -5,7 +5,8 @@
   "type": "module",
   "allowScripts": {
     "esbuild": true,
-    "esbuild@0.28.2": true
+    "esbuild@0.28.2": true,
+    "workerd": true
   },
   "scripts": {
     "dev": "tsx server.ts",
@@ -13,7 +14,11 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "node -e \"try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){}\"",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit && tsc -p tsconfig.worker.json --noEmit",
+    "cf:typegen": "wrangler types --strict-vars false --env-file .env.example",
+    "cf:dev": "npm run build && wrangler dev",
+    "cf:deploy:dry": "npm run build && wrangler deploy --dry-run",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@supabase/server": "^1.9.2",
@@ -40,6 +45,7 @@
     "autoprefixer": "^10.4.21",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.21.0",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "wrangler": "^4.169.0"
   }
 }

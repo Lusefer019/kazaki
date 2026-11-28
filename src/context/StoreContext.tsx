@@ -477,10 +477,12 @@ export const isCurrentSessionAdmin = (user?: User | null, _view?: string): boole
 };
 
 export const getAdminRequestHeaders = (user?: User | null): Record<string, string> => {
+  const cachedAdmin = getCachedAdminData();
+  const adminKey = (cachedAdmin?.password_hash || '').trim() || 'admin-authenticated-session';
   return {
     'x-admin-role': 'admin',
     'x-admin-user-id': user?.id || 'admin-user',
-    'x-admin-key': 'admin-authenticated-session',
+    'x-admin-key': adminKey,
   };
 };
 

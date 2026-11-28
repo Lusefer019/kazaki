@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useStore } from '../../context/StoreContext';
+import { useStore, getAdminRequestHeaders } from '../../context/StoreContext';
 import {
   Bot,
   Send,
@@ -36,7 +36,7 @@ interface BotConfigState {
 }
 
 export const TelegramBotView: React.FC = () => {
-  const { orders, products, settings } = useStore();
+  const { orders, settings, currentUser } = useStore();
 
   // Local state for bot settings
   const [botConfig, setBotConfig] = useState<BotConfigState>({
@@ -53,6 +53,8 @@ export const TelegramBotView: React.FC = () => {
     connected: boolean;
     botInfo: any;
     pollingActive: boolean;
+    runtime?: string;
+    hasServerToken?: boolean;
   }>({
     connected: false,
     botInfo: null,
@@ -62,6 +64,7 @@ export const TelegramBotView: React.FC = () => {
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
   const [testingConnection, setTestingConnection] = useState(false);
+  const [settingUpWebhook, setSettingUpWebhook] = useState(false);
   const [sendingReport, setSendingReport] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [showToken, setShowToken] = useState(false);
@@ -70,7 +73,7 @@ export const TelegramBotView: React.FC = () => {
   // Smart Analytical Assistant State (No AI Key Needed - Pure algorithmic business intelligence)
   const [activeQuery, setActiveQuery] = useState<'today' | 'top_products' | 'cities' | 'pending' | 'kpis'>('today');
 
-  // Fetch status from backend on mount
+  // Fetch status from backend (Cloudflare Worker or local server) on mount
   const fetchStatus = async () => {
     setLoadingStatus(true);
     try {
@@ -82,11 +85,15 @@ export const TelegramBotView: React.FC = () => {
             connected: data.connected,
             botInfo: data.botInfo,
             pollingActive: data.pollingActive,
+            runtime: data.runtime,
+            hasServerToken: Boolean(data.config?.hasToken || data.config?.botToken),
           });
           if (data.config) {
             setBotConfig((prev) => ({
               ...prev,
               ...data.config,
+              // Never wipe existing UI token if Worker masks raw token on GET /status
+              botToken: data.config.botToken || prev.botToken,
             }));
           }
         }
@@ -102,28 +109,35 @@ export const TelegramBotView: React.FC = () => {
     fetchStatus();
   }, []);
 
+  /** Shared helper for authenticated admin bot API calls. */
+  const postBotApi = async (endpoint: string, payload: Record<string, unknown>) => {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAdminRequestHeaders(currentUser),
+      },
+      body: JSON.stringify(payload),
+    });
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) {
+      throw new Error('خادم البوت غير متاح على هذا الرابط حالياً');
+    }
+    return res.json();
+  };
+
   // Save Config
   const handleSaveConfig = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setSavingConfig(true);
     setStatusMessage(null);
     try {
-      const res = await fetch('/api/telegram-bot/config', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-role': 'admin',
-          'x-admin-user-id': 'admin',
-        },
-        body: JSON.stringify({
-          ...botConfig,
-          enabled: Boolean(botConfig.botToken && botConfig.chatId),
-        }),
+      const data = await postBotApi('/api/telegram-bot/config', {
+        ...botConfig,
+        enabled: Boolean((botConfig.botToken || botStatus.hasServerToken) && botConfig.chatId),
       });
-
-      const data = await res.json();
       if (data.success) {
-        setStatusMessage({ text: 'تم حفظ إعدادات البوت بنجاح! 🌸', type: 'success' });
+        setStatusMessage({ text: data.message || 'تم حفظ إعدادات البوت بنجاح! 🌸', type: 'success' });
         await fetchStatus();
       } else {
         setStatusMessage({ text: data.message || 'فشل حفظ الإعدادات', type: 'error' });
@@ -140,20 +154,10 @@ export const TelegramBotView: React.FC = () => {
     setTestingConnection(true);
     setStatusMessage(null);
     try {
-      const res = await fetch('/api/telegram-bot/test', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-role': 'admin',
-          'x-admin-user-id': 'admin',
-        },
-        body: JSON.stringify({
-          botToken: botConfig.botToken,
-          chatId: botConfig.chatId,
-        }),
+      const data = await postBotApi('/api/telegram-bot/test', {
+        botToken: botConfig.botToken,
+        chatId: botConfig.chatId,
       });
-
-      const data = await res.json();
       if (data.success) {
         setStatusMessage({ text: data.message, type: 'success' });
         await fetchStatus();
@@ -167,27 +171,35 @@ export const TelegramBotView: React.FC = () => {
     }
   };
 
+  // Register Cloudflare Webhook explicitly
+  const handleSetupWebhook = async () => {
+    setSettingUpWebhook(true);
+    setStatusMessage(null);
+    try {
+      const data = await postBotApi('/api/telegram-bot/setup-webhook', {
+        botToken: botConfig.botToken,
+      });
+      setStatusMessage({
+        text: data.message || (data.success ? 'تم تفعيل Webhook بنجاح!' : 'تعذر تفعيل Webhook'),
+        type: data.success ? 'success' : 'error',
+      });
+    } catch (err: any) {
+      setStatusMessage({ text: 'تعذر تفعيل Webhook: ' + err.message, type: 'error' });
+    } finally {
+      setSettingUpWebhook(false);
+    }
+  };
+
   // Trigger manual report to Telegram
   const handleSendReport = async (type: 'today' | 'week' | 'full' | 'excel') => {
     setSendingReport(type);
     setStatusMessage(null);
     try {
-      const res = await fetch('/api/telegram-bot/report', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-role': 'admin',
-          'x-admin-user-id': 'admin',
-        },
-        body: JSON.stringify({ type, chatId: botConfig.chatId }),
+      const data = await postBotApi('/api/telegram-bot/report', { type, chatId: botConfig.chatId });
+      setStatusMessage({
+        text: data.message,
+        type: data.success ? 'success' : 'error',
       });
-
-      const data = await res.json();
-      if (data.success) {
-        setStatusMessage({ text: data.message, type: 'success' });
-      } else {
-        setStatusMessage({ text: data.message, type: 'error' });
-      }
     } catch (err: any) {
       setStatusMessage({ text: 'خطأ: ' + err.message, type: 'error' });
     } finally {
@@ -280,6 +292,9 @@ export const TelegramBotView: React.FC = () => {
               {botStatus.connected ? (
                 <>
                   متصل: <span className="font-mono text-emerald-300">@{botStatus.botInfo?.username || 'بوت مفعل'}</span>
+                  {botStatus.runtime === 'cloudflare-worker' && (
+                    <span className="mr-1.5 text-[10px] text-sky-300">(Cloudflare 24/7)</span>
+                  )}
                 </>
               ) : (
                 'غير مفعل حالياً'
@@ -477,7 +492,7 @@ export const TelegramBotView: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleTestConnection}
-                  disabled={testingConnection || !botConfig.botToken || !botConfig.chatId}
+                  disabled={testingConnection || (!botConfig.botToken && !botStatus.hasServerToken) || !botConfig.chatId}
                   className="py-2.5 px-4 rounded-xl border border-stone-300 bg-white text-stone-700 text-xs font-bold hover:bg-stone-50 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
                 >
                   {testingConnection ? (
@@ -487,6 +502,22 @@ export const TelegramBotView: React.FC = () => {
                   )}
                   <span>إرسال رسالة تجربة لحسابي</span>
                 </button>
+
+                {botStatus.runtime === 'cloudflare-worker' && (
+                  <button
+                    type="button"
+                    onClick={handleSetupWebhook}
+                    disabled={settingUpWebhook || (!botConfig.botToken && !botStatus.hasServerToken)}
+                    className="py-2.5 px-4 rounded-xl border border-sky-200 bg-sky-50 text-sky-800 text-xs font-bold hover:bg-sky-100 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
+                  >
+                    {settingUpWebhook ? (
+                      <RefreshCw className="w-4 h-4 animate-spin text-sky-600" />
+                    ) : (
+                      <Globe className="w-4 h-4 text-sky-600" />
+                    )}
+                    <span>تفعيل Webhook كلاود فلير</span>
+                  </button>
+                )}
               </div>
             </form>
           </div>
