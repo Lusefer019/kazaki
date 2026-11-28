@@ -142,7 +142,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <span className="text-xs sm:text-sm md:text-base font-extrabold text-stone-900 leading-tight">
                 {product.price} {currencyLabel}
               </span>
-              {product.originalPrice && (
+              {discountPercent && product.originalPrice && (
                 <span className="text-[10px] sm:text-xs text-stone-400 line-through">
                   {product.originalPrice} {currencyLabel}
                 </span>

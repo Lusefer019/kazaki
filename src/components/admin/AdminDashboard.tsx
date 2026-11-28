@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useStore, isCurrentSessionAdmin } from '../../context/StoreContext';
+import {
+  useStore,
+  isCurrentSessionAdmin,
+  calculateDiscountedPrice,
+  getEffectiveProductBasePrice,
+} from '../../context/StoreContext';
 import {
   LayoutDashboard,
   Smartphone,
@@ -110,6 +115,7 @@ export const AdminDashboard: React.FC = () => {
     updateShippingRates,
     addProduct,
     updateProduct,
+    applyProductDiscount,
     deleteProduct,
     addCategory,
     updateCategory,
@@ -245,7 +251,6 @@ export const AdminDashboard: React.FC = () => {
     descriptionEn: '',
     descriptionKu: '',
     price: 0,
-    originalPrice: 0,
     categoryId: categories[0]?.id || 'flowers',
     image: '',
     image2: '',
@@ -301,7 +306,12 @@ export const AdminDashboard: React.FC = () => {
   const [isDeletingProduct, setIsDeletingProduct] = useState(false);
 
   // Quick Discount Modal State
-  const [discountModalProduct, setDiscountModalProduct] = useState<Product | null>(null);
+  const [discountModalProductId, setDiscountModalProductId] = useState<string | null>(null);
+  const discountModalProduct = useMemo(
+    () => (discountModalProductId ? products.find((p) => p.id === discountModalProductId) || null : null),
+    [products, discountModalProductId]
+  );
+  const discountModalBasePrice = discountModalProduct ? getEffectiveProductBasePrice(discountModalProduct) : 0;
   const [discountPercentInput, setDiscountPercentInput] = useState<number>(20);
   const [discountTypeMode, setDiscountTypeMode] = useState<'percent' | 'customPrice'>('percent');
   const [discountCustomPrice, setDiscountCustomPrice] = useState<number>(0);
@@ -563,7 +573,6 @@ export const AdminDashboard: React.FC = () => {
       descriptionEn: '',
       descriptionKu: '',
       price: 35000,
-      originalPrice: 45000,
       categoryId: categories[0]?.id || 'flowers',
       image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80',
       image2: '',
@@ -593,7 +602,6 @@ export const AdminDashboard: React.FC = () => {
       descriptionEn: prod.descriptionEn || '',
       descriptionKu: prod.descriptionKu || '',
       price: prod.price,
-      originalPrice: prod.originalPrice || 0,
       categoryId: prod.categoryId,
       image: prod.image,
       image2: secondImage,
@@ -610,30 +618,26 @@ export const AdminDashboard: React.FC = () => {
 
   // Open Quick Discount Modal for a product
   const handleOpenDiscountModal = (prod: Product) => {
-    setDiscountModalProduct(prod);
+    setDiscountModalProductId(prod.id);
     setDiscountTypeMode('percent');
-    setDiscountPercentInput(20);
-    // If originalPrice exists and higher than price, calculate initial percent
     if (prod.originalPrice && prod.originalPrice > prod.price) {
       const calcPercent = Math.round(((prod.originalPrice - prod.price) / prod.originalPrice) * 100);
       setDiscountPercentInput(calcPercent > 0 ? calcPercent : 20);
       setDiscountCustomPrice(prod.price);
     } else {
-      const discounted = Math.round((prod.price * 0.8) / 250) * 250;
-      setDiscountCustomPrice(discounted);
+      setDiscountPercentInput(20);
+      setDiscountCustomPrice(calculateDiscountedPrice(prod.price, 20));
     }
   };
 
-  // Apply Quick Discount to Product
+  // Apply Quick Discount to Product's current price
   const handleApplyQuickDiscount = (prod: Product, percent: number) => {
-    // If product doesn't have originalPrice, its current price becomes originalPrice
-    const basePrice = (prod.originalPrice && prod.originalPrice > prod.price) ? prod.originalPrice : prod.price;
-    const newPrice = Math.max(500, Math.round((basePrice * (1 - percent / 100)) / 250) * 250);
-    updateProduct(prod.id, {
-      originalPrice: basePrice,
-      price: newPrice,
-    });
-    showNotification(`تم تفعيل خصم ${percent}% على "${prod.title}". السعر بعد الخصم: ${newPrice.toLocaleString('ar-IQ')} ${settings.currency}`);
+    const result = applyProductDiscount(prod.id, { percent });
+    if (result) {
+      showNotification(
+        `تم تفعيل خصم ${result.percent}% على "${result.product.title}". السعر بعد الخصم: ${result.product.price.toLocaleString('ar-IQ')} ${settings.currency}`
+      );
+    }
   };
 
   // Remove Discount from Product
@@ -688,11 +692,20 @@ export const AdminDashboard: React.FC = () => {
     const uniqueGallery = Array.from(new Set(galleryImages));
 
     if (editingProductId) {
+      const existingProd = products.find((p) => p.id === editingProductId);
+      const nextPrice = Number(productForm.price);
+      // Preserve active discount only when the product's price wasn't changed inside Edit Modal
+      const keepActiveDiscount =
+        existingProd &&
+        existingProd.originalPrice &&
+        existingProd.originalPrice > existingProd.price &&
+        nextPrice === existingProd.price;
+
       updateProduct(editingProductId, {
         title: productForm.title,
         description: productForm.description,
-        price: Number(productForm.price),
-        originalPrice: Number(productForm.originalPrice) || undefined,
+        price: nextPrice,
+        originalPrice: keepActiveDiscount ? existingProd.originalPrice : undefined,
         categoryId: productForm.categoryId,
         image: productForm.image,
         gallery: uniqueGallery,
@@ -709,7 +722,7 @@ export const AdminDashboard: React.FC = () => {
         title: productForm.title,
         description: productForm.description,
         price: Number(productForm.price),
-        originalPrice: Number(productForm.originalPrice) || undefined,
+        originalPrice: undefined,
         categoryId: productForm.categoryId,
         image: productForm.image,
         gallery: uniqueGallery,
@@ -2018,13 +2031,16 @@ export const AdminDashboard: React.FC = () => {
                                     const val = Number(e.target.value);
                                     if (!isNaN(val) && val > 0) {
                                       if (hasDiscount) {
-                                        if (val !== prod.originalPrice) {
+                                        if (val <= prod.price) {
+                                          updateProduct(prod.id, { price: val, originalPrice: undefined });
+                                          showNotification(`تم تحديث سعر "${prod.title}" إلى ${val} ${settings.currency}`);
+                                        } else if (val !== prod.originalPrice) {
                                           updateProduct(prod.id, { originalPrice: val });
                                           showNotification(`تم تحديث السعر الأصلي لـ "${prod.title}"`);
                                         }
                                       } else {
                                         if (val !== prod.price) {
-                                          updateProduct(prod.id, { price: val });
+                                          updateProduct(prod.id, { price: val, originalPrice: undefined });
                                           showNotification(`تم تحديث سعر "${prod.title}" إلى ${val} ${settings.currency}`);
                                         }
                                       }
@@ -2102,17 +2118,25 @@ export const AdminDashboard: React.FC = () => {
                                 <input
                                   type="number"
                                   min={1}
-                                  value={prod.price}
-                                  key={`final-price-${prod.id}-${prod.price}`}
-                                  onChange={(e) => {
+                                  defaultValue={prod.price}
+                                  key={`final-price-${prod.id}-${prod.price}-${prod.originalPrice}`}
+                                  onBlur={(e) => {
                                     const val = Number(e.target.value);
-                                    if (!isNaN(val) && val > 0) {
-                                      // If already has originalPrice or basePrice
-                                      const basePrice = (prod.originalPrice && prod.originalPrice > prod.price) ? prod.originalPrice : undefined;
+                                    if (!isNaN(val) && val > 0 && val !== prod.price) {
+                                      const basePrice =
+                                        prod.originalPrice && prod.originalPrice > prod.price
+                                          ? prod.originalPrice
+                                          : undefined;
                                       updateProduct(prod.id, {
                                         price: val,
                                         originalPrice: basePrice && basePrice > val ? basePrice : undefined,
                                       });
+                                      showNotification(`تم تحديث السعر الحالي لـ "${prod.title}" إلى ${val} ${settings.currency}`);
+                                    }
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      (e.target as HTMLInputElement).blur();
                                     }
                                   }}
                                   className={`w-24 px-2 py-1.5 rounded-lg border text-xs font-black text-center outline-hidden transition-all shadow-2xs ${
@@ -2120,7 +2144,7 @@ export const AdminDashboard: React.FC = () => {
                                       ? 'border-rose-400 bg-rose-50/50 text-rose-700 font-extrabold focus:bg-white'
                                       : 'border-rose-200 focus:border-rose-500 bg-rose-50/30 text-stone-900 focus:bg-white'
                                   }`}
-                                  title="السعر الفعلي الذي يدفعه الزبون بعد الخصم (تعديل مباشر)"
+                                  title="السعر الحالي الذي يدفعه الزبون (تعديل مباشر)"
                                 />
                                 <span className={`text-[11px] font-bold ${hasDiscount ? 'text-rose-600' : 'text-stone-500'}`}>
                                   {settings.currency}
@@ -3886,89 +3910,18 @@ export const AdminDashboard: React.FC = () => {
                 />
               </div>
 
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">
-                    السعر الأساسي الحالي ({settings.currency}) <span className="text-rose-600">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min={1}
-                    value={productForm.price}
-                    onChange={(e) => setProductForm({ ...productForm, price: Number(e.target.value) })}
-                    className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 font-bold"
-                  />
-                </div>
-
-                {/* زر وخيار تفعيل/إغلاق الخصم */}
-                <div className="p-3.5 rounded-2xl border border-rose-200/80 bg-rose-50/40 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-rose-100 text-rose-700">
-                        <Percent className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <span className="text-xs font-bold text-stone-900 block">
-                          تفعيل الخصم على هذا المنتج
-                        </span>
-                        <span className="text-[10px] text-stone-500">
-                          {Boolean(productForm.originalPrice && productForm.originalPrice > productForm.price)
-                            ? `الخصم مفعّل حالياً (${Math.round((((productForm.originalPrice - productForm.price) / productForm.originalPrice) * 100))}% توفير)`
-                            : 'الخصم متوقف حالياً. يمكنك تفعيله وإغلاقه في أي وقت'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(productForm.originalPrice && productForm.originalPrice > productForm.price)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            const suggestedOrig = Math.round((productForm.price * 1.25) / 250) * 250;
-                            setProductForm({ ...productForm, originalPrice: suggestedOrig });
-                          } else {
-                            setProductForm({ ...productForm, originalPrice: 0 });
-                          }
-                        }}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-stone-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
-                    </label>
-                  </div>
-
-                  {Boolean(productForm.originalPrice && productForm.originalPrice > productForm.price) && (
-                    <div className="grid grid-cols-2 gap-3 pt-2 border-t border-rose-200/60 animate-in fade-in">
-                      <div>
-                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
-                          السعر قبل الخصم ({settings.currency})
-                        </label>
-                        <input
-                          type="number"
-                          min={productForm.price + 1}
-                          value={productForm.originalPrice}
-                          onChange={(e) =>
-                            setProductForm({ ...productForm, originalPrice: Number(e.target.value) })
-                          }
-                          className="w-full text-xs border border-rose-200 rounded-xl px-3 py-2 bg-white outline-hidden focus:border-rose-400 font-bold"
-                          placeholder="السعر قبل الخصم"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
-                          نسبة الخصم المحسوبة
-                        </label>
-                        <div className="flex items-center gap-1.5 h-[36px] px-3 rounded-xl bg-white border border-rose-200 text-rose-700 font-bold text-xs">
-                          <Tag className="w-3.5 h-3.5" />
-                          <span>
-                            {Math.round((((productForm.originalPrice! - productForm.price) / productForm.originalPrice!) * 100))}% خصم للزبون
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 mb-1">
+                  السعر الحالي ({settings.currency}) <span className="text-rose-600">*</span>
+                </label>
+                <input
+                  type="number"
+                  required
+                  min={1}
+                  value={productForm.price}
+                  onChange={(e) => setProductForm({ ...productForm, price: Number(e.target.value) })}
+                  className="w-full text-xs border border-rose-200 rounded-xl px-3.5 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 font-bold"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -4655,7 +4608,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
               <button
                 type="button"
-                onClick={() => setDiscountModalProduct(null)}
+                onClick={() => setDiscountModalProductId(null)}
                 className="p-1.5 rounded-full hover:bg-rose-100 text-stone-400 hover:text-stone-700"
               >
                 <X className="w-4 h-4" />
@@ -4666,10 +4619,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="p-3.5 rounded-2xl bg-rose-50/40 border border-rose-100 flex items-center justify-between text-xs">
                 <span className="text-stone-500 font-medium">السعر الأساسي الحالي:</span>
                 <span className="font-bold text-stone-900">
-                  {((discountModalProduct.originalPrice && discountModalProduct.originalPrice > discountModalProduct.price)
-                    ? discountModalProduct.originalPrice
-                    : discountModalProduct.price
-                  ).toLocaleString('ar-IQ')} {settings.currency}
+                  {discountModalBasePrice.toLocaleString('ar-IQ')} {settings.currency}
                 </span>
               </div>
 
@@ -4690,11 +4640,9 @@ export const AdminDashboard: React.FC = () => {
                   type="button"
                   onClick={() => {
                     setDiscountTypeMode('customPrice');
-                    const base = (discountModalProduct.originalPrice && discountModalProduct.originalPrice > discountModalProduct.price)
-                      ? discountModalProduct.originalPrice
-                      : discountModalProduct.price;
-                    const calculated = Math.round((base * (1 - discountPercentInput / 100)) / 250) * 250;
-                    setDiscountCustomPrice(calculated);
+                    setDiscountCustomPrice(
+                      calculateDiscountedPrice(discountModalBasePrice, discountPercentInput)
+                    );
                   }}
                   className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer ${
                     discountTypeMode === 'customPrice'
@@ -4745,16 +4693,7 @@ export const AdminDashboard: React.FC = () => {
                   <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200 flex items-center justify-between text-xs">
                     <span className="text-emerald-800 font-medium">السعر بعد الخصم سيكون:</span>
                     <span className="font-black text-emerald-700 text-sm">
-                      {Math.max(
-                        500,
-                        Math.round(
-                          (((discountModalProduct.originalPrice && discountModalProduct.originalPrice > discountModalProduct.price)
-                            ? discountModalProduct.originalPrice
-                            : discountModalProduct.price) *
-                            (1 - discountPercentInput / 100)) /
-                            250
-                        ) * 250
-                      ).toLocaleString('ar-IQ')}{' '}
+                      {calculateDiscountedPrice(discountModalBasePrice, discountPercentInput).toLocaleString('ar-IQ')}{' '}
                       {settings.currency}
                     </span>
                   </div>
@@ -4766,28 +4705,19 @@ export const AdminDashboard: React.FC = () => {
                   </label>
                   <input
                     type="number"
-                    min={500}
+                    min={1}
                     value={discountCustomPrice}
                     onChange={(e) => setDiscountCustomPrice(Number(e.target.value))}
                     className="w-full text-sm font-bold border border-rose-200 rounded-xl px-4 py-2.5 bg-rose-50/20 focus:bg-white outline-hidden focus:border-rose-400 text-center"
                     placeholder="السعر بعد الخصم"
                   />
-                  {discountCustomPrice > 0 && (
+                  {discountCustomPrice > 0 && discountModalBasePrice > 0 && (
                     <div className="p-3 rounded-xl bg-rose-50/60 border border-rose-200 flex items-center justify-between text-xs">
                       <span className="text-rose-800 font-medium">نسبة الخصم المحسوبة:</span>
                       <span className="font-black text-rose-700 text-sm">
                         {Math.max(
                           0,
-                          Math.round(
-                            ((((discountModalProduct.originalPrice && discountModalProduct.originalPrice > discountModalProduct.price)
-                              ? discountModalProduct.originalPrice
-                              : discountModalProduct.price) -
-                              discountCustomPrice) /
-                              ((discountModalProduct.originalPrice && discountModalProduct.originalPrice > discountModalProduct.price)
-                                ? discountModalProduct.originalPrice
-                                : discountModalProduct.price)) *
-                              100
-                          )
+                          Math.round(((discountModalBasePrice - discountCustomPrice) / discountModalBasePrice) * 100)
                         )}
                         %
                       </span>
@@ -4799,7 +4729,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="pt-3 border-t border-rose-100 flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setDiscountModalProduct(null)}
+                  onClick={() => setDiscountModalProductId(null)}
                   className="flex-1 py-2.5 rounded-full border border-stone-200 text-stone-600 text-xs font-semibold hover:bg-stone-50 cursor-pointer"
                 >
                   إلغاء
@@ -4807,29 +4737,17 @@ export const AdminDashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    const base = (discountModalProduct.originalPrice && discountModalProduct.originalPrice > discountModalProduct.price)
-                      ? discountModalProduct.originalPrice
-                      : discountModalProduct.price;
-
-                    let finalPrice = discountModalProduct.price;
-                    if (discountTypeMode === 'percent') {
-                      finalPrice = Math.max(500, Math.round((base * (1 - discountPercentInput / 100)) / 250) * 250);
-                    } else {
-                      finalPrice = Math.max(500, discountCustomPrice);
-                    }
-
-                    if (finalPrice >= base) {
-                      showNotification('السعر بعد الخصم يجب أن يكون أقل من السعر الأصلي!');
+                    const options =
+                      discountTypeMode === 'percent'
+                        ? { percent: discountPercentInput }
+                        : { discountedPrice: discountCustomPrice };
+                    const result = applyProductDiscount(discountModalProduct.id, options);
+                    if (!result) {
+                      showNotification('السعر بعد الخصم يجب أن يكون أقل من السعر الأصلي وأكبر من صفر!');
                       return;
                     }
-
-                    updateProduct(discountModalProduct.id, {
-                      originalPrice: base,
-                      price: finalPrice,
-                    });
-                    const pct = Math.round(((base - finalPrice) / base) * 100);
-                    showNotification(`تم تفعيل خصم ${pct}% على "${discountModalProduct.title}" بنجاح!`);
-                    setDiscountModalProduct(null);
+                    showNotification(`تم تفعيل خصم ${result.percent}% على "${result.product.title}" بنجاح!`);
+                    setDiscountModalProductId(null);
                   }}
                   className="flex-1 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md cursor-pointer transition-all"
                 >

@@ -858,7 +858,10 @@ export const fetchProductsFromSupabase = async (): Promise<Product[] | null> => 
         descriptionEn: p.description_en || '',
         descriptionKu: p.description_ku || '',
         price: Number(p.price) || 0,
-        originalPrice: p.original_price ? Number(p.original_price) : undefined,
+        originalPrice:
+          p.original_price && Number(p.original_price) > (Number(p.price) || 0)
+            ? Number(p.original_price)
+            : undefined,
         categoryId: p.category_id || 'flowers',
         image: p.image || '',
         gallery: Array.isArray(p.gallery) ? p.gallery : [],

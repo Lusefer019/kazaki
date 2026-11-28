@@ -251,6 +251,10 @@ interface StoreContextType {
   // Admin Management
   addProduct: (product: Omit<Product, 'id'>) => void;
   updateProduct: (id: string, updates: Partial<Product>) => void;
+  applyProductDiscount: (
+    id: string,
+    options: { percent?: number; discountedPrice?: number }
+  ) => { product: Product; percent: number } | null;
   deleteProduct: (id: string) => void;
   addCategory: (category: Omit<Category, 'id'>) => void;
   updateCategory: (id: string, updates: Partial<Category>) => void;
@@ -264,6 +268,21 @@ interface StoreContextType {
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
+
+/** Returns the product's pre-discount base price (or its current price if no discount is active). */
+export const getEffectiveProductBasePrice = (prod: Pick<Product, 'price' | 'originalPrice'>): number =>
+  prod.originalPrice && prod.originalPrice > prod.price ? prod.originalPrice : prod.price;
+
+/** Calculates an IQD-friendly discounted price guaranteed to remain strictly below basePrice. */
+export const calculateDiscountedPrice = (basePrice: number, percent: number): number => {
+  if (basePrice <= 1 || percent <= 0) return basePrice;
+  const exact = Math.max(1, Math.round(basePrice * (1 - percent / 100)));
+  const rounded250 = Math.round(exact / 250) * 250;
+  if (rounded250 >= 250 && rounded250 < basePrice) {
+    return rounded250;
+  }
+  return exact < basePrice ? exact : Math.max(1, basePrice - 1);
+};
 
 const STORAGE_KEYS = {
   PRODUCTS: 'kazaki_products_leko_v9',
@@ -495,6 +514,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
         return parsed.map((prod) => ({
           ...prod,
+          originalPrice:
+            prod.originalPrice && prod.originalPrice > prod.price ? prod.originalPrice : undefined,
           titleEn: prod.titleEn || instantTranslateArabic(prod.title || '').en,
           titleKu: prod.titleKu || instantTranslateArabic(prod.title || '').ku,
           descriptionEn: prod.descriptionEn || instantTranslateArabic(prod.description || '').en,
@@ -506,6 +527,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return initialProducts;
     }
   });
+  const productsRef = useRef<Product[]>(products);
+  productsRef.current = products;
 
   const [categories, setCategories] = useState<Category[]>(() => {
     try {
@@ -2344,7 +2367,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             descriptionEn: newRow.description_en,
             descriptionKu: newRow.description_ku,
             price: Number(newRow.price) || 0,
-            originalPrice: newRow.original_price ? Number(newRow.original_price) : undefined,
+            originalPrice:
+              newRow.original_price && Number(newRow.original_price) > (Number(newRow.price) || 0)
+                ? Number(newRow.original_price)
+                : undefined,
             categoryId: newRow.category_id || 'flowers',
             image: newRow.image || '',
             gallery: Array.isArray(newRow.gallery) ? newRow.gallery : (newRow.image ? [newRow.image] : []),
@@ -3279,7 +3305,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
 
     const newProd = validation.product;
-    setProducts((prev) => [newProd, ...prev]);
+    const nextList = [newProd, ...productsRef.current];
+    productsRef.current = nextList;
+    setProducts(nextList);
     syncProductUpsertToSupabase(newProd);
 
     // Create instant new product notification for customer subscribers
@@ -3347,6 +3375,35 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   };
 
+  const commitProductChange = (
+    cleanId: string,
+    computePatch: (existing: Product) => Partial<Product> | null
+  ): Product | null => {
+    const existing = productsRef.current.find((p) => p.id === cleanId);
+    if (!existing) return null;
+
+    const patch = computePatch(existing);
+    if (!patch) return null;
+
+    const merged: Product = { ...existing, ...patch };
+    if (merged.originalPrice !== undefined && merged.originalPrice <= merged.price) {
+      merged.originalPrice = undefined;
+    }
+
+    const nextList = productsRef.current.map((p) => (p.id === cleanId ? merged : p));
+    productsRef.current = nextList;
+    setProducts(nextList);
+    syncProductUpsertToSupabase(merged);
+
+    // Keep active selectedProduct and cart synchronized with the final normalized product
+    setSelectedProduct((prev) => (prev && prev.id === cleanId ? merged : prev));
+    setCart((prevCart) =>
+      prevCart.map((item) => (item.product.id === cleanId ? { ...item, product: merged } : item))
+    );
+
+    return merged;
+  };
+
   const updateProduct = (id: string, updates: Partial<Product>) => {
     if (!isUserAdmin(currentUser)) {
       console.warn('Security Violation: updateProduct rejected due to missing admin privileges.');
@@ -3361,7 +3418,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (updates.title !== undefined) sanitizedUpdates.title = sanitizeText(updates.title, 200);
     if (updates.description !== undefined) sanitizedUpdates.description = sanitizeText(updates.description, 4000);
     if (updates.price !== undefined) sanitizedUpdates.price = sanitizePrice(updates.price);
-    if (updates.originalPrice !== undefined) sanitizedUpdates.originalPrice = sanitizePrice(updates.originalPrice);
+    if ('originalPrice' in updates) {
+      const sanitizedOrig =
+        updates.originalPrice !== undefined && updates.originalPrice !== null
+          ? sanitizePrice(updates.originalPrice)
+          : 0;
+      sanitizedUpdates.originalPrice = sanitizedOrig > 0 ? sanitizedOrig : undefined;
+    }
     if (updates.stockCount !== undefined) sanitizedUpdates.stockCount = sanitizeStockCount(updates.stockCount);
     if (updates.inStock !== undefined) sanitizedUpdates.inStock = Boolean(updates.inStock);
     if (updates.categoryId !== undefined) {
@@ -3381,26 +3444,47 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       sanitizedUpdates.tags = updates.tags.map((t) => sanitizeText(t, 50)).filter(Boolean);
     }
 
-    setProducts((prev) => {
-      const updated = prev.map((p) => (p.id === cleanId ? { ...p, ...sanitizedUpdates } : p));
-      const target = updated.find((p) => p.id === cleanId);
-      if (target) {
-        syncProductUpsertToSupabase(target);
+    commitProductChange(cleanId, () => sanitizedUpdates);
+  };
+
+  const applyProductDiscount = (
+    id: string,
+    options: { percent?: number; discountedPrice?: number }
+  ): { product: Product; percent: number } | null => {
+    if (!isUserAdmin(currentUser)) {
+      console.warn('Security Violation: applyProductDiscount rejected due to missing admin privileges.');
+      return null;
+    }
+
+    const cleanId = sanitizeText(id, 64);
+    if (!cleanId) return null;
+
+    let computedPercent = 0;
+    const updated = commitProductChange(cleanId, (existing) => {
+      const basePrice = getEffectiveProductBasePrice(existing);
+      if (basePrice <= 1) return null;
+
+      let finalPrice = existing.price;
+      if (typeof options.discountedPrice === 'number') {
+        finalPrice = sanitizePrice(options.discountedPrice);
+      } else if (typeof options.percent === 'number' && options.percent > 0 && options.percent < 100) {
+        finalPrice = calculateDiscountedPrice(basePrice, options.percent);
+      } else {
+        return null;
       }
-      return updated;
+
+      if (finalPrice <= 0 || finalPrice >= basePrice) {
+        return null;
+      }
+
+      computedPercent = Math.round(((basePrice - finalPrice) / basePrice) * 100);
+      return {
+        originalPrice: basePrice,
+        price: finalPrice,
+      };
     });
 
-    // Keep active selectedProduct in sync
-    setSelectedProduct((prev) => (prev && prev.id === cleanId ? { ...prev, ...sanitizedUpdates } : prev));
-
-    // Keep Cart items synchronized with updated price/details
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.product.id === cleanId
-          ? { ...item, product: { ...item.product, ...sanitizedUpdates } }
-          : item
-      )
-    );
+    return updated ? { product: updated, percent: computedPercent } : null;
   };
 
   const deleteProduct = (id: string) => {
@@ -3411,7 +3495,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const cleanId = sanitizeText(id, 64);
     if (!cleanId) return;
 
-    setProducts((prev) => prev.filter((p) => p.id !== cleanId));
+    const nextList = productsRef.current.filter((p) => p.id !== cleanId);
+    productsRef.current = nextList;
+    setProducts(nextList);
     setCart((prevCart) => prevCart.filter((item) => item.product.id !== cleanId));
     setSelectedProduct((prev) => (prev && prev.id === cleanId ? null : prev));
 
@@ -4255,6 +4341,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toggleCustomerServiceChannel,
         addProduct,
         updateProduct,
+        applyProductDiscount,
         deleteProduct,
         addCategory,
         updateCategory,

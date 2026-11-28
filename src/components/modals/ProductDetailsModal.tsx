@@ -294,7 +294,7 @@ export const ProductDetailsModal: React.FC = () => {
                 <span className="text-2xl font-extrabold text-stone-900">
                   {selectedProduct.price} {currencyLabel}
                 </span>
-                {selectedProduct.originalPrice && (
+                {discountPercent && selectedProduct.originalPrice && (
                   <span className="text-sm text-stone-400 line-through">
                     {selectedProduct.originalPrice} {currencyLabel}
                   </span>
